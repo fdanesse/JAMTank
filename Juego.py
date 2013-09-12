@@ -20,6 +20,7 @@ class Juego():
         self.escenario = False
         self.ventana = False
         self.reloj = False
+        self.estado = False
         
     def config(self):
         """
