@@ -33,13 +33,13 @@ class Jugador(Sprite):
         self.rect = self.image.get_rect()
         
         self.ancho_monitor, self.alto_monitor = resolucion
-        self.x = self.ancho_monitor / 2 - self.rect.w / 2
-        self.y = self.alto_monitor / 2 - self.rect.h / 2
+        self.centerx = self.ancho_monitor / 2
+        self.centery = self.alto_monitor / 2
         
         self.angulo = 0
         self.dx, self.dy = self.get_vector(self.angulo) # distancia en x,y
         
-        self.set_posicion(x = self.x, y = self.y)
+        self.set_posicion(centerx = self.centerx, centery = self.centery)
         
     def update(self, teclas):
         
@@ -87,11 +87,11 @@ class Jugador(Sprite):
         self.dy = y * -1
         self.actualizar_posicion()
         
-    def set_posicion(self, angulo=0, x=0, y=0):
+    def set_posicion(self, angulo=0, centerx=0, centery=0):
         
         self.angulo = angulo
-        self.rect.centerx = x
-        self.rect.centery = y
+        self.rect.centerx = centerx
+        self.rect.centery = centery
         self.image = pygame.transform.rotate(self.imagen_original, -self.angulo)
         
     def get_vector(self, angulo):
@@ -100,8 +100,9 @@ class Jugador(Sprite):
         Devuelve el incremento de puntos x,y en su desplazamiento.
         """
         
-        x = int(cos(radians(angulo)) * VELOCIDAD)
-        y = int(sin(radians(angulo)) * VELOCIDAD)
+        radianes = radians(angulo)
+        x = int(cos(radianes) * VELOCIDAD)
+        y = int(sin(radianes) * VELOCIDAD)
         
         return x,y
         
@@ -112,12 +113,12 @@ class Jugador(Sprite):
         No se ejecuta cuando está girando en un mismo lugar.
         """
         
-        x = self.x + self.dx
-        y = self.y + self.dy
+        x = self.centerx + self.dx
+        y = self.centery + self.dy
 
         if x > 0 and x < self.ancho_monitor and y > 0 and y < self.alto_monitor:
-            self.x += self.dx
-            self.y += self.dy
-            self.rect.x = int(self.x) - self.rect.w / 2
-            self.rect.y = int(self.y) - self.rect.h / 2
+            self.centerx += self.dx
+            self.centery += self.dy
+            self.rect.centerx = int(self.centerx)
+            self.rect.centery = int(self.centery)
             

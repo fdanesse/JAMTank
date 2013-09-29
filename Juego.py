@@ -94,7 +94,7 @@ class Juego():
             
             cambios = self.jugadores.draw(self.ventana)
             
-            pygame.display.update()
+            pygame.display.update(cambios)
 
     def add_jugador(self):
         
