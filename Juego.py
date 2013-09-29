@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 
 import pygame
 from pygame.locals import *
@@ -30,6 +31,17 @@ class Juego():
         pygame.init()
         self.reloj = pygame.time.Clock()
         
+        pygame.event.set_blocked(
+            [MOUSEMOTION, MOUSEBUTTONUP,
+            MOUSEBUTTONDOWN, JOYAXISMOTION,
+            JOYBALLMOTION, JOYHATMOTION,
+            JOYBUTTONUP, JOYBUTTONDOWN,
+            VIDEORESIZE, VIDEOEXPOSE,
+            USEREVENT, QUIT, ACTIVEEVENT])
+            
+        pygame.event.set_allowed([KEYDOWN, KEYUP])
+        pygame.key.set_repeat(15, 15)
+        
         pygame.display.set_mode(RESOLUCION_INICIAL, 0, 0)
         pygame.display.set_caption("JAMtank 2")
         
@@ -57,6 +69,19 @@ class Juego():
         
         while self.estado == "En Juego":
             self.reloj.tick(35)
+
+            hayTeclas = False
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
+                    hayTeclas = True
+                    
+            if hayTeclas:
+                teclas = pygame.key.get_pressed()
+                if teclas[pygame.K_ESCAPE]:
+                    pygame.quit()
+                    sys.exit()
+                    
+            pygame.event.clear()
             pygame.display.update()
             
 if __name__ == "__main__":
