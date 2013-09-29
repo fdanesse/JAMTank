@@ -7,6 +7,8 @@ import sys
 import pygame
 from pygame.locals import *
 
+from Jugador import Jugador
+
 RESOLUCION_INICIAL = (800,600)
 BASE_PATH = os.path.dirname(__file__)
 
@@ -22,6 +24,7 @@ class Juego():
         self.ventana = False
         self.reloj = False
         self.estado = False
+        self.jugadores = pygame.sprite.RenderUpdates()
         
     def config(self):
         """
@@ -70,22 +73,40 @@ class Juego():
         while self.estado == "En Juego":
             self.reloj.tick(35)
 
+            self.jugadores.clear(self.ventana, self.escenario)
+            
             hayTeclas = False
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
                     hayTeclas = True
+                    break
                     
             if hayTeclas:
                 teclas = pygame.key.get_pressed()
+                
+                self.jugadores.update(teclas)
+                
                 if teclas[pygame.K_ESCAPE]:
                     pygame.quit()
                     sys.exit()
                     
             pygame.event.clear()
-            pygame.display.update()
             
+            cambios = self.jugadores.draw(self.ventana)
+            
+            pygame.display.update()
+
+    def add_jugador(self):
+        
+        imagen_tanque = os.path.join(
+            BASE_PATH, "Tanques", "tanque-0.png")
+            
+        jugador = Jugador(imagen_tanque)
+        self.jugadores.add(jugador)
+        
 if __name__ == "__main__":
     juego = Juego()
     juego.config()
+    juego.add_jugador()
     juego.run()
     
