@@ -10,7 +10,7 @@ from pygame.sprite import Sprite
 
 class Jugador(Sprite):
 
-    def __init__(self, imagen_tanque):
+    def __init__(self, imagen_tanque, resolucion):
 
         pygame.sprite.Sprite.__init__(self)
         
@@ -25,5 +25,16 @@ class Jugador(Sprite):
         self.image = self.imagen_original.copy()
         self.rect = self.image.get_rect()
         
+        self.ancho_monitor, self.alto_monitor = resolucion
+        self.x = self.ancho_monitor / 2 - self.rect.w / 2
+        self.y = self.alto_monitor / 2 - self.rect.h / 2
+        
+        self.set_posicion(x = self.x, y = self.y)
+        
     def update(self, teclas):
         print teclas
+        
+    def set_posicion(self, x=0, y=0):
+        self.rect.centerx = x
+        self.rect.centery = y
+        

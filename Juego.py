@@ -101,7 +101,7 @@ class Juego():
         imagen_tanque = os.path.join(
             BASE_PATH, "Tanques", "tanque-0.png")
             
-        jugador = Jugador(imagen_tanque)
+        jugador = Jugador(imagen_tanque, RESOLUCION_INICIAL)
         self.jugadores.add(jugador)
         
 if __name__ == "__main__":
