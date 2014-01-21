@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import random
+
 from math import sin
 from math import cos
 from math import radians
@@ -12,15 +14,17 @@ from pygame.sprite import Sprite
 VELOCIDAD = 10
 INDICE_ROTACION = 5
 
+random.seed()
 
-class Jugador(Sprite):
+
+class Enemigo(Sprite):
 
     def __init__(self, imagen_tanque, resolucion):
 
         pygame.sprite.Sprite.__init__(self)
 
+        self.contador = 0
         self.eventos = []
-
         self.imagen_original = None
         self.image = None
         self.rect = None
@@ -44,11 +48,21 @@ class Jugador(Sprite):
             centerx=self.centerx,
             centery=self.centery)
 
-    def update_events(self, eventos):
-
-        self.eventos = eventos
-
     def update(self):
+
+        self.contador += 1
+
+        if self.contador == 15:
+            self.contador = 0
+
+            teclas = ["Up", "Down", "Right", "Left", "space"]
+            nombre = random.choice(teclas)
+
+            if nombre in teclas and nombre in self.eventos:
+                self.eventos.remove(nombre)
+
+            else:
+                self.eventos.append(nombre)
 
         if not self.eventos:
             return
