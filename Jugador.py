@@ -38,9 +38,9 @@ class Jugador(Sprite):
 
         self.angulo = 0
         # distancia en x,y
-        self.dx, self.dy = self.get_vector(self.angulo)
+        self.dx, self.dy = self.__get_vector(self.angulo)
 
-        self.set_posicion(
+        self.__set_posicion(
             centerx=self.centerx,
             centery=self.centery)
 
@@ -55,56 +55,56 @@ class Jugador(Sprite):
 
         # girar en movimiento
         if "Up" in self.eventos and "Right" in self.eventos:
-            self.arriba()
-            self.derecha()
+            self.__arriba()
+            self.__derecha()
 
         elif "Up" in self.eventos and "Left" in self.eventos:
-            self.arriba()
-            self.izquierda()
+            self.__arriba()
+            self.__izquierda()
 
         elif "Down" in self.eventos and "Right" in self.eventos:
-            self.abajo()
-            self.izquierda()
+            self.__abajo()
+            self.__izquierda()
 
         elif "Down" in self.eventos and "Left" in self.eventos:
-            self.abajo()
-            self.derecha()
+            self.__abajo()
+            self.__derecha()
 
         # moverse sin girar
         elif "Up" in self.eventos:
-            self.arriba()
+            self.__arriba()
 
         elif "Down" in self.eventos:
-            self.abajo()
+            self.__abajo()
 
         # girar sin moverse
         elif "Right" in self.eventos:
-            self.derecha()
+            self.__derecha()
 
         elif "Left" in self.eventos:
-            self.izquierda()
+            self.__izquierda()
 
-    def derecha(self):
+    def __derecha(self):
         self.angulo += int(0.7 * INDICE_ROTACION)
         self.image = pygame.transform.rotate(
             self.imagen_original, -self.angulo)
 
-    def izquierda(self):
+    def __izquierda(self):
         self.angulo -= int(0.7 * INDICE_ROTACION)
         self.image = pygame.transform.rotate(
             self.imagen_original, -self.angulo)
 
-    def arriba(self):
-        self.dx, self.dy = self.get_vector(self.angulo)
-        self.actualizar_posicion()
+    def __arriba(self):
+        self.dx, self.dy = self.__get_vector(self.angulo)
+        self.__actualizar_posicion()
 
-    def abajo(self):
-        x, y = self.get_vector(self.angulo)
+    def __abajo(self):
+        x, y = self.__get_vector(self.angulo)
         self.dx = x * -1
         self.dy = y * -1
-        self.actualizar_posicion()
+        self.__actualizar_posicion()
 
-    def set_posicion(self, angulo=0, centerx=0, centery=0):
+    def __set_posicion(self, angulo=0, centerx=0, centery=0):
 
         self.angulo = angulo
         self.rect.centerx = centerx
@@ -112,7 +112,7 @@ class Jugador(Sprite):
         self.image = pygame.transform.rotate(
             self.imagen_original, -self.angulo)
 
-    def get_vector(self, angulo):
+    def __get_vector(self, angulo):
         """
         Recibe un ángulo que da orientación al tanque.
         Devuelve el incremento de puntos x,y en su desplazamiento.
@@ -124,7 +124,7 @@ class Jugador(Sprite):
 
         return x, y
 
-    def actualizar_posicion(self):
+    def __actualizar_posicion(self):
         """
         Cambia la posicion del rectangulo.
         Solo se ejecuta si el tanque se mueve
