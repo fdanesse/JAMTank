@@ -7,24 +7,8 @@ import sys
 from gi.repository import GObject
 
 import pygame
-from pygame.locals import MOUSEMOTION
-from pygame.locals import MOUSEBUTTONUP
-from pygame.locals import MOUSEBUTTONDOWN
-from pygame.locals import JOYAXISMOTION
-from pygame.locals import JOYBALLMOTION
-from pygame.locals import JOYHATMOTION
-from pygame.locals import JOYBUTTONUP
-from pygame.locals import JOYBUTTONDOWN
-from pygame.locals import VIDEORESIZE
-from pygame.locals import VIDEOEXPOSE
-from pygame.locals import USEREVENT
-from pygame.locals import QUIT
-from pygame.locals import ACTIVEEVENT
-from pygame.locals import KEYDOWN
-from pygame.locals import KEYUP
 
-from Jugador import Jugador
-from Enemigo import Enemigo
+#from Enemigo import Enemigo
 
 RESOLUCION_INICIAL = (800, 600)
 BASE_PATH = os.path.dirname(__file__)
@@ -32,7 +16,7 @@ BASE_PATH = os.path.dirname(__file__)
 GObject.threads_init()
 
 
-class Juego(GObject.GObject):
+class Juego(GObject.Object):
     """
     Juego de Batalla entre Tanques.
     """
@@ -43,7 +27,7 @@ class Juego(GObject.GObject):
 
     def __init__(self, datos):
 
-        GObject.GObject.__init__(self)
+        GObject.Object.__init__(self)
 
         self.game_dict = datos
         self.resolucionreal = RESOLUCION_INICIAL
@@ -66,6 +50,22 @@ class Juego(GObject.GObject):
         pygame.init()
         self.reloj = pygame.time.Clock()
 
+        from pygame.locals import MOUSEMOTION
+        from pygame.locals import MOUSEBUTTONUP
+        from pygame.locals import MOUSEBUTTONDOWN
+        from pygame.locals import JOYAXISMOTION
+        from pygame.locals import JOYBALLMOTION
+        from pygame.locals import JOYHATMOTION
+        from pygame.locals import JOYBUTTONUP
+        from pygame.locals import JOYBUTTONDOWN
+        from pygame.locals import VIDEORESIZE
+        from pygame.locals import VIDEOEXPOSE
+        from pygame.locals import USEREVENT
+        from pygame.locals import QUIT
+        from pygame.locals import ACTIVEEVENT
+        from pygame.locals import KEYDOWN
+        from pygame.locals import KEYUP
+
         pygame.event.set_blocked(
             [MOUSEMOTION, MOUSEBUTTONUP,
             MOUSEBUTTONDOWN, JOYAXISMOTION,
@@ -73,13 +73,14 @@ class Juego(GObject.GObject):
             JOYBUTTONUP, JOYBUTTONDOWN,
             ACTIVEEVENT, USEREVENT])
 
-        pygame.event.set_allowed([QUIT, VIDEORESIZE, VIDEOEXPOSE])
+        pygame.event.set_allowed(
+            [QUIT, VIDEORESIZE, VIDEOEXPOSE])
 
         pygame.display.set_mode(
             (0, 0),
             pygame.DOUBLEBUF | pygame.FULLSCREEN, 0)
 
-        pygame.display.set_caption("JAMtank 2")
+        pygame.display.set_caption("JAMtank")
 
         imagen = pygame.image.load(
             self.game_dict['mapa'])
@@ -96,14 +97,18 @@ class Juego(GObject.GObject):
 
         imagen_tanque = self.game_dict['tanque']
 
+        from Jugador import Jugador
+
         self.jugador = Jugador(
             imagen_tanque, RESOLUCION_INICIAL)
         self.jugadores.add(self.jugador)
 
+        '''
         for enemigo in range(1, self.game_dict['enemigos']+1):
             enemigo = Enemigo(
                 imagen_tanque, RESOLUCION_INICIAL)
             self.jugadores.add(enemigo)
+        '''
 
     def run(self):
         """

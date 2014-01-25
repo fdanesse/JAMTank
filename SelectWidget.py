@@ -4,7 +4,6 @@
 import os
 
 from gi.repository import Gtk
-from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import GObject
 from gi.repository import GLib
@@ -20,7 +19,9 @@ def describe_archivo(archivo):
 
     import commands
 
-    datos = commands.getoutput('file -ik %s%s%s' % ("\"", archivo, "\""))
+    datos = commands.getoutput(
+        'file -ik %s%s%s' % ("\"", archivo, "\""))
+
     retorno = ""
 
     for dat in datos.split(":")[1:]:
@@ -37,15 +38,16 @@ class SelectWidget(Gtk.EventBox):
     "run": (GObject.SIGNAL_RUN_FIRST,
         GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT, ))}
 
-    def __init__(self):
+    def __init__(self, tipo='single'):
 
         Gtk.EventBox.__init__(self)
 
         self.game_dict = {
+            'tipo': tipo,
             'mapa': "",
             'tanque': "",
             'enemigos': 1,
-            'muertes': 10,
+            'vidas': 10,
             }
 
         self.set_border_width(20)
@@ -85,8 +87,8 @@ class SelectWidget(Gtk.EventBox):
         if tipo == "oponentes":
             self.game_dict['enemigos'] = valor
 
-        elif tipo == "muertes":
-            self.game_dict['muertes'] = valor
+        elif tipo == "vidas":
+            self.game_dict['vidas'] = valor
 
     def __seleccion_mapa(self, widget, path):
 
@@ -240,7 +242,7 @@ class SelectPanelMapa(Gtk.Paned):
 
         rect = self.preview.get_allocation()
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                path, -1, rect.height)
+            path, -1, rect.height)
         self.preview.set_from_pixbuf(pixbuf)
 
         self.emit("seleccion", path)
@@ -319,7 +321,7 @@ class SelectPanelTanque(Gtk.Paned):
 
         rect = self.preview.get_allocation()
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                path, -1, rect.height)
+            path, -1, rect.height)
         self.preview.set_from_pixbuf(pixbuf)
 
         self.emit("seleccion", path)
@@ -350,7 +352,7 @@ class OponentesSelectBox(Gtk.VBox):
         hbox = Gtk.HBox()
         limite = Gtk.Label("Vidas:")
         spin = NumBox(range(10, 50))
-        spin.connect("valor", self.__emit_valor, "muertes")
+        spin.connect("valor", self.__emit_valor, "vidas")
         hbox.pack_start(limite, False, False, 5)
         hbox.pack_start(spin, False, False, 5)
         self.pack_start(hbox, False, False, 0)
@@ -364,7 +366,7 @@ class OponentesSelectBox(Gtk.VBox):
 
 class NumBox(Gtk.HBox):
     """
-    Spin para cambiar la cantidad de muertes o enemigos.
+    Spin para cambiar la cantidad de vidas o enemigos.
     """
 
     __gsignals__ = {
@@ -436,8 +438,7 @@ class Lista(Gtk.TreeView):
 
         self.__setear_columnas()
 
-        self.treeselection = self.get_selection()
-        self.treeselection.set_select_function(
+        self.get_selection().set_select_function(
             self.__selecciones, self.modelo)
 
         self.set_model(self.modelo)
@@ -539,6 +540,7 @@ class Lista(Gtk.TreeView):
 
         return False
 
+    '''
     def seleccionar_siguiente(self, widget=None):
 
         modelo, iter = self.treeselection.get_selected()
@@ -564,11 +566,13 @@ class Lista(Gtk.TreeView):
             self.seleccionar_ultimo()
 
         return False
+    '''
 
     def seleccionar_primero(self, widget=None):
 
-        self.treeselection.select_path(0)
+        self.get_selection().select_path(0)
 
+    '''
     def seleccionar_ultimo(self, widget=None):
 
         model = self.get_model()
@@ -583,3 +587,4 @@ class Lista(Gtk.TreeView):
         if iter:
             self.treeselection.select_iter(iter)
             #path = model.get_path(iter)
+    '''

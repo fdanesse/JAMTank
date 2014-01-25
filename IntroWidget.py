@@ -34,26 +34,33 @@ class IntroWidget(Gtk.Table):
             boton,
             1, 2, 1, 2)
 
-        boton = Gtk.Button("Jugar en Red")
+        boton = Gtk.Button("Crear Juego en Red")
         boton.connect("clicked",
             self.__emit_switch, "red")
         self.attach(
             boton,
             1, 2, 2, 3)
 
+        boton = Gtk.Button("Unirse a Juego Existente")
+        boton.connect("clicked",
+            self.__emit_switch, "join")
+        self.attach(
+            boton,
+            1, 2, 3, 4)
+
         boton = Gtk.Button("Creditos")
         boton.connect("clicked",
             self.__emit_switch, "creditos")
         self.attach(
             boton,
-            1, 2, 3, 4)
+            1, 2, 4, 5)
 
         boton = Gtk.Button("Salir")
         boton.connect("clicked",
             self.__emit_switch, "salir")
         self.attach(
             boton,
-            1, 2, 4, 5)
+            1, 2, 5, 6)
 
         self.show_all()
 
