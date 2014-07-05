@@ -12,6 +12,7 @@ import pygame
 
 RESOLUCION_INICIAL = (800, 600)
 BASE_PATH = os.path.dirname(__file__)
+TERMINATOR = "\r\n\r\n"
 
 GObject.threads_init()
 
@@ -25,18 +26,23 @@ class Juego(GObject.Object):
         "update": (GObject.SIGNAL_RUN_LAST,
             GObject.TYPE_NONE, [])}
 
-    def __init__(self, datos):
+    def __init__(self, datos, client):
 
         GObject.Object.__init__(self)
 
         self.game_dict = datos
+        self.client = client
+
         self.resolucionreal = RESOLUCION_INICIAL
         self.escenario = False
         self.ventana = False
         self.reloj = False
         self.estado = False
         self.jugador = False
+
         self.jugadores = pygame.sprite.RenderUpdates()
+        self.balas = pygame.sprite.RenderUpdates()
+        self.explosiones = pygame.sprite.RenderUpdates()
 
     def escalar(self, resolucion):
 
@@ -115,6 +121,18 @@ class Juego(GObject.Object):
         El Juego comienza a Correr.
         """
 
+        '''
+        self.game_dict = {
+            'ip':'',
+            'nick': '',
+            'tipo': tipo,
+            'mapa': "",
+            'tanque': "",
+            'enemigos': 1,
+            'vidas': 10,
+            }
+        '''
+
         self.estado = "En Juego"
 
         self.ventana.blit(self.escenario, (0, 0))
@@ -127,24 +145,30 @@ class Juego(GObject.Object):
 
                 self.jugadores.clear(
                     self.ventana, self.escenario)
-                #self.balas.clear(
-                #    self.ventana, self.escenario)
-                #self.explosiones.clear(
-                #    self.ventana, self.escenario)
+                self.balas.clear(
+                    self.ventana, self.escenario)
+                self.explosiones.clear(
+                    self.ventana, self.escenario)
 
-                # FIXME:
-                #   Obtener datos de tanques y balas
-                #   Enviarlas al servidor
-                #   Recibir los datos del servidor
+                self.jugador.update()
+                a, x, y = self.jugador.get_datos()
+                # enviar
+                # recibir
+                # actualizar todos los jugadores
+                self.jugador.set_posicion(
+                    angulo=a, centerx=x, centery=y)
+                # FIXME: actualizar mis balas
 
-                self.jugadores.update()
                 # FIXME: Redibujar balas
                 # FIXME: Redibujar explosiones
+                # FIXME: Verificar colisiones de balas agenas
 
                 pygame.event.pump()
                 pygame.event.clear()
 
                 self.jugadores.draw(self.ventana)
+                self.balas.draw(self.ventana)
+                self.explosiones.draw(self.ventana)
 
                 self.ventana_real.blit(pygame.transform.scale(
                     self.ventana, self.resolucionreal), (0,0))

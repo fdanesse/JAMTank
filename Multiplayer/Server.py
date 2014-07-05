@@ -15,17 +15,19 @@ GAME = {
     'vidas': 10,
     }
 
-JUGADORES = {
-    #ids: {         # id = self.client_address[0]
-    #   'nick': '',
-    #   'tanque': {
-    #       'path': '',
-    #       'pos': (angulo,x,y),
-    #   'energia': 100,
-    #   'vidas': 10,
-    #   'balas': [(x,y), ...]
-    #   }
+MODEL = {
+    'nick': '',
+    'tanque': {
+        #'path': '',
+        'pos': (0, 0, 0),
+        'energia': 100,
+        },
+    'vidas': 0,
+    'balas': [0],
+    'puntos': 0,
     }
+
+JUGADORES = {}
 
 
 class Server(SocketServer.ThreadingMixIn,
@@ -42,15 +44,20 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         """
 
         datos = self.request.recv(200)
-        self.__procesar(datos)
-        self.request.send(datos)
+        respuesta = self.__procesar(datos)
+        self.request.send(respuesta)
 
-    def __procesar(self, datos):
+    def __registrar_server(self, datos):
+        """
+        Registra datos del juego:
+            mapa
+            enemigos
+            vidas
+        """
 
-        mensages = datos.split(TERMINATOR)
-
-        # Configuración del Juego
-        for mensaje in mensages:
+        mensajes = datos.split(TERMINATOR)
+        print mensajes
+        for mensaje in mensajes:
             if mensaje.startswith('M*'):
                 GAME['mapa'] = mensaje.split('M*')[-1].strip()
 
@@ -60,7 +67,61 @@ class RequestHandler(SocketServer.StreamRequestHandler):
             elif mensaje.startswith('V*'):
                 GAME['vidas'] = int(mensaje.split('V*')[-1].strip())
 
-        print self.client_address[0], GAME
+    def __registrar_jugador(self, datos):
+        """
+        Registra un nuevo jugador en el juego, enviandole
+        el mapa del juego.
+        """
+
+        direccion = self.client_address[0]
+
+        if not direccion in JUGADORES.keys():
+            JUGADORES[direccion] = MODEL.copy()
+
+        mensajes = datos.split(TERMINATOR)
+
+        for mensaje in mensajes:
+            if mensaje.startswith('N*'):
+                JUGADORES[direccion]['nick'] = mensaje.split('N*')[-1].strip()
+
+    def __procesar(self, datos):
+        """
+        Procesa los datos enviados por un cliente.
+        """
+
+        if datos.startswith('HOST'):
+            self.__registrar_server(
+                datos.replace('HOST', ''))
+            return TERMINATOR
+
+        elif datos.startswith('REGISTRO'):
+            self.__registrar_jugador(
+                datos.replace('HOST', ''))
+            return GAME['mapa']
+
+        else:
+            print datos
+            return ""
+        '''
+        # FIXME: Respetar límite de jugadores.
+        direccion = self.client_address[0]
+
+        if not direccion in JUGADORES.keys():
+            JUGADORES[direccion] = MODEL.copy()
+
+        mensajes = datos.split(TERMINATOR)
+
+        for mensaje in mensajes:
+            # Registro de jugador:
+            if mensaje.startswith('N*'):
+                JUGADORES[direccion]['nick'] = mensaje.split('N*')[-1].strip()
+
+            elif mensaje.startswith('T*'):
+                JUGADORES[direccion]['tanque']['pos'] = mensaje.split('T*')[-1].strip()
+
+            else:
+                print mensaje
+        '''
 
 
 if __name__ == "__main__":

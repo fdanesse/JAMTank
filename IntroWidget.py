@@ -8,6 +8,15 @@ from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import GObject
 
+"""
+Contiene Opciones:
+    Jugar Solo                  emit("switch", "solo")
+    Crear Juego en Red          emit("switch", "red")
+    Unirse a Juego Existente    emit("switch", "join")
+    Creditos                    emit("switch", "creditos")
+    Salir                       emit("switch", "salir")
+"""
+
 
 class IntroWidget(Gtk.Table):
 
@@ -28,44 +37,28 @@ class IntroWidget(Gtk.Table):
         self.temp_path = "/dev/shm/jamtank_intro_img.png"
 
         boton = Gtk.Button("Jugar Solo")
-        boton.connect("clicked",
-            self.__emit_switch, "solo")
-        self.attach(
-            boton,
-            1, 2, 1, 2)
+        boton.connect("clicked", self.__emit_switch, "solo")
+        self.attach(boton, 1, 2, 1, 2)
 
         boton = Gtk.Button("Crear Juego en Red")
-        boton.connect("clicked",
-            self.__emit_switch, "red")
-        self.attach(
-            boton,
-            1, 2, 2, 3)
+        boton.connect("clicked", self.__emit_switch, "red")
+        self.attach(boton, 1, 2, 2, 3)
 
         boton = Gtk.Button("Unirse a Juego Existente")
-        boton.connect("clicked",
-            self.__emit_switch, "join")
-        self.attach(
-            boton,
-            1, 2, 3, 4)
+        boton.connect("clicked", self.__emit_switch, "join")
+        self.attach(boton, 1, 2, 3, 4)
 
         boton = Gtk.Button("Creditos")
-        boton.connect("clicked",
-            self.__emit_switch, "creditos")
-        self.attach(
-            boton,
-            1, 2, 4, 5)
+        boton.connect("clicked", self.__emit_switch, "creditos")
+        self.attach(boton, 1, 2, 4, 5)
 
         boton = Gtk.Button("Salir")
-        boton.connect("clicked",
-            self.__emit_switch, "salir")
-        self.attach(
-            boton,
-            1, 2, 5, 6)
+        boton.connect("clicked", self.__emit_switch, "salir")
+        self.attach(boton, 1, 2, 5, 6)
 
         self.show_all()
 
     def __emit_switch(self, widget, valor):
-
         self.emit("switch", valor)
 
     def load(self, path):
@@ -82,13 +75,11 @@ class IntroWidget(Gtk.Table):
                 self.imagen_original = GdkPixbuf.Pixbuf.new_from_file(path)
                 self.imagen = self.imagen_original.copy()
                 self.imagen.savev(self.temp_path, "png", [], [])
-
                 self.set_size_request(-1, -1)
 
         self.connect("draw", self.__do_draw)
 
     def __do_draw(self, widget, context):
-
         if not self.image_path:
             return
 

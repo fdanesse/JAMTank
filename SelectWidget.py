@@ -10,23 +10,32 @@ from gi.repository import GLib
 
 BASE = os.path.dirname(__file__)
 
+"""
+Permite Elegir Opciones del Juego:
+    self.game_dict = {
+        'ip':'',
+        'nick': '',
+        'tipo': tipo,
+        'mapa': "",
+        'tanque': "",
+        'enemigos': 1,
+        'vidas': 10,
+        }
+
+    emit("run", self.game_dict)
+"""
+
 
 def describe_archivo(archivo):
     """
     Devuelve el tipo de un archivo (imagen, video, texto).
     -z, --uncompress para ver dentro de los zip.
     """
-
     import commands
-
-    datos = commands.getoutput(
-        'file -ik %s%s%s' % ("\"", archivo, "\""))
-
+    datos = commands.getoutput('file -ik %s%s%s' % ("\"", archivo, "\""))
     retorno = ""
-
     for dat in datos.split(":")[1:]:
         retorno += " %s" % (dat)
-
     return retorno
 
 
@@ -43,6 +52,8 @@ class SelectWidget(Gtk.EventBox):
         Gtk.EventBox.__init__(self)
 
         self.game_dict = {
+            'ip':'',
+            'nick': '',
             'tipo': tipo,
             'mapa': "",
             'tanque': "",
@@ -51,9 +62,7 @@ class SelectWidget(Gtk.EventBox):
             }
 
         self.set_border_width(20)
-
         self.select_box = False
-
         self.show_all()
 
         self.__switch("mapa")
@@ -67,53 +76,40 @@ class SelectWidget(Gtk.EventBox):
         if valor == "mapa":
             self.select_box = SelectBox("Mapa")
             self.add(self.select_box)
-            self.select_box.connect(
-                "accion", self.__accion_mapa)
-            self.select_box.connect(
-                "seleccion", self.__seleccion_mapa)
+            self.select_box.connect("accion", self.__accion_mapa)
+            self.select_box.connect("seleccion", self.__seleccion_mapa)
 
         elif valor == "tanque":
             self.select_box = SelectBox("Tanque")
-            self.select_box.connect(
-                "valor", self.__set_valores)
+            self.select_box.connect("valor", self.__set_valores)
             self.add(self.select_box)
-            self.select_box.connect(
-                "accion", self.__accion_tanque)
-            self.select_box.connect(
-                "seleccion", self.__seleccion_tanque)
+            self.select_box.connect("accion", self.__accion_tanque)
+            self.select_box.connect("seleccion", self.__seleccion_tanque)
 
     def __set_valores(self, widget, valor, tipo):
-
         if tipo == "oponentes":
             self.game_dict['enemigos'] = valor
-
         elif tipo == "vidas":
             self.game_dict['vidas'] = valor
 
     def __seleccion_mapa(self, widget, path):
-
         self.game_dict['mapa'] = path
 
     def __seleccion_tanque(self, widget, path):
-
         self.game_dict['tanque'] = path
 
     def __accion_mapa(self, widget, accion):
-
         if accion == "Anterior":
             # volver a intro
             self.emit("salir")
-
         elif accion == "Siguiente":
             # ir a elegir tanque
             self.__switch("tanque")
 
     def __accion_tanque(self, widget, accion):
-
         if accion == "Anterior":
             # volver a elegir mapa
             self.__switch("mapa")
-
         elif accion == "Siguiente":
             # comenzar juego
             self.emit("run", self.game_dict)
@@ -170,22 +166,18 @@ class SelectBox(Gtk.VBox):
         self.select.connect("seleccion", self.__emit_seleccion)
 
     def __emit_valor(self, widget, valor, tipo):
-
         self.emit("valor", valor, tipo)
 
     def __emit_seleccion(self, widget, path):
-
         self.emit("seleccion", path)
 
     def __accion(self, widget, accion):
-
         self.emit("accion", accion)
 
 
 class SelectPanelMapa(Gtk.Paned):
     """
-    Panel con lista de mapas para
-    que el usuario elija.
+    Panel con lista de mapas para que el usuario elija.
     """
 
     __gsignals__ = {
@@ -194,29 +186,22 @@ class SelectPanelMapa(Gtk.Paned):
 
     def __init__(self):
 
-        Gtk.Paned.__init__(self,
-            orientation=Gtk.Orientation.HORIZONTAL)
+        Gtk.Paned.__init__(self, orientation=Gtk.Orientation.HORIZONTAL)
 
         self.lista = Lista()
         self.preview = Gtk.Image()
 
         scroll = Gtk.ScrolledWindow()
-        scroll.set_policy(
-            Gtk.PolicyType.AUTOMATIC,
-            Gtk.PolicyType.AUTOMATIC)
+        scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         scroll.add(self.lista)
 
-        self.pack1(scroll,
-            resize=False, shrink=False)
-        self.pack2(self.preview,
-            resize=True, shrink=True)
+        self.pack1(scroll, resize=False, shrink=False)
+        self.pack2(self.preview, resize=True, shrink=True)
 
         scroll.set_size_request(230, -1)
 
         self.connect("realize", self.__do_realize)
-
-        self.lista.connect(
-            "nueva-seleccion", self.__set_image)
+        self.lista.connect("nueva-seleccion", self.__set_image)
 
         self.show_all()
 
@@ -239,19 +224,16 @@ class SelectPanelMapa(Gtk.Paned):
         self.lista.agregar_items(elementos)
 
     def __set_image(self, widget, path):
-
         rect = self.preview.get_allocation()
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
             path, -1, rect.height)
         self.preview.set_from_pixbuf(pixbuf)
-
         self.emit("seleccion", path)
 
 
 class SelectPanelTanque(Gtk.Paned):
     """
-    Panel con lista de mapas para
-    que el usuario elija.
+    Panel con lista de Tanques para que el usuario elija.
     """
 
     __gsignals__ = {
@@ -263,44 +245,35 @@ class SelectPanelTanque(Gtk.Paned):
 
     def __init__(self):
 
-        Gtk.Paned.__init__(self,
-            orientation=Gtk.Orientation.HORIZONTAL)
+        Gtk.Paned.__init__(self, orientation=Gtk.Orientation.HORIZONTAL)
 
         self.lista = Lista()
         self.preview = Gtk.Image()
 
         scroll = Gtk.ScrolledWindow()
-        scroll.set_policy(
-            Gtk.PolicyType.AUTOMATIC,
-            Gtk.PolicyType.AUTOMATIC)
+        scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         scroll.add(self.lista)
 
-        self.pack1(scroll,
-            resize=False, shrink=False)
+        self.pack1(scroll, resize=False, shrink=False)
 
         vbox = Gtk.VBox()
         oponentes = OponentesSelectBox()
         oponentes.connect("valor", self.__emit_valor)
         vbox.pack_start(self.preview, True, True, 0)
         vbox.pack_start(oponentes, True, True, 0)
-        self.pack2(vbox,
-            resize=True, shrink=True)
+        self.pack2(vbox, resize=True, shrink=True)
 
         scroll.set_size_request(230, -1)
 
         self.connect("realize", self.__do_realize)
-
-        self.lista.connect(
-            "nueva-seleccion", self.__set_image)
+        self.lista.connect("nueva-seleccion", self.__set_image)
 
         self.show_all()
 
     def __emit_valor(self, widget, valor, tipo):
-
         self.emit("valor", valor, tipo)
 
     def __do_realize(self, widget):
-
         elementos = []
         mapas_path = os.path.join(BASE, "Tanques")
 
@@ -318,12 +291,10 @@ class SelectPanelTanque(Gtk.Paned):
         self.lista.agregar_items(elementos)
 
     def __set_image(self, widget, path):
-
         rect = self.preview.get_allocation()
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
             path, -1, rect.height)
         self.preview.set_from_pixbuf(pixbuf)
-
         self.emit("seleccion", path)
 
 
@@ -360,7 +331,6 @@ class OponentesSelectBox(Gtk.VBox):
         self.show_all()
 
     def __emit_valor(self, widget, valor, tipo):
-
         self.emit("valor", valor, tipo)
 
 
@@ -395,9 +365,7 @@ class NumBox(Gtk.HBox):
         self.label.set_text(str(self.valor))
 
     def __change(self, widget):
-
         label = widget.get_label()
-
         if label == "-":
             if self.valor - 1 >= min(self.rango):
                 self.valor -= 1
@@ -412,9 +380,6 @@ class NumBox(Gtk.HBox):
 
 
 class Lista(Gtk.TreeView):
-    """
-    Lista generica.
-    """
 
     __gsignals__ = {
     "nueva-seleccion": (GObject.SIGNAL_RUN_FIRST,
@@ -431,24 +396,19 @@ class Lista(Gtk.TreeView):
         self.permitir_select = True
         self.valor_select = None
 
-        self.modelo = Gtk.ListStore(
-            GdkPixbuf.Pixbuf,
-            GObject.TYPE_STRING,
+        self.modelo = Gtk.ListStore(GdkPixbuf.Pixbuf, GObject.TYPE_STRING,
             GObject.TYPE_STRING)
 
         self.__setear_columnas()
+        self.set_model(self.modelo)
 
         self.get_selection().set_select_function(
             self.__selecciones, self.modelo)
 
-        self.set_model(self.modelo)
         self.show_all()
 
     def __selecciones(self, treeselection,
         model, path, is_selected, listore):
-        """
-        Cuando se selecciona un item en la lista.
-        """
 
         if not self.permitir_select:
             return True
@@ -465,36 +425,28 @@ class Lista(Gtk.TreeView):
         return True
 
     def __setear_columnas(self):
-
         self.append_column(self.__construir_columa_icono('', 0, True))
         self.append_column(self.__construir_columa('Nombre', 1, True))
         self.append_column(self.__construir_columa('', 2, False))
 
     def __construir_columa(self, text, index, visible):
-
         render = Gtk.CellRendererText()
-
         columna = Gtk.TreeViewColumn(text, render, text=index)
         columna.set_sort_column_id(index)
         columna.set_property('visible', visible)
         columna.set_property('resizable', False)
         columna.set_sizing(Gtk.TreeViewColumnSizing.AUTOSIZE)
-
         return columna
 
     def __construir_columa_icono(self, text, index, visible):
-
         render = Gtk.CellRendererPixbuf()
-
         columna = Gtk.TreeViewColumn(text, render, pixbuf=index)
         columna.set_property('visible', visible)
         columna.set_property('resizable', False)
         columna.set_sizing(Gtk.TreeViewColumnSizing.AUTOSIZE)
-
         return columna
 
     def limpiar(self):
-
         self.permitir_select = False
         self.modelo.clear()
         self.permitir_select = True
@@ -504,17 +456,11 @@ class Lista(Gtk.TreeView):
         Recibe lista de: [texto para mostrar, path oculto] y
         Comienza secuencia de agregado a la lista.
         """
-
         self.get_toplevel().set_sensitive(False)
         self.permitir_select = False
-
         GLib.idle_add(self.__ejecutar_agregar_elemento, elementos)
 
     def __ejecutar_agregar_elemento(self, elementos):
-        """
-        Agrega los items a la lista, uno a uno, actualizando.
-        """
-
         if not elementos:
             self.permitir_select = True
             self.seleccionar_primero()
@@ -522,64 +468,45 @@ class Lista(Gtk.TreeView):
             return False
 
         texto, path = elementos[0]
-
         icono = False
-
         tipo = describe_archivo(path)
 
         if 'image' in tipo and not 'iso' in tipo:
             icono = os.path.join(path)
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                icono, 50, -1)
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(icono, 50, -1)
             self.modelo.append([pixbuf, texto, path])
 
         elementos.remove(elementos[0])
-
-        GLib.idle_add(
-            self.__ejecutar_agregar_elemento, elementos)
-
+        GLib.idle_add(self.__ejecutar_agregar_elemento, elementos)
         return False
-
-    '''
-    def seleccionar_siguiente(self, widget=None):
-
-        modelo, iter = self.treeselection.get_selected()
-
-        try:
-            self.treeselection.select_iter(
-                modelo.iter_next(iter))
-
-        except:
-            self.seleccionar_primero()
-
-        return False
-
-    def seleccionar_anterior(self, widget=None):
-
-        modelo, iter = self.treeselection.get_selected()
-
-        try:
-            self.treeselection.select_iter(
-                modelo.iter_previous(iter))
-
-        except:
-            self.seleccionar_ultimo()
-
-        return False
-    '''
 
     def seleccionar_primero(self, widget=None):
-
         self.get_selection().select_path(0)
 
     '''
-    def seleccionar_ultimo(self, widget=None):
+    def seleccionar_siguiente(self, widget=None):
+        modelo, iter = self.treeselection.get_selected()
+        try:
+            self.treeselection.select_iter(
+                modelo.iter_next(iter))
+        except:
+            self.seleccionar_primero()
+        return False
 
+    def seleccionar_anterior(self, widget=None):
+        modelo, iter = self.treeselection.get_selected()
+        try:
+            self.treeselection.select_iter(
+                modelo.iter_previous(iter))
+        except:
+            self.seleccionar_ultimo()
+        return False
+
+    def seleccionar_ultimo(self, widget=None):
         model = self.get_model()
         item = model.get_iter_first()
 
         iter = None
-
         while item:
             iter = item
             item = model.iter_next(item)
