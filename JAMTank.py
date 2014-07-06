@@ -13,7 +13,7 @@ BASE = os.path.dirname(__file__)
 
 from IntroWidget import IntroWidget
 from GameWidget import GameWidget
-from SelectWidget import SelectWidget
+from SelectServer import SelectServer
 
 #GObject.threads_init()
 #Gdk.threads_init()
@@ -31,7 +31,7 @@ class JAMTank(Gtk.Window):
         Gtk.Window.__init__(self)
 
         self.set_title("JAMTank")
-
+        self.modify_bg(0, Gdk.color_parse("#ffffff"))
         self.set_icon_from_file(os.path.join(BASE, "Iconos", "jamtank.svg"))
 
         self.set_resizable(True)
@@ -67,7 +67,7 @@ class JAMTank(Gtk.Window):
         """
         self.switch(False, 1, datos=False)
 
-    def __run(self, widget, datos):
+    def __solo_run(self, widget, datos):
         """
         El Usuario lanza juego (single o multiplayer).
         """
@@ -75,26 +75,6 @@ class JAMTank(Gtk.Window):
         self.widget_game = GameWidget()
         self.add(self.widget_game)
         GLib.idle_add(self.widget_game.setup_init, datos)
-
-    def __intro_switch(self, widget, valor):
-        """
-        Recibe opción de juego desde IntroWidget
-        """
-
-        if valor == "solo":
-            self.switch(False, 2, datos=False)
-
-        elif valor == "red":
-            self.switch(False, 4, datos=False)
-
-        #elif valor == "join":
-        #    self.switch(5)
-
-        #elif valor == "creditos":
-        #    self.switch(6)
-
-        elif valor == "salir":
-            self.__salir()
 
     def __update_events(self):
         self.widget_game.juego.update_events(self.eventos)
@@ -108,6 +88,71 @@ class JAMTank(Gtk.Window):
                 self.widget_game.client.desconectarse()
         sys.exit(0)
 
+    def __intro_switch(self, widget, valor):
+        """
+        Recibe opción de juego desde IntroWidget
+        """
+
+        if valor == "solo":
+            self.switch(False, 2, datos=False)
+
+        elif valor == "red":
+            self.switch(False, 3, datos=False)
+
+        elif valor == "join":
+            self.switch(False, 4, datos=False)
+
+        elif valor == "salir":
+            self.__salir()
+
+    def __server_select_accion(self, wiidget, accion, _dict):
+        if accion == 'salir':
+            self.switch(False, 1, datos=False)
+        else:
+            print accion, _dict
+
+    def switch(self, widget, valor, datos=False):
+        """
+        Cambia los widgets en la ventana:
+        """
+        self.__reset()
+        if valor == 1:
+            # Introduccion, opciones de juego.
+            self.intro_widget = IntroWidget()
+            self.intro_widget.connect("switch", self.__intro_switch)
+            self.add(self.intro_widget)
+            GLib.idle_add(self.intro_widget.load, os.path.join(
+                BASE, "Iconos", "jamtank.svg"))
+
+        elif valor == 2:
+            print "FIXME: Comenzar Guión del Juego"
+            '''
+            self.select_widget = SelectWidget(tipo='single')
+            self.select_widget.connect("salir", self.switch, 1, False)
+            self.select_widget.connect("run", self.__solo_run)
+            self.add(self.select_widget)
+            '''
+
+        elif valor == 3:
+            # Selección nick, mapa, tanque, oponentes y vidas.
+            print "FIXME: Esta PC será Servidor"
+            self.select_widget = SelectServer()
+            self.add(self.select_widget)
+            #GLib.idle_add(self.select_widget.load, os.path.join(
+            #    BASE, "Iconos", "jamtank.svg"))
+            self.select_widget.connect("accion", self.__server_select_accion)
+
+        elif valor == 4:
+            # Selección de nick, ip y tanque para unirse a partida multiplayer.
+            print "FIXME: Esta PC será Cliente"
+            '''
+            self.select_widget = SelectWidget(tipo='join')
+            self.select_widget.connect("salir", self.switch, 1, False)
+            self.select_widget.connect("run", self.__run)
+            self.add(self.select_widget)
+            '''
+        GLib.idle_add(self.queue_draw)
+    '''
     def do_key_press_event(self, event):
         """
         Agrega eventos para mover el tanque o disparar.
@@ -152,47 +197,7 @@ class JAMTank(Gtk.Window):
 
         self.__update_events()
         return False
-
-    def switch(self, widget, valor, datos=False):
-        """
-        Cambia los widgets en la ventana:
-        """
-        self.__reset()
-        if valor == 1:
-            # Introduccion, opciones de juego.
-            self.intro_widget = IntroWidget()
-            self.intro_widget.connect("switch", self.__intro_switch)
-            self.add(self.intro_widget)
-            GLib.idle_add(self.intro_widget.load, os.path.join(BASE, "Iconos",
-                "jamtank.svg"))
-
-        elif valor == 2:
-            # Selección de mapa, tanque, oponentes y vidas single player.
-            self.select_widget = SelectWidget(tipo='single')
-            self.select_widget.connect("salir", self.switch, 1, False)
-            self.select_widget.connect("run", self.__run)
-            self.add(self.select_widget)
-
-        elif valor == 3:
-            pass
-
-        elif valor == 4:
-            # Selección de mapa, tanque, oponentes y vidas multiplayer.
-            self.select_widget = SelectWidget(tipo='multi')
-            self.select_widget.connect("salir", self.switch, 1, False)
-            self.select_widget.connect("run", self.__run)
-            self.add(self.select_widget)
-
-        elif valor == 5:
-            # Selección de ip y tanque para unirse a partida multiplayer.
-            pass
-
-        elif valor == 6:
-            # Créditos.
-            pass
-
-        GLib.idle_add(self.queue_draw)
-
+    '''
 
 if __name__ == "__main__":
     JAMTank()

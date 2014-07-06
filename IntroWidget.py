@@ -28,11 +28,6 @@ class IntroWidget(Gtk.Table):
 
         Gtk.Table.__init__(self, rows=7, columns=3, homogeneous=True)
 
-        self.imagen_original = None
-        self.image_path = None
-        self.angulo = 0
-        self.rotacion = GdkPixbuf.PixbufRotation.NONE
-        self.zoom_valor = 0
         self.imagen = False
         self.temp_path = "/dev/shm/jamtank_intro_img.png"
 
@@ -58,31 +53,7 @@ class IntroWidget(Gtk.Table):
 
         self.show_all()
 
-    def __emit_switch(self, widget, valor):
-        self.emit("switch", valor)
-
-    def load(self, path):
-        """
-        Carga una imagen.
-        """
-
-        if path:
-            if os.path.exists(path):
-                self.angulo = 0
-                self.rotacion = GdkPixbuf.PixbufRotation.NONE
-                self.zoom_valor = 0
-                self.image_path = path
-                self.imagen_original = GdkPixbuf.Pixbuf.new_from_file(path)
-                self.imagen = self.imagen_original.copy()
-                self.imagen.savev(self.temp_path, "png", [], [])
-                self.set_size_request(-1, -1)
-
-        self.connect("draw", self.__do_draw)
-
     def __do_draw(self, widget, context):
-        if not self.image_path:
-            return
-
         rect = self.get_allocation()
 
         src = self.imagen
@@ -99,3 +70,19 @@ class IntroWidget(Gtk.Table):
 
         Gdk.cairo_set_source_pixbuf(context, dst, x, y)
         context.paint()
+
+    def __emit_switch(self, widget, valor):
+        self.emit("switch", valor)
+
+    def load(self, path):
+        """
+        Carga una imagen para pintar el fondo.
+        """
+
+        if path:
+            if os.path.exists(path):
+                self.imagen = GdkPixbuf.Pixbuf.new_from_file(path)
+                self.imagen.savev(self.temp_path, "png", [], [])
+                self.set_size_request(-1, -1)
+
+        self.connect("draw", self.__do_draw)
