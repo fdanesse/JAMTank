@@ -55,14 +55,11 @@ class IntroWidget(Gtk.Table):
 
     def __do_draw(self, widget, context):
         rect = self.get_allocation()
-
         src = self.imagen
         dst = GdkPixbuf.Pixbuf.new_from_file_at_size(
             self.temp_path, rect.width, rect.height)
 
-        GdkPixbuf.Pixbuf.scale(
-            src, dst, 0, 0, 100, 100,
-            0, 0, 1.5, 1.5,
+        GdkPixbuf.Pixbuf.scale(src, dst, 0, 0, 100, 100, 0, 0, 1.5, 1.5,
             GdkPixbuf.InterpType.BILINEAR)
 
         x = rect.width / 2 - dst.get_width() / 2
@@ -78,11 +75,9 @@ class IntroWidget(Gtk.Table):
         """
         Carga una imagen para pintar el fondo.
         """
-
         if path:
             if os.path.exists(path):
                 self.imagen = GdkPixbuf.Pixbuf.new_from_file(path)
                 self.imagen.savev(self.temp_path, "png", [], [])
                 self.set_size_request(-1, -1)
-
         self.connect("draw", self.__do_draw)

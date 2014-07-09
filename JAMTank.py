@@ -12,7 +12,6 @@ from gi.repository import GLib
 BASE = os.path.dirname(__file__)
 
 from IntroWidget import IntroWidget
-from GameWidget import GameWidget
 from SelectServer import SelectServer
 
 #GObject.threads_init()
@@ -72,6 +71,7 @@ class JAMTank(Gtk.Window):
         El Usuario lanza juego (single o multiplayer).
         """
         self.__reset()
+        from GameWidget import GameWidget
         self.widget_game = GameWidget()
         self.add(self.widget_game)
         GLib.idle_add(self.widget_game.setup_init, datos)
@@ -92,24 +92,24 @@ class JAMTank(Gtk.Window):
         """
         Recibe opción de juego desde IntroWidget
         """
-
         if valor == "solo":
             self.switch(False, 2, datos=False)
-
         elif valor == "red":
             self.switch(False, 3, datos=False)
-
         elif valor == "join":
             self.switch(False, 4, datos=False)
-
         elif valor == "salir":
             self.__salir()
 
     def __server_select_accion(self, wiidget, accion, _dict):
+        self.__reset()
         if accion == 'salir':
             self.switch(False, 1, datos=False)
         else:
-            print accion, _dict
+            from Multiplayer.ServerGameWidget import GameWidget
+            self.widget_game = GameWidget()
+            self.add(self.widget_game)
+            GLib.idle_add(self.widget_game.setup_init, _dict)
 
     def switch(self, widget, valor, datos=False):
         """

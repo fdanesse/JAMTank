@@ -77,12 +77,10 @@ class NumBox(Gtk.HBox):
         self.show_all()
 
         self.label.set_text(str(self.valor))
-
         GLib.idle_add(self.emit, "valor", self.valor)
 
     def __change(self, widget):
         label = widget.get_label()
-
         if label == "-":
             if self.valor - 1 >= min(self.rango):
                 self.valor -= 1
@@ -122,9 +120,7 @@ class Lista(Gtk.TreeView):
 
         self.show_all()
 
-    def __selecciones(self, treeselection,
-        model, path, is_selected, listore):
-
+    def __selecciones(self, treeselection, model, path, is_selected, listore):
         if not self.permitir_select:
             return True
 
@@ -162,7 +158,6 @@ class Lista(Gtk.TreeView):
         return columna
 
     def __ejecutar_agregar_elemento(self, elementos):
-
         if not elementos:
             self.permitir_select = True
             self.seleccionar_primero()

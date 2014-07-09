@@ -46,12 +46,12 @@ class SelectServer(Gtk.EventBox):
         self.imagen = False
 
         self.game_dict = {
-            'server': '',
+            'server': get_ip(),
             'nick': '',
             'mapa': "",
             'tanque': "",
-            'enemigos': 1,
-            'vidas': 10,
+            'enemigos': 10,
+            'vidas': 50,
             }
 
         self.modify_bg(0, Gdk.color_parse("#ffffff"))
@@ -114,7 +114,7 @@ class SelectServer(Gtk.EventBox):
         nick = Gtk.Entry()
         nick.connect("changed", self.__change_nick)
         event.add(nick)
-        tabla.attach_defaults(frame, 3, 5, 4, 5)
+        tabla.attach_defaults(frame, 2, 5, 4, 5)
 
         event = Gtk.EventBox()
         event.modify_bg(0, Gdk.color_parse("#ffffff"))
@@ -148,9 +148,7 @@ class SelectServer(Gtk.EventBox):
         dst = GdkPixbuf.Pixbuf.new_from_file_at_size(
             self.temp_path, rect.width, rect.height)
 
-        GdkPixbuf.Pixbuf.scale(
-            src, dst, 0, 0, 100, 100,
-            0, 0, 1.5, 1.5,
+        GdkPixbuf.Pixbuf.scale(src, dst, 0, 0, 100, 100, 0, 0, 1.5, 1.5,
             GdkPixbuf.InterpType.BILINEAR)
 
         x = rect.width / 2 - dst.get_width() / 2
@@ -185,42 +183,50 @@ class SelectServer(Gtk.EventBox):
 
     def __change_nick(self, widget):
         self.game_dict['nick'] = widget.get_text()
+        self.__check_dict()
 
     def __seleccion_tanque(self, widget, path):
         rect = self.tanqueview.get_allocation()
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-            path, -1, rect.height)
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(path, -1, rect.height)
         self.tanqueview.set_from_pixbuf(pixbuf)
         self.game_dict['tanque'] = path
+        self.__check_dict()
 
     def __seleccion_mapa(self, widget, path):
         rect = self.mapaview.get_allocation()
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-            path, -1, rect.height)
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(path, -1, rect.height)
         self.mapaview.set_from_pixbuf(pixbuf)
         self.game_dict['mapa'] = path
+        self.__check_dict()
 
     def __seleccion_oponentes(self, widget, valor, tipo):
-        print valor, tipo
         if tipo == "oponentes":
             self.game_dict['enemigos'] = valor
         elif tipo == "vidas":
             self.game_dict['vidas'] = valor
+        self.__check_dict()
 
     def __accion(self, widget, accion):
         self.emit("accion", accion, self.game_dict)
+
+    def __check_dict(self):
+        valor = True
+        for item in self.game_dict.items():
+            if not item[1]:
+                valor = False
+                break
+        self.jugar.set_sensitive(valor)
+
 
     ''' FIXME: Pinta el fondo, no lo uso
     def load(self, path):
         """
         Carga una imagen para pintar el fondo.
         """
-
         if path:
             if os.path.exists(path):
                 self.imagen = GdkPixbuf.Pixbuf.new_from_file(path)
                 self.imagen.savev(self.temp_path, "png", [], [])
                 self.set_size_request(-1, -1)
-
         self.get_child().connect("draw", self.__do_draw)
     '''
