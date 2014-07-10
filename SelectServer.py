@@ -19,12 +19,12 @@ BASE = os.path.dirname(__file__)
 """
 Permite Elegir Opciones del Juego:
     self.game_dict = {
-        'server': '',
+        'server': get_ip(),
         'nick': '',
         'mapa': "",
         'tanque': "",
-        'enemigos': 1,
-        'vidas': 10,
+        'enemigos': 10,
+        'vidas': 50,
         }
 
     emit("accion", accion, self.game_dict)

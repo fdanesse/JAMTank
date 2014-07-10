@@ -5,6 +5,7 @@ from math import sin
 from math import cos
 from math import radians
 
+import os
 import pygame
 
 from pygame.sprite import Sprite
@@ -15,17 +16,17 @@ INDICE_ROTACION = 5
 
 class Jugador(Sprite):
 
-    def __init__(self, imagen_tanque, resolucion):
+    def __init__(self, imagen_path, resolucion):
 
         pygame.sprite.Sprite.__init__(self)
 
         self.eventos = []
-
+        self.energia = 100
         self.imagen_original = None
         self.image = None
         self.rect = None
 
-        imagen = pygame.image.load(imagen_tanque)
+        imagen = pygame.image.load(imagen_path)
         imagen_escalada = pygame.transform.scale(imagen, (50, 50))
         self.imagen_original = imagen_escalada.convert_alpha()
 
@@ -92,10 +93,7 @@ class Jugador(Sprite):
             self.temp_x = int(self.temp_x)
             self.temp_y = int(self.temp_y)
 
-    def get_datos(self):
-        return (self.temp_angulo, self.temp_x, self.temp_y)
-
-    def set_posicion(self, angulo=0, centerx=0, centery=0):
+    def __set_posicion(self, angulo=0, centerx=0, centery=0):
         """
         Actualiza los datos según lo recibido desde el server.
         """
@@ -112,6 +110,14 @@ class Jugador(Sprite):
 
         self.image = pygame.transform.rotate(
             self.imagen_original, -self.angulo)
+
+    def get_datos(self):
+        return (self.temp_angulo, self.temp_x, self.temp_y)
+
+    def update_data(self, angulo=0, centerx=0, centery=0,
+        energia=100, bala=False):
+        self.energia = energia
+        self.__set_posicion(angulo=angulo, centerx=centerx, centery=centery)
 
     def update_events(self, eventos):
         self.eventos = eventos
@@ -145,5 +151,8 @@ class Jugador(Sprite):
             self.__derecha()
         elif "Left" in self.eventos:
             self.__izquierda()
+
+        elif "Escape" in self.eventos:
+            print "FIXME: Salir", self.update
 
         # FIXME: actualizar mis balas

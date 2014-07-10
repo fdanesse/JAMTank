@@ -122,7 +122,7 @@ class JAMTank(Gtk.Window):
             return
 
         nombre = Gdk.keyval_name(event.keyval)
-        teclas = ["Up", "Down", "Right", "Left", "space"]
+        teclas = ["Up", "Down", "Right", "Left", "space", "Escape"]
 
         if nombre in teclas and not nombre in self.eventos:
             if nombre == "Up" and "Down" in self.eventos:
@@ -143,7 +143,7 @@ class JAMTank(Gtk.Window):
             return
 
         nombre = Gdk.keyval_name(event.keyval)
-        teclas = ["Up", "Down", "Right", "Left", "space"]
+        teclas = ["Up", "Down", "Right", "Left", "space", "Escape"]
         if nombre in teclas and nombre in self.eventos:
             self.eventos.remove(nombre)
 

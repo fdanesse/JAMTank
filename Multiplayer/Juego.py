@@ -3,12 +3,11 @@
 
 import os
 import sys
+import pygame
 
 from gi.repository import GObject
 
-import pygame
-
-#from Enemigo import Enemigo
+from Jugador import Jugador
 
 RESOLUCION_INICIAL = (800, 600)
 BASE_PATH = os.path.dirname(__file__)
@@ -16,29 +15,44 @@ TERMINATOR = "\r\n\r\n"
 
 GObject.threads_init()
 
-'''
-    self.game_dict = {
-        'server': '',
-        'nick': '',
-        'mapa': "",
-        'tanque': "",
-        'enemigos': 1,
-        'vidas': 10,
-        'players':
-            {ip: {
-                'nick': '',
-                'tanque': {
-                    'path': '',
-                    'pos': (0, 0, 0),
-                    'energia': 100,
-                    },
-                'vidas': 0,
-                'puntos': 0,
-                'bala': ()
-                },
-            },
-        }
-'''
+"""
+_dict = {
+    'server': get_ip(),
+    'nick': '',
+    'mapa': "",
+    'tanque': "",
+    'enemigos': 10,
+    'vidas': 50,
+    }
+"""
+
+GAME = {
+    'mapa': "",
+    'enemigos': 0,
+    'vidas': 0,
+    }
+
+MODEL = {
+    'nick': '',
+    'tanque': '',
+    'sprite': False,  #'pos': (0, 0, 0), 'energia': 100,
+    'vidas': 0,
+    'puntos': 0,
+    'bala': ()
+    }
+
+JUGADORES = {}
+
+
+def get_ip():
+    import socket
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("gmail.com", 80))
+        return s.getsockname()[0]
+    except:
+        return ""
+
 
 class Juego(GObject.Object):
 
@@ -50,7 +64,16 @@ class Juego(GObject.Object):
 
         GObject.Object.__init__(self)
 
-        self.game_dict = _dict
+        GAME['mapa'] = _dict['mapa']
+        GAME['enemigos'] = _dict['enemigos']
+        GAME['vidas'] = _dict['vidas']
+
+        ip = get_ip()
+        JUGADORES[ip] = MODEL
+        JUGADORES[ip]['nick'] = _dict['nick']
+        JUGADORES[ip]['tanque'] = _dict['tanque']
+        JUGADORES[ip]['vidas'] = _dict['vidas']
+
         self.client = client
 
         self.resolucionreal = RESOLUCION_INICIAL
@@ -72,25 +95,54 @@ class Juego(GObject.Object):
         for mensaje in mensajes:
             m = mensaje.strip()
             if m.startswith('PLAYER*'):
-                datos = m.split('**')
-                ip, nick, path, ang, x, y, energia, vidas, puntos = (0, 0, 0, 0, 0, 0, 0, 0, 0)
-                for dato in datos:
-                    if dato.startswith('PLAYER*'):
-                        ip = dato.replace('PLAYER*', '').strip()
-                    elif dato.startswith('nick*'):
-                        nick = dato.replace('nick*', '').strip()
-                    elif dato.startswith('tanque*'):
-                        path, ang, x, y, energia = dato.replace('tanque*', '').strip().split()
-                    elif dato.startswith('vidas*'):
-                        vidas = dato.replace('vidas*', '').strip()
-                    elif dato.startswith('puntos*'):
-                        puntos = dato.replace('puntos*', '').strip()
-                    elif dato.startswith('bala*'):
-                        # FIXME: Procesar Bala
-                        pass
+                self.__process_player(m)
 
-                #print ip, nick, path, ang, x, y, energia, vidas, puntos
-                self.jugador.set_posicion(angulo=int(ang), centerx=int(x), centery=int(y))
+    def __process_player(self, m):
+        ip, nick, path, ang, x, y, energia, vidas, puntos, bala = (
+            '', '', '', 0, 0, 0, 0, 0, 0, ())
+        datos = m.split('**')
+        for dato in datos:
+            if dato.startswith('PLAYER*'):
+                ip = dato.replace('PLAYER*', '').strip()
+            elif dato.startswith('nick*'):
+                nick = dato.replace('nick*', '').strip()
+            elif dato.startswith('tanque*'):
+                path, ang, x, y, energia = dato.replace(
+                    'tanque*', '').strip().split()
+                ang = int(ang)
+                x = int(x)
+                y = int(y)
+                energia = int(energia)
+            elif dato.startswith('vidas*'):
+                vidas = int(dato.replace('vidas*', '').strip())
+            elif dato.startswith('puntos*'):
+                puntos = dato.replace('puntos*', '').strip()
+            elif dato.startswith('bala*'):
+                # FIXME: Procesar Bala
+                pass
+
+        self.__update_player(ip, nick, path, ang, x, y, energia,
+            vidas, puntos, bala)
+
+    def __update_player(self, ip, nick, path, ang, x, y, energia, vidas,
+        puntos, bala):
+
+        if not ip in JUGADORES.keys():
+            pass
+            """
+            JUGADORES[ip] = MODEL
+            JUGADORES[ip]['nick'] = nick
+            JUGADORES[ip]['tanque'] = path  # FIXME: Corregir
+            JUGADORES[ip]['vidas'] = vidas
+            jugador = Jugador(JUGADORES[ip]['tanque'], RESOLUCION_INICIAL)
+            self.jugadores.add(jugador)
+            JUGADORES[ip]['sprite'] = jugador
+            JUGADORES[ip]['sprite'].update_data(angulo=ang, centerx=x,
+                centery=y, energia=energia, bala=bala)
+            """
+        else:
+            JUGADORES[ip]['sprite'].update_data(angulo=ang, centerx=x,
+                centery=y, energia=energia, bala=bala)
 
     def run(self):
         self.estado = "En Juego"
@@ -111,12 +163,10 @@ class Juego(GObject.Object):
                 mensajes = self.client.recibir()  # recibir
                 self.__process_data(mensajes)  # procesar y actualizar
 
-                # actualizar todos los jugadores
-                #self.jugador.set_posicion(angulo=a, centerx=x, centery=y)
                 # FIXME: actualizar mis balas
                 # FIXME: Redibujar balas
-                # FIXME: Redibujar explosiones
                 # FIXME: Verificar colisiones de balas agenas
+                # FIXME: Redibujar explosiones
 
                 pygame.event.pump()
                 pygame.event.clear()
@@ -169,7 +219,7 @@ class Juego(GObject.Object):
 
         pygame.display.set_caption("JAMtank")
 
-        imagen = pygame.image.load(self.game_dict['mapa'])
+        imagen = pygame.image.load(GAME['mapa'])
         self.escenario = pygame.transform.scale(imagen,
             RESOLUCION_INICIAL).convert_alpha()
 
@@ -178,13 +228,13 @@ class Juego(GObject.Object):
         self.ventana_real = pygame.display.get_surface()
 
         #pygame.mouse.set_visible(False)
-        imagen_tanque = self.game_dict['tanque']
-        from Jugador import Jugador
-        self.jugador = Jugador(imagen_tanque, RESOLUCION_INICIAL)
+        ip = get_ip()
+        self.jugador = Jugador(JUGADORES[ip]['tanque'], RESOLUCION_INICIAL)
         self.jugadores.add(self.jugador)
+        JUGADORES[ip]['sprite'] = self.jugador
 
         '''
-        for enemigo in range(1, self.game_dict['enemigos']+1):
+        for enemigo in range(1, GAME['enemigos']+1):
             enemigo = Enemigo(
                 imagen_tanque, RESOLUCION_INICIAL)
             self.jugadores.add(enemigo)

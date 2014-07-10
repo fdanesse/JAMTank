@@ -15,6 +15,17 @@ from Network.Client import Client
 
 TERMINATOR = "\r\n\r\n"
 
+"""
+_dict = {
+    'server': get_ip(),
+    'nick': '',
+    'mapa': "",
+    'tanque': "",
+    'enemigos': 10,
+    'vidas': 50,
+    }
+"""
+
 
 class GameWidget(Gtk.DrawingArea):
 
