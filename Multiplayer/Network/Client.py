@@ -27,7 +27,6 @@ class Client(GObject.Object):
         self.socket.setblocking(0)
 
     def desconectarse(self):
-        print "Cerrando el socket"
         self.socket.close()
 
     def enviar(self, datos):
@@ -38,10 +37,9 @@ class Client(GObject.Object):
         mensajes = []
         while not entrada:
             try:
-                entrada = self.socket.recv(512)  #(200)
+                entrada = self.socket.recv(512)
                 mensajes = entrada.split(TERMINATOR)
             except socket.error, e:
-                #print "ERROR CLIENT:", e
                 pass
         return mensajes
 

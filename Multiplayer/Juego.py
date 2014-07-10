@@ -18,19 +18,16 @@ GObject.threads_init()
 
 
 class Juego(GObject.Object):
-    """
-    Juego de Batalla entre Tanques.
-    """
 
     __gsignals__ = {
-        "update": (GObject.SIGNAL_RUN_LAST,
-            GObject.TYPE_NONE, [])}
+    "update": (GObject.SIGNAL_RUN_LAST,
+        GObject.TYPE_NONE, [])}
 
-    def __init__(self, datos, client):
+    def __init__(self, _dict, client):
 
         GObject.Object.__init__(self)
 
-        self.game_dict = datos
+        self.game_dict = _dict
         self.client = client
 
         self.resolucionreal = RESOLUCION_INICIAL
@@ -44,15 +41,17 @@ class Juego(GObject.Object):
         self.balas = pygame.sprite.RenderUpdates()
         self.explosiones = pygame.sprite.RenderUpdates()
 
-    def escalar(self, resolucion):
+    def __client_send_data(self, a, x, y):
+        _buffer = 'TP*%s %s %s%s' % (a, x, y, TERMINATOR)
+        self.client.enviar(_buffer)
 
+    def __client_get_data(self):
+        return self.client.recibir()
+
+    def escalar(self, resolucion):
         self.resolucionreal = resolucion
 
     def config(self):
-        """
-        Configuración inicial del Juego.
-        """
-
         pygame.init()
         self.reloj = pygame.time.Clock()
 
@@ -72,41 +71,28 @@ class Juego(GObject.Object):
         from pygame.locals import KEYDOWN
         from pygame.locals import KEYUP
 
-        pygame.event.set_blocked(
-            [MOUSEMOTION, MOUSEBUTTONUP,
-            MOUSEBUTTONDOWN, JOYAXISMOTION,
-            JOYBALLMOTION, JOYHATMOTION,
-            JOYBUTTONUP, JOYBUTTONDOWN,
-            ACTIVEEVENT, USEREVENT])
-
-        pygame.event.set_allowed(
-            [QUIT, VIDEORESIZE, VIDEOEXPOSE])
+        pygame.event.set_blocked([MOUSEMOTION, MOUSEBUTTONUP, MOUSEBUTTONDOWN,
+            JOYAXISMOTION, JOYBALLMOTION, JOYHATMOTION, JOYBUTTONUP,
+            JOYBUTTONDOWN, ACTIVEEVENT, USEREVENT])
+        pygame.event.set_allowed([QUIT, VIDEORESIZE, VIDEOEXPOSE])
 
         pygame.display.set_mode(
-            (0, 0),
-            pygame.DOUBLEBUF | pygame.FULLSCREEN, 0)
+            (0, 0), pygame.DOUBLEBUF | pygame.FULLSCREEN, 0)
 
         pygame.display.set_caption("JAMtank")
 
-        imagen = pygame.image.load(
-            self.game_dict['mapa'])
+        imagen = pygame.image.load(self.game_dict['mapa'])
+        self.escenario = pygame.transform.scale(imagen,
+            RESOLUCION_INICIAL).convert_alpha()
 
-        self.escenario = pygame.transform.scale(
-            imagen, RESOLUCION_INICIAL).convert_alpha()
-
-        self.ventana = pygame.Surface(
-            (RESOLUCION_INICIAL[0], RESOLUCION_INICIAL[1]))
-
+        self.ventana = pygame.Surface((RESOLUCION_INICIAL[0],
+            RESOLUCION_INICIAL[1]))
         self.ventana_real = pygame.display.get_surface()
 
-        pygame.mouse.set_visible(False)
-
+        #pygame.mouse.set_visible(False)
         imagen_tanque = self.game_dict['tanque']
-
         from Jugador import Jugador
-
-        self.jugador = Jugador(
-            imagen_tanque, RESOLUCION_INICIAL)
+        self.jugador = Jugador(imagen_tanque, RESOLUCION_INICIAL)
         self.jugadores.add(self.jugador)
 
         '''
@@ -117,48 +103,26 @@ class Juego(GObject.Object):
         '''
 
     def run(self):
-        """
-        El Juego comienza a Correr.
-        """
-
-        '''
-        self.game_dict = {
-            'ip':'',
-            'nick': '',
-            'tipo': tipo,
-            'mapa': "",
-            'tanque': "",
-            'enemigos': 1,
-            'vidas': 10,
-            }
-        '''
-
         self.estado = "En Juego"
-
         self.ventana.blit(self.escenario, (0, 0))
-
         pygame.display.update()
 
         while self.estado == "En Juego":
             try:
                 self.reloj.tick(35)
 
-                self.jugadores.clear(
-                    self.ventana, self.escenario)
-                self.balas.clear(
-                    self.ventana, self.escenario)
-                self.explosiones.clear(
-                    self.ventana, self.escenario)
+                self.jugadores.clear(self.ventana, self.escenario)
+                self.balas.clear(self.ventana, self.escenario)
+                self.explosiones.clear(self.ventana, self.escenario)
 
                 self.jugador.update()
                 a, x, y = self.jugador.get_datos()
-                # enviar
-                # recibir
+                self.__client_send_data(a, x, y)  # enviar
+                datos = self.__client_get_data()  # recibir
+                print datos
                 # actualizar todos los jugadores
-                self.jugador.set_posicion(
-                    angulo=a, centerx=x, centery=y)
+                self.jugador.set_posicion(angulo=a, centerx=x, centery=y)
                 # FIXME: actualizar mis balas
-
                 # FIXME: Redibujar balas
                 # FIXME: Redibujar explosiones
                 # FIXME: Verificar colisiones de balas agenas
@@ -170,8 +134,8 @@ class Juego(GObject.Object):
                 self.balas.draw(self.ventana)
                 self.explosiones.draw(self.ventana)
 
-                self.ventana_real.blit(pygame.transform.scale(
-                    self.ventana, self.resolucionreal), (0,0))
+                self.ventana_real.blit(pygame.transform.scale(self.ventana,
+                    self.resolucionreal), (0,0))
 
                 pygame.display.update()
 
@@ -179,11 +143,10 @@ class Juego(GObject.Object):
                 self.estado = False
 
     def update_events(self, eventos):
-
         self.jugador.update_events(eventos)
 
 
-if __name__ == "__main__":
-    juego = Juego()
-    juego.config()
-    juego.run()
+#if __name__ == "__main__":
+#    juego = Juego()
+#    juego.config()
+#    juego.run()

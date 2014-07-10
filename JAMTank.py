@@ -3,6 +3,7 @@
 
 import os
 import sys
+import time
 import pygame
 
 from gi.repository import Gtk
@@ -67,9 +68,6 @@ class JAMTank(Gtk.Window):
         self.switch(False, 1, datos=False)
 
     def __solo_run(self, widget, datos):
-        """
-        El Usuario lanza juego (single o multiplayer).
-        """
         self.__reset()
         from GameWidget import GameWidget
         self.widget_game = GameWidget()
@@ -84,8 +82,14 @@ class JAMTank(Gtk.Window):
             if self.widget_game.juego:
                 self.widget_game.juego.estado = False
                 pygame.quit()
+                time.sleep(0.5)
             if self.widget_game.client:
                 self.widget_game.client.desconectarse()
+                time.sleep(0.5)
+            if self.widget_game.server:
+                #self.widget_game.server.estado = False
+                self.widget_game.server.shutdown()
+                time.sleep(0.5)
         sys.exit(0)
 
     def __intro_switch(self, widget, valor):
@@ -110,11 +114,43 @@ class JAMTank(Gtk.Window):
             self.widget_game = GameWidget()
             self.add(self.widget_game)
             GLib.idle_add(self.widget_game.setup_init, _dict)
+            self.connect('key-press-event', self.__key_press_event)
+            self.connect('key-release-event', self.__key_release_event)
+
+    def __key_press_event(self, widget, event):
+        if not self.widget_game:
+            return
+
+        nombre = Gdk.keyval_name(event.keyval)
+        teclas = ["Up", "Down", "Right", "Left", "space"]
+
+        if nombre in teclas and not nombre in self.eventos:
+            if nombre == "Up" and "Down" in self.eventos:
+                self.eventos.remove("Down")
+            elif nombre == "Down" and "Up" in self.eventos:
+                self.eventos.remove("Up")
+            elif nombre == "Right" and "Left" in self.eventos:
+                self.eventos.remove("Left")
+            elif nombre == "Left" and "Right" in self.eventos:
+                self.eventos.remove("Right")
+
+            self.eventos.append(nombre)
+        self.__update_events()
+        return False
+
+    def __key_release_event(self, widget, event):
+        if not self.widget_game:
+            return
+
+        nombre = Gdk.keyval_name(event.keyval)
+        teclas = ["Up", "Down", "Right", "Left", "space"]
+        if nombre in teclas and nombre in self.eventos:
+            self.eventos.remove(nombre)
+
+        self.__update_events()
+        return False
 
     def switch(self, widget, valor, datos=False):
-        """
-        Cambia los widgets en la ventana:
-        """
         self.__reset()
         if valor == 1:
             # Introduccion, opciones de juego.
@@ -152,52 +188,7 @@ class JAMTank(Gtk.Window):
             self.add(self.select_widget)
             '''
         GLib.idle_add(self.queue_draw)
-    '''
-    def do_key_press_event(self, event):
-        """
-        Agrega eventos para mover el tanque o disparar.
-        """
 
-        if not self.widget_game:
-            return
-
-        nombre = Gdk.keyval_name(event.keyval)
-        teclas = ["Up", "Down", "Right", "Left", "space"]
-        if nombre in teclas and not nombre in self.eventos:
-
-            if nombre == "Up" and "Down" in self.eventos:
-                self.eventos.remove("Down")
-
-            elif nombre == "Down" and "Up" in self.eventos:
-                self.eventos.remove("Up")
-
-            elif nombre == "Right" and "Left" in self.eventos:
-                self.eventos.remove("Left")
-
-            elif nombre == "Left" and "Right" in self.eventos:
-                self.eventos.remove("Right")
-
-            self.eventos.append(nombre)
-
-        self.__update_events()
-        return False
-
-    def do_key_release_event(self, event):
-        """
-        Quita eventos de mover el tanque.
-        """
-
-        if not self.widget_game:
-            return
-
-        nombre = Gdk.keyval_name(event.keyval)
-        teclas = ["Up", "Down", "Right", "Left", "space"]
-        if nombre in teclas and nombre in self.eventos:
-            self.eventos.remove(nombre)
-
-        self.__update_events()
-        return False
-    '''
 
 if __name__ == "__main__":
     JAMTank()

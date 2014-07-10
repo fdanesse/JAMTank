@@ -4,7 +4,7 @@
 #   Server.py por:
 #   Flavio Danesse <fdanesse@gmail.com>
 
-
+import socket
 import SocketServer
 
 TERMINATOR = "\r\n\r\n"
@@ -18,7 +18,7 @@ GAME = {
 MODEL = {
     'nick': '',
     'tanque': {
-        #'path': '',
+        'path': '',
         'pos': (0, 0, 0),
         'energia': 100,
         },
@@ -38,46 +38,70 @@ class Server(SocketServer.ThreadingMixIn,
 class RequestHandler(SocketServer.StreamRequestHandler):
 
     def handle(self):
-        datos = self.request.recv(200)
-        respuesta = self.__procesar(datos)
-        self.request.send(respuesta)
+        while 1:
+            try:
+                datos = self.request.recv(512)
+                respuesta = self.__procesar(datos)
+                self.request.send(respuesta)
+            except socket.error, err:
+                print "Error en Server: ", err
+                self.request.close()
+                return
 
     def __procesar(self, datos):
         mensajes = datos.split(TERMINATOR)
-        retorno = "OK*"
 
         for mensaje in mensajes:
             if mensaje.startswith('CONNECT*'):
-                return self.__check_enemigos()
+                #return self.__check_enemigos()
+                pass
 
+            # Configuración del juego:
             elif mensaje.startswith('M*'):
                 GAME['mapa'] = mensaje.split('M*')[-1].strip()
-                #return "OK*%s" % TERMINATOR
-
             elif mensaje.startswith('E*'):
                 GAME['enemigos'] = int(mensaje.split('E*')[-1].strip())
-                #return "OK*%s" % TERMINATOR
-
             elif mensaje.startswith('V*'):
                 GAME['vidas'] = int(mensaje.split('V*')[-1].strip())
-                #return "OK*%s" % TERMINATOR
 
+            # Configuración de Jugador:
             elif mensaje.startswith('N*'):
-                self.__add_nick(mensaje.strip())
-
+                self.__add_nick(mensaje.split('N*')[-1].strip())
             elif mensaje.startswith('T*'):
-                self.__add_tanque(mensaje.strip())
+                self.__add_tanque(mensaje.split('T*')[-1].strip())
+
+            # Posición y Angulo de Tanque:
+            elif mensaje.startswith('TP*'):
+                self.__update_player(mensaje.split('TP*')[-1].strip())
 
             else:
                 pass
 
-        return "%s%s%s%s" % (GAME, TERMINATOR, JUGADORES, TERMINATOR)  #retorno
+        return self.__return_data()
 
-    def __check_enemigos(self):
-        if len(JUGADORES.keys()) < GAME['enemigos']:
-            return "CONNECT*%s" % TERMINATOR
-        else:
-            return "CLOSE*%s" % TERMINATOR
+    def __return_data(self):
+        _buffer = ""
+        for ip in JUGADORES.keys():
+            _buffer = "%sPLAYER*%s**" % (_buffer, ip)
+            _buffer = "%snick*%s**" % (_buffer, JUGADORES[ip].get('nick', " "))
+
+            path = JUGADORES[ip]['tanque']['path']
+            a, x, y = JUGADORES[ip]['tanque']['pos']
+            energia = JUGADORES[ip]['tanque']['energia']
+            _buffer = "%stanque*%s**%s**%s**%s**%s**" % (_buffer, path, a, x, y, energia)
+
+            _buffer = "%svidas*%s**" % (_buffer, JUGADORES[ip]['vidas'])
+            _buffer = "%spuntos*%s**" % (_buffer, JUGADORES[ip]['puntos'])
+            #_buffer = "%sbalas*%s**" % (_buffer, JUGADORES[ip]['balas'])
+            _buffer = "%s%s" % (_buffer, TERMINATOR)
+
+        return _buffer
+
+    #def __check_enemigos(self):
+    #    if len(JUGADORES.keys()) < GAME['enemigos']:
+    #        return "CONNECT*%s" % TERMINATOR
+    #    else:
+    #        return "CLOSE*%s" % TERMINATOR
 
     def __add_nick(self, nick):
         self.__check_jugador()
@@ -85,7 +109,13 @@ class RequestHandler(SocketServer.StreamRequestHandler):
 
     def __add_tanque(self, tanque):
         self.__check_jugador()
-        JUGADORES[self.client_address[0]]['tanque'] = tanque
+        JUGADORES[self.client_address[0]]['tanque']['path']= tanque
+
+    def __update_player(self, mensaje):
+        self.__check_jugador()
+        angulo, x, y = mensaje.split()
+        JUGADORES[self.client_address[0]]['tanque']['pos'] = (int(angulo),
+            int(x), int(y))
 
     def __check_jugador(self):
         if not self.client_address[0] in JUGADORES.keys():
