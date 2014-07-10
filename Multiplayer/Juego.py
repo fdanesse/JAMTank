@@ -16,6 +16,29 @@ TERMINATOR = "\r\n\r\n"
 
 GObject.threads_init()
 
+'''
+    self.game_dict = {
+        'server': '',
+        'nick': '',
+        'mapa': "",
+        'tanque': "",
+        'enemigos': 1,
+        'vidas': 10,
+        'players':
+            {ip: {
+                'nick': '',
+                'tanque': {
+                    'path': '',
+                    'pos': (0, 0, 0),
+                    'energia': 100,
+                    },
+                'vidas': 0,
+                'puntos': 0,
+                'bala': ()
+                },
+            },
+        }
+'''
 
 class Juego(GObject.Object):
 
@@ -45,11 +68,76 @@ class Juego(GObject.Object):
         _buffer = 'TP*%s %s %s%s' % (a, x, y, TERMINATOR)
         self.client.enviar(_buffer)
 
-    def __client_get_data(self):
-        return self.client.recibir()
+    def __process_data(self, mensajes):
+        for mensaje in mensajes:
+            m = mensaje.strip()
+            if m.startswith('PLAYER*'):
+                datos = m.split('**')
+                ip, nick, path, ang, x, y, energia, vidas, puntos = (0, 0, 0, 0, 0, 0, 0, 0, 0)
+                for dato in datos:
+                    if dato.startswith('PLAYER*'):
+                        ip = dato.replace('PLAYER*', '').strip()
+                    elif dato.startswith('nick*'):
+                        nick = dato.replace('nick*', '').strip()
+                    elif dato.startswith('tanque*'):
+                        path, ang, x, y, energia = dato.replace('tanque*', '').strip().split()
+                    elif dato.startswith('vidas*'):
+                        vidas = dato.replace('vidas*', '').strip()
+                    elif dato.startswith('puntos*'):
+                        puntos = dato.replace('puntos*', '').strip()
+                    elif dato.startswith('bala*'):
+                        # FIXME: Procesar Bala
+                        pass
+
+                #print ip, nick, path, ang, x, y, energia, vidas, puntos
+                self.jugador.set_posicion(angulo=int(ang), centerx=int(x), centery=int(y))
+
+    def run(self):
+        self.estado = "En Juego"
+        self.ventana.blit(self.escenario, (0, 0))
+        pygame.display.update()
+
+        while self.estado == "En Juego":
+            try:
+                self.reloj.tick(35)
+
+                self.jugadores.clear(self.ventana, self.escenario)
+                self.balas.clear(self.ventana, self.escenario)
+                self.explosiones.clear(self.ventana, self.escenario)
+
+                self.jugador.update()
+                a, x, y = self.jugador.get_datos()
+                self.__client_send_data(a, x, y)  # enviar
+                mensajes = self.client.recibir()  # recibir
+                self.__process_data(mensajes)  # procesar y actualizar
+
+                # actualizar todos los jugadores
+                #self.jugador.set_posicion(angulo=a, centerx=x, centery=y)
+                # FIXME: actualizar mis balas
+                # FIXME: Redibujar balas
+                # FIXME: Redibujar explosiones
+                # FIXME: Verificar colisiones de balas agenas
+
+                pygame.event.pump()
+                pygame.event.clear()
+
+                self.jugadores.draw(self.ventana)
+                self.balas.draw(self.ventana)
+                self.explosiones.draw(self.ventana)
+
+                self.ventana_real.blit(pygame.transform.scale(self.ventana,
+                    self.resolucionreal), (0,0))
+
+                pygame.display.update()
+
+            except:
+                self.estado = False
 
     def escalar(self, resolucion):
         self.resolucionreal = resolucion
+
+    def update_events(self, eventos):
+        self.jugador.update_events(eventos)
 
     def config(self):
         pygame.init()
@@ -101,49 +189,6 @@ class Juego(GObject.Object):
                 imagen_tanque, RESOLUCION_INICIAL)
             self.jugadores.add(enemigo)
         '''
-
-    def run(self):
-        self.estado = "En Juego"
-        self.ventana.blit(self.escenario, (0, 0))
-        pygame.display.update()
-
-        while self.estado == "En Juego":
-            try:
-                self.reloj.tick(35)
-
-                self.jugadores.clear(self.ventana, self.escenario)
-                self.balas.clear(self.ventana, self.escenario)
-                self.explosiones.clear(self.ventana, self.escenario)
-
-                self.jugador.update()
-                a, x, y = self.jugador.get_datos()
-                self.__client_send_data(a, x, y)  # enviar
-                datos = self.__client_get_data()  # recibir
-                print datos
-                # actualizar todos los jugadores
-                self.jugador.set_posicion(angulo=a, centerx=x, centery=y)
-                # FIXME: actualizar mis balas
-                # FIXME: Redibujar balas
-                # FIXME: Redibujar explosiones
-                # FIXME: Verificar colisiones de balas agenas
-
-                pygame.event.pump()
-                pygame.event.clear()
-
-                self.jugadores.draw(self.ventana)
-                self.balas.draw(self.ventana)
-                self.explosiones.draw(self.ventana)
-
-                self.ventana_real.blit(pygame.transform.scale(self.ventana,
-                    self.resolucionreal), (0,0))
-
-                pygame.display.update()
-
-            except:
-                self.estado = False
-
-    def update_events(self, eventos):
-        self.jugador.update_events(eventos)
 
 
 #if __name__ == "__main__":

@@ -23,8 +23,8 @@ MODEL = {
         'energia': 100,
         },
     'vidas': 0,
-    'balas': [0],
     'puntos': 0,
+    'bala': ()
     }
 
 JUGADORES = {}
@@ -88,11 +88,11 @@ class RequestHandler(SocketServer.StreamRequestHandler):
             path = JUGADORES[ip]['tanque']['path']
             a, x, y = JUGADORES[ip]['tanque']['pos']
             energia = JUGADORES[ip]['tanque']['energia']
-            _buffer = "%stanque*%s**%s**%s**%s**%s**" % (_buffer, path, a, x, y, energia)
+            _buffer = "%stanque*%s %s %s %s %s**" % (_buffer, path, a, x, y, energia)
 
             _buffer = "%svidas*%s**" % (_buffer, JUGADORES[ip]['vidas'])
             _buffer = "%spuntos*%s**" % (_buffer, JUGADORES[ip]['puntos'])
-            #_buffer = "%sbalas*%s**" % (_buffer, JUGADORES[ip]['balas'])
+            _buffer = "%sbala*%s**" % (_buffer, JUGADORES[ip]['bala'])
             _buffer = "%s%s" % (_buffer, TERMINATOR)
 
         return _buffer

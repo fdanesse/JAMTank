@@ -32,7 +32,6 @@ class GameWidget(Gtk.DrawingArea):
         self.show_all()
 
     def __run_client(self, _dict):
-        # CLIENT
         self.client = Client(_dict['server'])
         self.client_thread = threading.Thread(target=self.client.conectarse,
             name='client')
@@ -57,7 +56,7 @@ class GameWidget(Gtk.DrawingArea):
         retorno = self.client.recibir()
 
         #print "ServerGameWidget:", retorno
-        GLib.timeout_add(500, self.__run_game, _dict)
+        GLib.timeout_add(500, self.__run_game, _dict.copy())
         return False
 
     def __run_game(self, _dict):
@@ -73,7 +72,6 @@ class GameWidget(Gtk.DrawingArea):
         return False
 
     def setup_init(self, _dict):
-        # SERVER
         self.server = Server((_dict['server'], 5000), RequestHandler)
         self.server.allow_reuse_address = True
         self.server.socket.setblocking(0)
@@ -82,7 +80,7 @@ class GameWidget(Gtk.DrawingArea):
         self.server_thread.setDaemon(True)
         self.server_thread.start()
 
-        GLib.timeout_add(500, self.__run_client, _dict)
+        GLib.timeout_add(500, self.__run_client, _dict.copy())
         return False
 
     def do_draw(self, context):
