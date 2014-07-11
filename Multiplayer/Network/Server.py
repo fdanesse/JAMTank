@@ -44,7 +44,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                 respuesta = self.__procesar(datos)
                 self.request.send(respuesta)
             except socket.error, err:
-                print "Error en Server: ", err
+                print "Error en Server: ", err, self.client_address[0]
                 self.request.close()
                 return
 
@@ -53,8 +53,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
 
         for mensaje in mensajes:
             if mensaje.startswith('CONNECT*'):
-                #return self.__check_enemigos()
-                pass
+                return self.__check_enemigos()
 
             # Configuración del juego:
             elif mensaje.startswith('M*'):
@@ -97,11 +96,14 @@ class RequestHandler(SocketServer.StreamRequestHandler):
 
         return _buffer
 
-    #def __check_enemigos(self):
-    #    if len(JUGADORES.keys()) < GAME['enemigos']:
-    #        return "CONNECT*%s" % TERMINATOR
-    #    else:
-    #        return "CLOSE*%s" % TERMINATOR
+    def __check_enemigos(self):
+        ips = JUGADORES.keys()
+        if self.client_address[0] in ips:
+            return "CONNECT*%s %s%s" % (GAME['mapa'], GAME['vidas'], TERMINATOR)
+        if len(ips) < GAME['enemigos']:
+            return "CONNECT*%s %s%s" % (GAME['mapa'], GAME['vidas'], TERMINATOR)
+        else:
+            return "CLOSE*%s" % TERMINATOR
 
     def __add_nick(self, nick):
         self.__check_jugador()
@@ -121,13 +123,27 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         if not self.client_address[0] in JUGADORES.keys():
             JUGADORES[self.client_address[0]] = MODEL.copy()
 
-#if __name__ == "__main__":
-#    server = Server(("192.168.1.9", 5000), RequestHandler)
-#    server.allow_reuse_address = True
-#    server.socket.setblocking(0)
-#    server.serve_forever()
-#    '''
-#    server_thread = threading.Thread(target=server.serve_forever)
-#    server_thread.setDaemon(True)
-#    server_thread.start()
-#    '''
+if __name__ == "__main__":
+    ret = ''
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("gmail.com", 80))
+        ret = s.getsockname()[0]
+        s.close()
+    except:
+        ret = ''
+
+    GAME['mapa'] = "fondo1.png"
+    GAME['enemigos'] = 1
+    GAME['vidas'] = 10
+
+    if ret:
+        import threading
+        server = Server((ret, 5000), RequestHandler)
+        server.allow_reuse_address = True
+        server.socket.setblocking(0)
+        server.serve_forever()
+
+        server_thread = threading.Thread(target=server.serve_forever)
+        server_thread.setDaemon(True)
+        server_thread.start()

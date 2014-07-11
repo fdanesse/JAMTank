@@ -46,6 +46,8 @@ class Jugador(Sprite):
         self.temp_x = 0
         self.temp_y = 0
 
+        #self.__set_posicion(angulo=0, centerx=100, centery=100)
+
     def __derecha(self):
         self.temp_angulo += int(0.7 * INDICE_ROTACION)
         self.temp_image = pygame.transform.rotate(
@@ -151,8 +153,5 @@ class Jugador(Sprite):
             self.__derecha()
         elif "Left" in self.eventos:
             self.__izquierda()
-
-        elif "Escape" in self.eventos:
-            print "FIXME: Salir", self.update
 
         # FIXME: actualizar mis balas

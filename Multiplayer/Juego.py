@@ -28,7 +28,6 @@ _dict = {
 
 GAME = {
     'mapa': "",
-    'enemigos': 0,
     'vidas': 0,
     }
 
@@ -65,14 +64,13 @@ class Juego(GObject.Object):
         GObject.Object.__init__(self)
 
         GAME['mapa'] = _dict['mapa']
-        GAME['enemigos'] = _dict['enemigos']
-        GAME['vidas'] = _dict['vidas']
+        GAME['vidas'] = int(_dict['vidas'])
 
         ip = get_ip()
         JUGADORES[ip] = MODEL
         JUGADORES[ip]['nick'] = _dict['nick']
         JUGADORES[ip]['tanque'] = _dict['tanque']
-        JUGADORES[ip]['vidas'] = _dict['vidas']
+        JUGADORES[ip]['vidas'] = int(_dict['vidas'])
 
         self.client = client
 
@@ -116,7 +114,7 @@ class Juego(GObject.Object):
             elif dato.startswith('vidas*'):
                 vidas = int(dato.replace('vidas*', '').strip())
             elif dato.startswith('puntos*'):
-                puntos = dato.replace('puntos*', '').strip()
+                puntos = int(dato.replace('puntos*', '').strip())
             elif dato.startswith('bala*'):
                 # FIXME: Procesar Bala
                 pass
@@ -126,28 +124,37 @@ class Juego(GObject.Object):
 
     def __update_player(self, ip, nick, path, ang, x, y, energia, vidas,
         puntos, bala):
-
+        print ip in JUGADORES.keys()
         if not ip in JUGADORES.keys():
-            pass
-            """
             JUGADORES[ip] = MODEL
             JUGADORES[ip]['nick'] = nick
-            JUGADORES[ip]['tanque'] = path  # FIXME: Corregir
+            dirpath = os.path.dirname(os.path.dirname(GAME['mapa']))
+            JUGADORES[ip]['tanque'] = os.path.join(dirpath, 'Tanques', path)
             JUGADORES[ip]['vidas'] = vidas
+
             jugador = Jugador(JUGADORES[ip]['tanque'], RESOLUCION_INICIAL)
             self.jugadores.add(jugador)
             JUGADORES[ip]['sprite'] = jugador
             JUGADORES[ip]['sprite'].update_data(angulo=ang, centerx=x,
                 centery=y, energia=energia, bala=bala)
-            """
         else:
             JUGADORES[ip]['sprite'].update_data(angulo=ang, centerx=x,
                 centery=y, energia=energia, bala=bala)
+
+    def salir(self):
+        # FIXME: Enviar Desconectarse y Finalizar al Servidor
+        self.estado = False
+        pygame.quit()
+        if self.client:
+            self.client.desconectarse()
+            del(self.client)
+            self.client = False
 
     def run(self):
         self.estado = "En Juego"
         self.ventana.blit(self.escenario, (0, 0))
         pygame.display.update()
+        pygame.time.wait(3)
 
         while self.estado == "En Juego":
             try:
@@ -159,9 +166,11 @@ class Juego(GObject.Object):
 
                 self.jugador.update()
                 a, x, y = self.jugador.get_datos()
-                self.__client_send_data(a, x, y)  # enviar
-                mensajes = self.client.recibir()  # recibir
-                self.__process_data(mensajes)  # procesar y actualizar
+
+                if self.client:
+                    self.__client_send_data(a, x, y)  # enviar
+                    mensajes = self.client.recibir()  # recibir
+                    self.__process_data(mensajes)  # procesar y actualizar
 
                 # FIXME: actualizar mis balas
                 # FIXME: Redibujar balas
@@ -179,7 +188,7 @@ class Juego(GObject.Object):
                     self.resolucionreal), (0,0))
 
                 pygame.display.update()
-
+                pygame.time.wait(1)
             except:
                 self.estado = False
 

@@ -182,7 +182,9 @@ class SelectServer(Gtk.EventBox):
         self.lista_tanques.agregar_items(elementos)
 
     def __change_nick(self, widget):
-        self.game_dict['nick'] = widget.get_text()
+        nick = widget.get_text().replace('\n','').replace('\r', '')
+        nick = nick.replace('*','').replace(' ','_')
+        self.game_dict['nick'] = nick
         self.__check_dict()
 
     def __seleccion_tanque(self, widget, path):

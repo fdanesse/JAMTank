@@ -10,8 +10,6 @@ from gi.repository import GdkX11
 from gi.repository import GLib
 from gi.repository import GObject
 
-from Network.Server import Server
-from Network.Server import RequestHandler
 from Network.Client import Client
 from Juego import Juego
 
@@ -19,12 +17,9 @@ TERMINATOR = "\r\n\r\n"
 
 """
 _dict = {
-    'server': get_ip(),
-    'nick': '',
-    'mapa': "",
+    'nick': "",
     'tanque': "",
-    'enemigos': 10,
-    'vidas': 50,
+    'server': ""
     }
 """
 
@@ -40,15 +35,23 @@ class GameWidget(Gtk.DrawingArea):
         Gtk.DrawingArea.__init__(self)
 
         self.game_thread = False
-        self.server_thread = False
         self.client_thread = False
         self.client = False
-        self.server = False
         self.juego = False
 
         self.show_all()
 
     def __run_client(self, _dict):
+        '''
+        try:
+            import socket
+            socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            address = (_dict['server'], 5000)
+            socket.connect(address)
+            socket.close()
+        except:
+            return False
+        '''
         self.client = Client(_dict['server'])
         self.client.conectarse()
         self.client_thread = threading.Thread(target=self.client.conectarse,
@@ -58,19 +61,20 @@ class GameWidget(Gtk.DrawingArea):
 
         time.sleep(0.5)
 
-        mapa = os.path.basename(_dict['mapa'])
-        _buffer = 'M*%s%s' % (mapa, TERMINATOR)
-        _buffer = '%sE*%s%s' % (_buffer, _dict['enemigos'], TERMINATOR)
-        _buffer = '%sV*%s%s' % (_buffer, _dict['vidas'], TERMINATOR)
-
-        tanque = os.path.basename(_dict['tanque'])
-        _buffer = '%sN*%s%s' % (_buffer, _dict['nick'], TERMINATOR)
-        _buffer = '%sT*%s%s' % (_buffer, tanque, TERMINATOR)
-
+        _buffer = 'CONNECT*%s' % (TERMINATOR)
         self.client.enviar(_buffer)
-        retorno = self.client.recibir()
+        mensajes = self.client.recibir()
 
-        GLib.timeout_add(500, self.__run_game, _dict.copy())
+        for mensaje in mensajes:
+            if mensaje.startswith('CONNECT*'):
+                mapa, vidas = mensaje.replace('CONNECT*', "").split()
+                dirpath = os.path.dirname(os.path.dirname(_dict['tanque']))
+                _dict['mapa'] = os.path.join(dirpath, "Mapas", mapa)
+                _dict['vidas'] = int(vidas)
+                GLib.timeout_add(500, self.__run_game, _dict.copy())
+                return False
+            if mensaje.startswith('CLOSE*'):
+                print "FIXME: El Servidor no admite mas Jugadores", self.__run_client
         return False
 
     def __run_game(self, _dict):
@@ -85,15 +89,7 @@ class GameWidget(Gtk.DrawingArea):
         return False
 
     def setup_init(self, _dict):
-        self.server = Server((_dict['server'], 5000), RequestHandler)
-        self.server.allow_reuse_address = True
-        self.server.socket.setblocking(0)
-
-        self.server_thread = threading.Thread(target=self.server.serve_forever)
-        self.server_thread.setDaemon(True)
-        self.server_thread.start()
-
-        GLib.timeout_add(500, self.__run_client, _dict.copy())
+        self.__run_client(_dict.copy())
         return False
 
     def do_draw(self, context):
@@ -111,5 +107,4 @@ class GameWidget(Gtk.DrawingArea):
     def salir(self):
         if self.juego:
             self.juego.salir()
-        self.server.shutdown()
         self.emit('salir')
