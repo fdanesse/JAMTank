@@ -183,7 +183,7 @@ class SelectServer(Gtk.EventBox):
 
     def __change_nick(self, widget):
         nick = widget.get_text().replace('\n','').replace('\r', '')
-        nick = nick.replace('*','').replace(' ','_')
+        nick = nick.replace('*','').replace(' ','_').replace('|', '')
         self.game_dict['nick'] = nick
         self.__check_dict()
 

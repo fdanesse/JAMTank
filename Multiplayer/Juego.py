@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
 import pygame
 
 from gi.repository import GObject
+from gi.repository import Gtk
 
 from Jugador import Jugador
 
@@ -15,22 +15,12 @@ TERMINATOR = "\r\n\r\n"
 
 GObject.threads_init()
 
-"""
-_dict = {
-    'server': get_ip(),
-    'nick': '',
-    'mapa': "",
-    'tanque': "",
-    'enemigos': 10,
-    'vidas': 50,
-    }
-"""
-
 GAME = {
     'mapa': "",
-    'vidas': 0,
+    #'vidas': 0,
     }
 
+'''
 MODEL = {
     'nick': '',
     'tanque': '',
@@ -39,8 +29,10 @@ MODEL = {
     'puntos': 0,
     'bala': ()
     }
+'''
 
 JUGADORES = {}
+PR = False
 
 
 def get_ip():
@@ -48,7 +40,7 @@ def get_ip():
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("gmail.com", 80))
-        return s.getsockname()[0]
+        return str(s.getsockname()[0]).strip()
     except:
         return ""
 
@@ -63,13 +55,28 @@ class Juego(GObject.Object):
 
         GObject.Object.__init__(self)
 
-        GAME['mapa'] = _dict['mapa']
-        GAME['vidas'] = int(_dict['vidas'])
+        # _dict = {
+        #   'enemigos': 10,             **** Sólo lo recibe en caso de ser HOST
+        #   'tanque': '. . . /JAMTank/Tanques/tanque_3.png',
+        #   'mapa': '. . . /JAMTank/Mapas/fondo2.png',
+        #   'nick': 'un_nombre',
+        #   'vidas': 50,
+        #   'server': '192.168.1.9'}
+
+        GAME['mapa'] = str(_dict['mapa'])
+        #GAME['vidas'] = int(_dict['vidas'])
 
         ip = get_ip()
-        JUGADORES[ip] = MODEL
-        JUGADORES[ip]['nick'] = _dict['nick']
-        JUGADORES[ip]['tanque'] = _dict['tanque']
+        JUGADORES[ip] = {
+            'nick': '',
+            'tanque': '',
+            'sprite': False,
+            'vidas': 0,
+            'puntos': 0,
+            'bala': ()
+            }
+        JUGADORES[ip]['nick'] = str(_dict['nick'])
+        JUGADORES[ip]['tanque'] = str(_dict['tanque'])
         JUGADORES[ip]['vidas'] = int(_dict['vidas'])
 
         self.client = client
@@ -90,6 +97,9 @@ class Juego(GObject.Object):
         self.client.enviar(_buffer)
 
     def __process_data(self, mensajes):
+        if PR:
+            print "CLIENT Recibe:", mensajes
+
         for mensaje in mensajes:
             m = mensaje.strip()
             if m.startswith('PLAYER*'):
@@ -98,12 +108,12 @@ class Juego(GObject.Object):
     def __process_player(self, m):
         ip, nick, path, ang, x, y, energia, vidas, puntos, bala = (
             '', '', '', 0, 0, 0, 0, 0, 0, ())
-        datos = m.split('**')
+        datos = m.split('||')
         for dato in datos:
             if dato.startswith('PLAYER*'):
-                ip = dato.replace('PLAYER*', '').strip()
+                ip = str(dato.replace('PLAYER*', '').strip())
             elif dato.startswith('nick*'):
-                nick = dato.replace('nick*', '').strip()
+                nick = str(dato.replace('nick*', '').strip())
             elif dato.startswith('tanque*'):
                 path, ang, x, y, energia = dato.replace(
                     'tanque*', '').strip().split()
@@ -124,9 +134,16 @@ class Juego(GObject.Object):
 
     def __update_player(self, ip, nick, path, ang, x, y, energia, vidas,
         puntos, bala):
-        print ip in JUGADORES.keys()
+
         if not ip in JUGADORES.keys():
-            JUGADORES[ip] = MODEL
+            JUGADORES[ip] = {
+                'nick': '',
+                'tanque': '',
+                'sprite': False,
+                'vidas': 0,
+                'puntos': 0,
+                'bala': ()
+                }
             JUGADORES[ip]['nick'] = nick
             dirpath = os.path.dirname(os.path.dirname(GAME['mapa']))
             JUGADORES[ip]['tanque'] = os.path.join(dirpath, 'Tanques', path)
@@ -159,7 +176,8 @@ class Juego(GObject.Object):
         while self.estado == "En Juego":
             try:
                 self.reloj.tick(35)
-
+                while Gtk.events_pending():
+                    Gtk.main_iteration()
                 self.jugadores.clear(self.ventana, self.escenario)
                 self.balas.clear(self.ventana, self.escenario)
                 self.explosiones.clear(self.ventana, self.escenario)
@@ -185,7 +203,7 @@ class Juego(GObject.Object):
                 self.explosiones.draw(self.ventana)
 
                 self.ventana_real.blit(pygame.transform.scale(self.ventana,
-                    self.resolucionreal), (0,0))
+                    self.resolucionreal), (0, 0))
 
                 pygame.display.update()
                 pygame.time.wait(1)
@@ -220,7 +238,7 @@ class Juego(GObject.Object):
 
         pygame.event.set_blocked([MOUSEMOTION, MOUSEBUTTONUP, MOUSEBUTTONDOWN,
             JOYAXISMOTION, JOYBALLMOTION, JOYHATMOTION, JOYBUTTONUP,
-            JOYBUTTONDOWN, ACTIVEEVENT, USEREVENT])
+            JOYBUTTONDOWN, ACTIVEEVENT, USEREVENT, KEYDOWN, KEYUP])
         pygame.event.set_allowed([QUIT, VIDEORESIZE, VIDEOEXPOSE])
 
         pygame.display.set_mode(
@@ -241,13 +259,6 @@ class Juego(GObject.Object):
         self.jugador = Jugador(JUGADORES[ip]['tanque'], RESOLUCION_INICIAL)
         self.jugadores.add(self.jugador)
         JUGADORES[ip]['sprite'] = self.jugador
-
-        '''
-        for enemigo in range(1, GAME['enemigos']+1):
-            enemigo = Enemigo(
-                imagen_tanque, RESOLUCION_INICIAL)
-            self.jugadores.add(enemigo)
-        '''
 
 
 #if __name__ == "__main__":

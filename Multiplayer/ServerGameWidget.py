@@ -7,7 +7,6 @@ import threading
 
 from gi.repository import Gtk
 from gi.repository import GdkX11
-from gi.repository import GLib
 from gi.repository import GObject
 
 from Network.Server import Server
@@ -39,9 +38,9 @@ class GameWidget(Gtk.DrawingArea):
 
         Gtk.DrawingArea.__init__(self)
 
-        self.game_thread = False
+        #self.game_thread = False
         self.server_thread = False
-        self.client_thread = False
+        #self.client_thread = False
         self.client = False
         self.server = False
         self.juego = False
@@ -49,43 +48,43 @@ class GameWidget(Gtk.DrawingArea):
         self.show_all()
 
     def __run_client(self, _dict):
-        self.client = Client(_dict['server'])
+        self.client = Client(str(_dict['server']))
         self.client.conectarse()
-        self.client_thread = threading.Thread(target=self.client.conectarse,
-            name='client')
-        self.client_thread.setDaemon(True)
-        self.client_thread.start()
+        #self.client_thread = threading.Thread(target=self.client.conectarse,
+        #    name='client')
+        #self.client_thread.setDaemon(True)
+        #self.client_thread.start()
 
-        time.sleep(0.5)
-
-        mapa = os.path.basename(_dict['mapa'])
+        mapa = os.path.basename(str(_dict['mapa']))
         _buffer = 'M*%s%s' % (mapa, TERMINATOR)
-        _buffer = '%sE*%s%s' % (_buffer, _dict['enemigos'], TERMINATOR)
-        _buffer = '%sV*%s%s' % (_buffer, _dict['vidas'], TERMINATOR)
+        _buffer = '%sE*%s%s' % (_buffer, str(_dict['enemigos']), TERMINATOR)
+        _buffer = '%sV*%s%s' % (_buffer, str(_dict['vidas']), TERMINATOR)
 
-        tanque = os.path.basename(_dict['tanque'])
-        _buffer = '%sN*%s%s' % (_buffer, _dict['nick'], TERMINATOR)
+        tanque = os.path.basename(str(_dict['tanque']))
+        _buffer = '%sN*%s%s' % (_buffer, str(_dict['nick']), TERMINATOR)
         _buffer = '%sT*%s%s' % (_buffer, tanque, TERMINATOR)
 
         self.client.enviar(_buffer)
         retorno = self.client.recibir()
 
-        GLib.timeout_add(500, self.__run_game, _dict.copy())
-        return False
+        time.sleep(0.5)
+        self.__run_game(_dict.copy())
 
     def __run_game(self, _dict):
         xid = self.get_property('window').get_xid()
         os.putenv('SDL_WINDOWID', str(xid))
 
-        self.juego = Juego(_dict, self.client)
+        self.juego = Juego(_dict.copy(), self.client)
         self.juego.config()
-        self.game_thread = threading.Thread(target=self.juego.run, name='game')
-        self.game_thread.setDaemon(True)
-        self.game_thread.start()
-        return False
+        time.sleep(0.5)
+        self.juego.run()
+        #self.game_thread = threading.Thread(
+        #   target=self.juego.run, name='game')
+        #self.game_thread.setDaemon(True)
+        #self.game_thread.start()
 
     def setup_init(self, _dict):
-        self.server = Server((_dict['server'], 5000), RequestHandler)
+        self.server = Server((str(_dict['server']), 5000), RequestHandler)
         self.server.allow_reuse_address = True
         self.server.socket.setblocking(0)
 
@@ -93,7 +92,8 @@ class GameWidget(Gtk.DrawingArea):
         self.server_thread.setDaemon(True)
         self.server_thread.start()
 
-        GLib.timeout_add(500, self.__run_client, _dict.copy())
+        time.sleep(0.5)
+        self.__run_client(_dict.copy())
         return False
 
     def do_draw(self, context):

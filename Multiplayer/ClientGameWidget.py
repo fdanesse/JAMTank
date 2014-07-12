@@ -7,7 +7,6 @@ import threading
 
 from gi.repository import Gtk
 from gi.repository import GdkX11
-from gi.repository import GLib
 from gi.repository import GObject
 
 from Network.Client import Client
@@ -34,8 +33,8 @@ class GameWidget(Gtk.DrawingArea):
 
         Gtk.DrawingArea.__init__(self)
 
-        self.game_thread = False
-        self.client_thread = False
+        #self.game_thread = False
+        #self.client_thread = False
         self.client = False
         self.juego = False
 
@@ -52,41 +51,55 @@ class GameWidget(Gtk.DrawingArea):
         except:
             return False
         '''
-        self.client = Client(_dict['server'])
+        self.client = Client(str(_dict['server']))
         self.client.conectarse()
-        self.client_thread = threading.Thread(target=self.client.conectarse,
-            name='client')
-        self.client_thread.setDaemon(True)
-        self.client_thread.start()
-
-        time.sleep(0.5)
+        #self.client_thread = threading.Thread(target=self.client.conectarse,
+        #    name='client')
+        #self.client_thread.setDaemon(True)
+        #self.client_thread.start()
 
         _buffer = 'CONNECT*%s' % (TERMINATOR)
         self.client.enviar(_buffer)
         mensajes = self.client.recibir()
-
         for mensaje in mensajes:
             if mensaje.startswith('CONNECT*'):
                 mapa, vidas = mensaje.replace('CONNECT*', "").split()
-                dirpath = os.path.dirname(os.path.dirname(_dict['tanque']))
+                dirpath = os.path.dirname(os.path.dirname(
+                    str(_dict['tanque'])))
                 _dict['mapa'] = os.path.join(dirpath, "Mapas", mapa)
                 _dict['vidas'] = int(vidas)
-                GLib.timeout_add(500, self.__run_game, _dict.copy())
+
+                tanque = os.path.basename(str(_dict['tanque']))
+                _buffer = ''
+                _buffer = '%sN*%s%s' % (_buffer,
+                    str(_dict['nick']), TERMINATOR)
+                _buffer = '%sT*%s%s' % (_buffer, tanque, TERMINATOR)
+                self.client.enviar(_buffer)
+                retorno = self.client.recibir()
+
+                time.sleep(0.5)
+                self.__run_game(_dict.copy())
                 return False
             if mensaje.startswith('CLOSE*'):
-                print "FIXME: El Servidor no admite mas Jugadores", self.__run_client
+                # FIXME: Si llega hasta acá, no se puede lanzar el juego
+                print "FIXME: El Servidor no admite mas Jugadores"
+                return False
+        # FIXME: Si llega hasta acá, no se puede lanzar el juego
+        print "Este mensaje no corresponde en esta instancia de cliente"
         return False
 
     def __run_game(self, _dict):
         xid = self.get_property('window').get_xid()
         os.putenv('SDL_WINDOWID', str(xid))
 
-        self.juego = Juego(_dict, self.client)
+        self.juego = Juego(_dict.copy(), self.client)
         self.juego.config()
-        self.game_thread = threading.Thread(target=self.juego.run, name='game')
-        self.game_thread.setDaemon(True)
-        self.game_thread.start()
-        return False
+        time.sleep(0.5)
+        self.juego.run()
+        #self.game_thread = threading.Thread(
+        #    target=self.juego.run, name='game')
+        #self.game_thread.setDaemon(True)
+        #self.game_thread.start()
 
     def setup_init(self, _dict):
         self.__run_client(_dict.copy())

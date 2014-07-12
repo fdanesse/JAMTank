@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import pygame
 from math import sin
 from math import cos
 from math import radians
-
-import os
-import pygame
 
 from pygame.sprite import Sprite
 
@@ -43,8 +41,8 @@ class Jugador(Sprite):
 
         self.temp_image = None
         self.temp_angulo = 0
-        self.temp_x = 0
-        self.temp_y = 0
+        self.temp_x = 320
+        self.temp_y = 240
 
         #self.__set_posicion(angulo=0, centerx=100, centery=100)
 

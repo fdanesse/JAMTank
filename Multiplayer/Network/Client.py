@@ -5,7 +5,7 @@
 #   Flavio Danesse <fdanesse@gmail.com>
 
 import socket
-
+import time
 from gi.repository import GObject
 
 GObject.threads_init()
@@ -17,7 +17,7 @@ class Client(GObject.Object):
 
     def __init__(self, ip):
 
-        GObject.Object.__init__(self)  #GObject.GObject
+        GObject.Object.__init__(self)
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.dir = (ip, 5000)
@@ -25,22 +25,28 @@ class Client(GObject.Object):
     def conectarse(self):
         self.socket.connect(self.dir)
         self.socket.setblocking(0)
+        time.sleep(0.5)
 
     def desconectarse(self):
         self.socket.close()
+        time.sleep(0.5)
 
     def enviar(self, datos):
         self.socket.send(datos)
+        time.sleep(0.02)
 
     def recibir(self):
         entrada = ""
         mensajes = []
-        while not entrada:
-            try:
-                entrada = self.socket.recv(512)
-                mensajes = entrada.split(TERMINATOR)
-            except socket.error, e:
-                pass
+        #while not entrada:
+        try:
+            entrada = self.socket.recv(512)
+            mensajes = entrada.split(TERMINATOR)
+            #print "CLIENT:", mensajes
+        except socket.error, err:
+            #print "ERROR CLIENT recibir", err
+            pass
+
         return mensajes
 
 

@@ -3,8 +3,6 @@
 
 import os
 import sys
-import time
-import pygame
 
 from gi.repository import Gtk
 from gi.repository import Gdk
@@ -15,6 +13,11 @@ BASE = os.path.dirname(__file__)
 from IntroWidget import IntroWidget
 from SelectServer import SelectServer
 from SelectClient import SelectClient
+
+"""
+Requiere:
+    python-pygame
+"""
 
 #GObject.threads_init()
 #Gdk.threads_init()
@@ -52,6 +55,8 @@ class JAMTank(Gtk.Window):
 
         self.eventos = []
         self.show_all()
+
+        print os.getpid()
 
     def __reset(self):
         """
