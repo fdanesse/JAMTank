@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import pygame
 from math import sin
 from math import cos
 from math import radians
 
+#from Sonido import Motor
 from pygame.sprite import Sprite
 
 VELOCIDAD = 10
@@ -17,6 +19,13 @@ class Jugador(Sprite):
     def __init__(self, imagen_path, resolucion):
 
         Sprite.__init__(self)
+
+        # FIXME: Motores desactivados, verificar y corregir
+        #path = os.path.dirname(os.path.dirname(imagen_path))
+        #motor1 = os.path.join(path, "Audio", "motor1.mp3")
+        #motor2 = os.path.join(path, "Audio", "motor2.mp3")
+        #self.motor = Motor(motor1)
+        #self.motor.connect("endfile", self.__change_motor, motor2)
 
         self.eventos = []
         self.energia = 100
@@ -43,6 +52,11 @@ class Jugador(Sprite):
         self.temp_angulo = 0
         self.temp_x = self.ancho_monitor / 2
         self.temp_y = self.alto_monitor / 2
+
+    #def __change_motor(self, player, sound):
+    #    del(player)
+    #    self.motor = Motor(sound)
+    #    self.motor.connect("endfile", self.__change_motor, sound)
 
     def __derecha(self):
         self.temp_angulo += int(0.7 * INDICE_ROTACION)

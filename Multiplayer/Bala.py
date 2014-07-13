@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import pygame
 from math import sin
 from math import cos
 from math import radians
 
 from pygame.sprite import Sprite
+from Sonido import play
 
 VELOCIDAD = 18
 
@@ -27,6 +29,10 @@ class Bala(Sprite):
         self.temp_y = y + self.dy
         self.rect.centerx = self.temp_x
         self.rect.centery = self.temp_y
+
+        self.sound_path = os.path.dirname(os.path.dirname(image_path))
+        sound_path = os.path.join(self.sound_path, "Audio", "disparo.mp3")
+        play(sound_path)
 
     def __get_vector(self, angulo):
         dx = int(cos(radians(angulo)) * VELOCIDAD)
@@ -49,5 +55,8 @@ class Bala(Sprite):
             self.temp_y = int(y)
             return self
         else:
+            # FIXME: Saturación deja sin audio al juego
+            #sound_path = os.path.join(self.sound_path, "Audio", "explosion.mp3")
+            #play(sound_path)
             self.kill()
             return False
