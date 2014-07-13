@@ -28,7 +28,8 @@ MODEL = {
     'sprite': False,  #'pos': (0, 0, 0), 'energia': 100,
     'vidas': 0,
     'puntos': 0,
-    'bala': ()
+    'bala': '',
+    'bala-sprite', ''
     }
 '''
 
@@ -67,18 +68,18 @@ class Juego(GObject.Object):
         GAME['mapa'] = str(_dict['mapa'])
         #GAME['vidas'] = int(_dict['vidas'])
 
-        ip = get_ip()
-        JUGADORES[ip] = {
+        self.ip = get_ip()
+        JUGADORES[self.ip] = {
             'nick': '',
             'tanque': '',
             'sprite': False,
             'vidas': 0,
             'puntos': 0,
-            'bala': ()
+            'bala': '',
             }
-        JUGADORES[ip]['nick'] = str(_dict['nick'])
-        JUGADORES[ip]['tanque'] = str(_dict['tanque'])
-        JUGADORES[ip]['vidas'] = int(_dict['vidas'])
+        JUGADORES[self.ip]['nick'] = str(_dict['nick'])
+        JUGADORES[self.ip]['tanque'] = str(_dict['tanque'])
+        JUGADORES[self.ip]['vidas'] = int(_dict['vidas'])
 
         self.client = client
 
@@ -89,6 +90,7 @@ class Juego(GObject.Object):
         self.estado = False
         self.jugador = False
         self.bala = False
+        self.disparo = False
 
         self.jugadores = pygame.sprite.RenderUpdates()
         self.balas = pygame.sprite.RenderUpdates()
@@ -96,6 +98,14 @@ class Juego(GObject.Object):
 
     def __client_send_data(self, a, x, y):
         _buffer = 'TP*%s %s %s%s' % (a, x, y, TERMINATOR)
+        if self.disparo:
+            a, x, y = self.disparo
+            _buffer = '%sBP*%s %s %s%s' % (_buffer, a, x, y, TERMINATOR)
+        elif self.bala:
+            a, x, y = self.bala.get_datos()
+            _buffer = '%sBP*%s %s %s%s' % (_buffer, a, x, y, TERMINATOR)
+        else:
+            _buffer = '%sBP*%s' % (_buffer, TERMINATOR)
         self.client.enviar(_buffer)
 
     def __process_data(self, mensajes):
@@ -128,15 +138,41 @@ class Juego(GObject.Object):
             elif dato.startswith('puntos*'):
                 puntos = int(dato.replace('puntos*', '').strip())
             elif dato.startswith('bala*'):
-                # FIXME: Procesar Bala
-                pass
+                dat = dato.replace('bala*', '').strip()
+                if dat:
+                    if len(dat.split()) == 3:
+                        ab, xb, yb = dat.split()
+                        ab = int(ab)
+                        xb = int(xb)
+                        yb = int(yb)
+                        self.__update_bala(ip, ab, xb, yb)
+            #        else:
+            #            self.__kill_bala(ip)
+            #    else:
+            #        self.__kill_bala(ip)
 
-        self.__update_player(ip, nick, path, ang, x, y, energia,
-            vidas, puntos, bala)
+        self.__update_player(ip, nick, path, ang, x, y, energia, vidas, puntos)
+
+    #def __kill_bala(self, ip):
+    #    if JUGADORES[ip]['bala']:
+    #        JUGADORES[ip]['bala'].kill()
+    #        JUGADORES[ip]['bala'] = ''
+
+    def __update_bala(self, ip, ang, x, y):
+        if not JUGADORES[ip]['bala']:
+            path = os.path.dirname(os.path.dirname(GAME['mapa']))
+            image_path = os.path.join(path, "Iconos", "bala.png")
+            bala = Bala(ang, x, y, image_path, RESOLUCION_INICIAL)
+            self.balas.add(bala)
+            JUGADORES[ip]['bala'] = bala
+            if ip == self.ip:
+               self.bala = bala
+               self.disparo = False
+        else:
+            JUGADORES[ip]['bala'].set_posicion(centerx=x, centery=y)
 
     def __update_player(self, ip, nick, path, ang, x, y, energia, vidas,
-        puntos, bala):
-
+        puntos):
         if not ip in JUGADORES.keys():
             JUGADORES[ip] = {
                 'nick': '',
@@ -144,7 +180,7 @@ class Juego(GObject.Object):
                 'sprite': False,
                 'vidas': 0,
                 'puntos': 0,
-                'bala': ()
+                'bala': '',
                 }
             JUGADORES[ip]['nick'] = nick
             dirpath = os.path.dirname(os.path.dirname(GAME['mapa']))
@@ -155,10 +191,10 @@ class Juego(GObject.Object):
             self.jugadores.add(jugador)
             JUGADORES[ip]['sprite'] = jugador
             JUGADORES[ip]['sprite'].update_data(angulo=ang, centerx=x,
-                centery=y, energia=energia, bala=bala)
+                centery=y, energia=energia)
         else:
             JUGADORES[ip]['sprite'].update_data(angulo=ang, centerx=x,
-                centery=y, energia=energia, bala=bala)
+                centery=y, energia=energia)
 
     def salir(self):
         # FIXME: Enviar Desconectarse y Finalizar al Servidor
@@ -187,26 +223,15 @@ class Juego(GObject.Object):
                 self.jugador.update()
                 a, x, y = self.jugador.get_datos()
 
-                # FIXME: La bala debe crearse al regreso.
-                #if self.bala:
-                #    self.bala = self.bala.update()
-                #    if self.bala:
-                #        bx, by = self.bala.get_datos()
+                if self.bala:
+                    self.bala = self.bala.update()
+                    if not self.bala:
+                        JUGADORES[self.ip]['bala'] = ''
 
                 if self.client:
-                    # FIXME: Agregar Datos de Bala
                     self.__client_send_data(a, x, y)  # enviar
                     mensajes = self.client.recibir()  # recibir
                     self.__process_data(mensajes)  # procesar y actualizar
-
-                # FIXME: La bala debe crearse al regreso.
-                #if self.bala:
-                #    self.bala.set_posicion(bx, by)
-
-                # FIXME: actualizar mis balas
-                # FIXME: Redibujar balas
-                # FIXME: Verificar colisiones de balas agenas
-                # FIXME: Redibujar explosiones
 
                 pygame.event.pump()
                 pygame.event.clear()
@@ -220,6 +245,7 @@ class Juego(GObject.Object):
 
                 pygame.display.update()
                 pygame.time.wait(1)
+
             except:
                 self.estado = False
 
@@ -228,13 +254,8 @@ class Juego(GObject.Object):
 
     def update_events(self, eventos):
         self.jugador.update_events(eventos)
-        # FIXME: La bala debe crearse al regreso.
-        #if "space" in eventos and not self.bala:
-        #    path = os.path.dirname(os.path.dirname(GAME['mapa']))
-        #    image_path = os.path.join(path, "Iconos", "bala.png")
-        #    angulo, x, y = self.jugador.get_datos()
-        #    self.bala = Bala(angulo, x, y, image_path, RESOLUCION_INICIAL)
-        #    self.balas.add(self.bala)
+        if "space" in eventos and not self.bala and not self.disparo:
+             self.disparo = self.jugador.get_datos()
 
     def config(self):
         pygame.init()
@@ -275,10 +296,9 @@ class Juego(GObject.Object):
         self.ventana_real = pygame.display.get_surface()
 
         #pygame.mouse.set_visible(False)
-        ip = get_ip()
-        self.jugador = Jugador(JUGADORES[ip]['tanque'], RESOLUCION_INICIAL)
+        self.jugador = Jugador(JUGADORES[self.ip]['tanque'], RESOLUCION_INICIAL)
         self.jugadores.add(self.jugador)
-        JUGADORES[ip]['sprite'] = self.jugador
+        JUGADORES[self.ip]['sprite'] = self.jugador
 
 
 #if __name__ == "__main__":

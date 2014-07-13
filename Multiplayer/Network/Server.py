@@ -25,7 +25,7 @@ MODEL = {
         },
     'vidas': 0,
     'puntos': 0,
-    'bala': ()
+    'bala': ''
     }
 '''
 
@@ -82,6 +82,9 @@ class RequestHandler(SocketServer.StreamRequestHandler):
             elif mensaje.startswith('TP*'):
                 self.__update_player(str(mensaje.split('TP*')[-1].strip()), ip)
 
+            elif mensaje.startswith('BP*'):
+                self.__update_bala(str(mensaje.split('BP*')[-1].strip()), ip)
+
             else:
                 pass
 
@@ -101,8 +104,13 @@ class RequestHandler(SocketServer.StreamRequestHandler):
 
             _buffer = "%svidas*%s||" % (_buffer, JUGADORES[ip]['vidas'])
             _buffer = "%spuntos*%s||" % (_buffer, JUGADORES[ip]['puntos'])
-            _buffer = "%sbala*%s||" % (_buffer, JUGADORES[ip]['bala'])
-            _buffer = "%s%s" % (_buffer, TERMINATOR)
+            if JUGADORES[ip]['bala']:
+                a, x, y = JUGADORES[ip]['bala']
+                _buffer = "%sbala*%s %s %s||%s" % (
+                    _buffer, a, x, y, TERMINATOR)
+            else:
+                #_buffer = "%s%s" % (_buffer, TERMINATOR)
+                _buffer = "%sbala*||%s" % (_buffer, TERMINATOR)
 
         return _buffer
 
@@ -126,6 +134,14 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         self.__check_jugador(ip)
         JUGADORES[ip]['tanque']['path'] = tanque
 
+    def __update_bala(self, mensaje, ip):
+        self.__check_jugador(ip)
+        if len(mensaje.split()) == 3:
+            angulo, x, y = mensaje.split()
+            JUGADORES[ip]['bala'] = (int(angulo), int(x), int(y))
+        else:
+            JUGADORES[ip]['bala'] = ''
+
     def __update_player(self, mensaje, ip):
         self.__check_jugador(ip)
         angulo, x, y = mensaje.split()
@@ -142,7 +158,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                     },
                 'vidas': 0,
                 'puntos': 0,
-                'bala': ()}
+                'bala': ''}
 
 
 if __name__ == "__main__":

@@ -139,7 +139,7 @@ class Jugador(Sprite):
         return (self.temp_angulo, self.temp_x, self.temp_y)
 
     def update_data(self, angulo=0, centerx=0, centery=0,
-        energia=100, bala=False):
+        energia=100):
         self.energia = energia
         self.__set_posicion(angulo=angulo, centerx=centerx, centery=centery)
 

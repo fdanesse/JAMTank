@@ -18,9 +18,9 @@ class Bala(Sprite):
         Sprite.__init__(self)
 
         self.image = pygame.image.load(image_path)
-        #self.image.set_colorkey(MAGENTA)
         self.rect = self.image.get_rect()
 
+        self.angulo = angulo
         self.ancho_monitor, self.alto_monitor = resolucion
         self.dx, self.dy = self.__get_vector(angulo)
         self.temp_x = x + self.dx
@@ -34,7 +34,7 @@ class Bala(Sprite):
         return dx, dy
 
     def get_datos(self):
-        return (self.temp_x, self.temp_y)
+        return (self.angulo, self.temp_x, self.temp_y)
 
     def set_posicion(self, centerx=0, centery=0):
         self.rect.centerx = centerx
@@ -45,10 +45,8 @@ class Bala(Sprite):
         y = self.rect.centery + self.dy
         if x > 0 and x < self.ancho_monitor and \
             y > 0 and y < self.alto_monitor:
-            self.temp_x += self.dx
-            self.temp_y += self.dy
-            self.temp_x = int(self.temp_x)
-            self.temp_y = int(self.temp_y)
+            self.temp_x = int(x)
+            self.temp_y = int(y)
             return self
         else:
             self.kill()
