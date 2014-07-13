@@ -21,11 +21,13 @@ class Jugador(Sprite):
         Sprite.__init__(self)
 
         # FIXME: Motores desactivados, verificar y corregir
-        #path = os.path.dirname(os.path.dirname(imagen_path))
+        path = os.path.dirname(os.path.dirname(imagen_path))
         #motor1 = os.path.join(path, "Audio", "motor1.mp3")
-        #motor2 = os.path.join(path, "Audio", "motor2.mp3")
+        motor2 = os.path.join(path, "Audio", "motor2.ogg")
         #self.motor = Motor(motor1)
         #self.motor.connect("endfile", self.__change_motor, motor2)
+        disparo = pygame.mixer.Sound(motor2)
+        disparo.play(-1)
 
         self.eventos = []
         self.energia = 100

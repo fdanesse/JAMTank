@@ -296,7 +296,10 @@ class Juego(GObject.Object):
             RESOLUCION_INICIAL[1]))
         self.ventana_real = pygame.display.get_surface()
 
-        #pygame.mouse.set_visible(False)
+        pygame.mixer.init(44100, -16, 2, 2048)
+        pygame.mixer.music.set_volume(1.0)
+        #sonido_juego.play(-1)
+
         self.jugador = Jugador(JUGADORES[self.ip]['tanque'], RESOLUCION_INICIAL)
         self.jugadores.add(self.jugador)
         JUGADORES[self.ip]['sprite'] = self.jugador
