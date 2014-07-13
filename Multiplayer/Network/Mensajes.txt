@@ -1,5 +1,0 @@
-M*      Mapa
-E*      Enemigos
-V*      Vidas
-N*      Nick
-T*      Tanque

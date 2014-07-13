@@ -7,6 +7,7 @@ import pygame
 from gi.repository import GObject
 from gi.repository import Gtk
 
+from Sonido import play
 from Jugador import Jugador
 from Bala import Bala
 
@@ -161,6 +162,8 @@ class Juego(GObject.Object):
     def __update_bala(self, ip, ang, x, y):
         if not JUGADORES[ip]['bala']:
             path = os.path.dirname(os.path.dirname(GAME['mapa']))
+            sound_path = os.path.join(path, "Audio", "disparo.mp3")
+            play(sound_path)
             image_path = os.path.join(path, "Iconos", "bala.png")
             bala = Bala(ang, x, y, image_path, RESOLUCION_INICIAL)
             self.balas.add(bala)
