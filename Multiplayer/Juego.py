@@ -8,6 +8,7 @@ from gi.repository import GObject
 from gi.repository import Gtk
 
 from Jugador import Jugador
+from Bala import Bala
 
 RESOLUCION_INICIAL = (800, 600)
 BASE_PATH = os.path.dirname(__file__)
@@ -87,6 +88,7 @@ class Juego(GObject.Object):
         self.reloj = False
         self.estado = False
         self.jugador = False
+        self.bala = False
 
         self.jugadores = pygame.sprite.RenderUpdates()
         self.balas = pygame.sprite.RenderUpdates()
@@ -185,10 +187,21 @@ class Juego(GObject.Object):
                 self.jugador.update()
                 a, x, y = self.jugador.get_datos()
 
+                # FIXME: La bala debe crearse al regreso.
+                #if self.bala:
+                #    self.bala = self.bala.update()
+                #    if self.bala:
+                #        bx, by = self.bala.get_datos()
+
                 if self.client:
+                    # FIXME: Agregar Datos de Bala
                     self.__client_send_data(a, x, y)  # enviar
                     mensajes = self.client.recibir()  # recibir
                     self.__process_data(mensajes)  # procesar y actualizar
+
+                # FIXME: La bala debe crearse al regreso.
+                #if self.bala:
+                #    self.bala.set_posicion(bx, by)
 
                 # FIXME: actualizar mis balas
                 # FIXME: Redibujar balas
@@ -215,6 +228,13 @@ class Juego(GObject.Object):
 
     def update_events(self, eventos):
         self.jugador.update_events(eventos)
+        # FIXME: La bala debe crearse al regreso.
+        #if "space" in eventos and not self.bala:
+        #    path = os.path.dirname(os.path.dirname(GAME['mapa']))
+        #    image_path = os.path.join(path, "Iconos", "bala.png")
+        #    angulo, x, y = self.jugador.get_datos()
+        #    self.bala = Bala(angulo, x, y, image_path, RESOLUCION_INICIAL)
+        #    self.balas.add(self.bala)
 
     def config(self):
         pygame.init()

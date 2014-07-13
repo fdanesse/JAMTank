@@ -16,7 +16,7 @@ class Jugador(Sprite):
 
     def __init__(self, imagen_path, resolucion):
 
-        pygame.sprite.Sprite.__init__(self)
+        Sprite.__init__(self)
 
         self.eventos = []
         self.energia = 100
@@ -41,20 +41,20 @@ class Jugador(Sprite):
 
         self.temp_image = None
         self.temp_angulo = 0
-        self.temp_x = 320
-        self.temp_y = 240
-
-        #self.__set_posicion(angulo=0, centerx=100, centery=100)
+        self.temp_x = self.ancho_monitor / 2
+        self.temp_y = self.alto_monitor / 2
 
     def __derecha(self):
         self.temp_angulo += int(0.7 * INDICE_ROTACION)
-        self.temp_image = pygame.transform.rotate(
-            self.imagen_original, -self.temp_angulo)
+        # FIXME: Solo util sin la red
+        #self.temp_image = pygame.transform.rotate(
+        #    self.imagen_original, -self.temp_angulo)
 
     def __izquierda(self):
         self.temp_angulo -= int(0.7 * INDICE_ROTACION)
-        self.temp_image = pygame.transform.rotate(
-            self.imagen_original, -self.temp_angulo)
+        # FIXME: Solo util sin la red
+        #self.temp_image = pygame.transform.rotate(
+        #    self.imagen_original, -self.temp_angulo)
 
     def __arriba(self):
         self.dx, self.dy = self.__get_vector(self.temp_angulo)
@@ -111,7 +111,31 @@ class Jugador(Sprite):
         self.image = pygame.transform.rotate(
             self.imagen_original, -self.angulo)
 
+    def __get_tanques_rects(self, group):
+        recs = []
+        for jugador in group.sprites():
+            if jugador != self:
+                recs.append(jugador.rect)
+        return recs
+
+    def __check_collision(self, lista):
+        rect = pygame.Rect(self.rect.x, self.rect.y,
+            self.rect.width + 10, self.rect.height + 10)
+        for rectangulo in lista:
+            if rect.colliderect(rectangulo):
+                return True
+        return False
+
     def get_datos(self):
+        # FIXME: Activar y Corregir:
+        #rects = self.__get_tanques_rects(self.groups()[0])
+        #if rects:
+        #    if self.__check_collision(rects):
+        #        return (self.angulo, self.centerx, self.centery)
+        #    else:
+        #        return (self.temp_angulo, self.temp_x, self.temp_y)
+        #else:
+        #    return (self.temp_angulo, self.temp_x, self.temp_y)
         return (self.temp_angulo, self.temp_x, self.temp_y)
 
     def update_data(self, angulo=0, centerx=0, centery=0,
@@ -151,5 +175,3 @@ class Jugador(Sprite):
             self.__derecha()
         elif "Left" in self.eventos:
             self.__izquierda()
-
-        # FIXME: actualizar mis balas

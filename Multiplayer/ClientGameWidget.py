@@ -86,6 +86,7 @@ class GameWidget(Gtk.DrawingArea):
                 return False
         # FIXME: Si llega hasta acá, no se puede lanzar el juego
         print "Este mensaje no corresponde en esta instancia de cliente"
+        print mensajes
         return False
 
     def __run_game(self, _dict):
