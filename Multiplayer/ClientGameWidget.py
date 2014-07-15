@@ -41,16 +41,6 @@ class GameWidget(Gtk.DrawingArea):
         self.show_all()
 
     def __run_client(self, _dict):
-        '''
-        try:
-            import socket
-            socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            address = (_dict['server'], 5000)
-            socket.connect(address)
-            socket.close()
-        except:
-            return False
-        '''
         self.client = Client(str(_dict['server']))
         self.client.conectarse()
         #self.client_thread = threading.Thread(target=self.client.conectarse,
@@ -78,7 +68,7 @@ class GameWidget(Gtk.DrawingArea):
                 retorno = self.client.recibir()
 
                 time.sleep(0.5)
-                self.__run_game(_dict.copy())
+                self.__run_game(dict(_dict))
                 return False
             if mensaje.startswith('CLOSE*'):
                 # FIXME: Si llega hasta acá, no se puede lanzar el juego
@@ -93,7 +83,7 @@ class GameWidget(Gtk.DrawingArea):
         xid = self.get_property('window').get_xid()
         os.putenv('SDL_WINDOWID', str(xid))
 
-        self.juego = Juego(_dict.copy(), self.client)
+        self.juego = Juego(dict(_dict), self.client)
         self.juego.config()
         time.sleep(0.5)
         self.juego.run()
@@ -103,7 +93,7 @@ class GameWidget(Gtk.DrawingArea):
         #self.game_thread.start()
 
     def setup_init(self, _dict):
-        self.__run_client(_dict.copy())
+        self.__run_client(dict(_dict))
         return False
 
     def do_draw(self, context):

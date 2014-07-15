@@ -1,0 +1,23 @@
+CLIENT:
+    CLIENT Envia: ['CONNECT*', '']
+    CLIENT Recibe: ['CONNECT*fondo1.png 50', '']
+    CLIENT Envia: ['N*coso', 'T*tanque_3.png', '']
+    CLIENT Recibe: ['PLAYER*192.168.1.9||nick*coso||tanque*tanque_3.png 0 0 0 100||vidas*0||puntos*0||bala*||', '']
+    CLIENT Envia: ['TP*0 400 300', 'BP*', '']
+
+SERVER:
+    SERVER Recibe: ['CONNECT*', '']
+    SERVER Envia: ['CONNECT*fondo1.png 50', '']
+    SERVER Recibe: ['N*coso', 'T*tanque_3.png', '']
+    SERVER Envia: ['PLAYER*192.168.1.9||nick*coso||tanque*tanque_3.png 0 0 0 100||vidas*0||puntos*0||bala*||', '']
+    SERVER Recibe: ['TP*0 400 300', 'BP*', '']
+
+    Hasta que recibe: SERVER Recibe: [''] # Este cliente se ha desconectado. Provocará: Error en Server:  [Errno 32] Broken pipe 192.168.1.9
+
+
+CLIENT Envia: ['CONNECT*', '']                      >>>
+                                                    <<<         SERVER Envia: ['CONNECT*fondo1.png 50', ''] or ['CLOSE*', '']
+CLIENT Envia: ['N*coso', 'T*tanque_3.png', '']      >>>
+                                                    <<<         SERVER Envia: ['PLAYER*192.168.1.9||nick*coso||tanque*tanque_3.png 0 0 0 100||vidas*0||puntos*0||bala*||', '']
+CLIENT Envia: ['TP*0 400 300', 'BP*', '']           >>>
+. . .                                               >>>         SERVER Recibe: [''] # Este cliente se ha desconectado. Provocará: Error en Server:  [Errno 32] Broken pipe 192.168.1.9

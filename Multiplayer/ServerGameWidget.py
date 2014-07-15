@@ -68,13 +68,13 @@ class GameWidget(Gtk.DrawingArea):
         retorno = self.client.recibir()
 
         time.sleep(0.5)
-        self.__run_game(_dict.copy())
+        self.__run_game(dict(_dict))
 
     def __run_game(self, _dict):
         xid = self.get_property('window').get_xid()
         os.putenv('SDL_WINDOWID', str(xid))
 
-        self.juego = Juego(_dict.copy(), self.client)
+        self.juego = Juego(dict(_dict), self.client)
         self.juego.config()
         time.sleep(0.5)
         self.juego.run()
@@ -93,7 +93,7 @@ class GameWidget(Gtk.DrawingArea):
         self.server_thread.start()
 
         time.sleep(0.5)
-        self.__run_client(_dict.copy())
+        self.__run_client(dict(_dict))
         return False
 
     def do_draw(self, context):

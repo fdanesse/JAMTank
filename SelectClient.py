@@ -180,7 +180,7 @@ class SelectClient(Gtk.EventBox):
         self.__check_dict()
 
     def __accion(self, widget, accion):
-        self.emit("accion", accion, self.game_dict)
+        self.emit("accion", accion, dict(self.game_dict))
 
     def __check_dict(self):
         valor = True

@@ -43,6 +43,8 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         while 1:
             try:
                 datos = self.request.recv(512)
+                if PR:
+                    print "SERVER Recibe:", datos.split(TERMINATOR)
                 respuesta = self.__procesar(datos, str(self.client_address[0]))
                 if PR:
                     print "SERVER Envia:", respuesta.split(TERMINATOR)
@@ -57,9 +59,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
 
     def __procesar(self, datos, ip):
         mensajes = datos.split(TERMINATOR)
-        if PR:
-            print "SERVER Recibe:", mensajes
-
+        # FIXME: si mensaje es una lista vacía no hay clientes.
         for mensaje in mensajes:
             if mensaje.startswith('CONNECT*'):
                 return self.__check_enemigos(ip)

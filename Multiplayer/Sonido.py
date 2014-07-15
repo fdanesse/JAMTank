@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# http://soundbible.com/tags-military.html
+
 import gi
 gi.require_version('Gst', '1.0')
 

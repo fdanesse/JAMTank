@@ -19,10 +19,10 @@ class Jugador(Sprite):
 
         Sprite.__init__(self)
 
-        path = os.path.dirname(os.path.dirname(imagen_path))
-        motor2 = os.path.join(path, "Audio", "motor2.ogg")
-        disparo = pygame.mixer.Sound(motor2)
-        disparo.play(-1)
+        #path = os.path.dirname(os.path.dirname(imagen_path))
+        #motor2 = os.path.join(path, "Audio", "motor2.ogg")
+        #disparo = pygame.mixer.Sound(motor2)
+        #disparo.play(-1)
 
         self.eventos = []
         self.energia = 100

@@ -166,9 +166,9 @@ class Juego(GObject.Object):
             self.balas.add(bala)
             JUGADORES[ip]['bala'] = bala
             if ip == self.ip:
-               self.bala = bala
-               self.disparo = False
-               # FIXME: Agregar control de tiempo para próximo disparo
+                self.bala = bala
+                self.disparo = False
+                # FIXME: Agregar control de tiempo para próximo disparo
         else:
             JUGADORES[ip]['bala'].set_posicion(centerx=x, centery=y)
 
@@ -255,8 +255,8 @@ class Juego(GObject.Object):
 
     def update_events(self, eventos):
         self.jugador.update_events(eventos)
-        if "space" in eventos and not self.bala and not self.disparo:
-             self.disparo = self.jugador.get_datos()
+        #if "space" in eventos and not self.bala and not self.disparo:
+        #     self.disparo = self.jugador.get_datos()
 
     def config(self):
         pygame.init()
@@ -300,7 +300,8 @@ class Juego(GObject.Object):
         pygame.mixer.music.set_volume(1.0)
         #sonido_juego.play(-1)
 
-        self.jugador = Jugador(JUGADORES[self.ip]['tanque'], RESOLUCION_INICIAL)
+        self.jugador = Jugador(JUGADORES[self.ip]['tanque'],
+            RESOLUCION_INICIAL)
         self.jugadores.add(self.jugador)
         JUGADORES[self.ip]['sprite'] = self.jugador
 
