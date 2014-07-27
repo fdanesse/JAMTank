@@ -109,7 +109,6 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                 _buffer = "%sbala*%s %s %s||%s" % (
                     _buffer, a, x, y, TERMINATOR)
             else:
-                #_buffer = "%s%s" % (_buffer, TERMINATOR)
                 _buffer = "%sbala*||%s" % (_buffer, TERMINATOR)
 
         return _buffer

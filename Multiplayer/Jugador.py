@@ -144,13 +144,12 @@ class Jugador(Sprite):
         #    return (self.temp_angulo, self.temp_x, self.temp_y)
         return (self.temp_angulo, self.temp_x, self.temp_y)
 
-    def update_data(self, angulo=0, centerx=0, centery=0,
-        energia=100):
+    def update_data(self, angulo=0, centerx=0, centery=0, energia=100):
         self.energia = energia
         self.__set_posicion(angulo=angulo, centerx=centerx, centery=centery)
 
     def update_events(self, eventos):
-        self.eventos = eventos
+        self.eventos = list(eventos)
 
     def update(self):
         if not self.eventos:

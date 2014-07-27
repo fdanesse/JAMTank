@@ -34,7 +34,6 @@ MODEL = {
 '''
 
 JUGADORES = {}
-PR = False
 
 
 def get_ip():
@@ -98,28 +97,26 @@ class Juego(GObject.Object):
 
     def __client_send_data(self, a, x, y):
         _buffer = 'TP*%s %s %s%s' % (a, x, y, TERMINATOR)
-        if self.disparo:
+        if self.disparo and not self.bala:
             a, x, y = self.disparo
             _buffer = '%sBP*%s %s %s%s' % (_buffer, a, x, y, TERMINATOR)
-        elif self.bala:
+        elif self.bala and not self.disparo:
             a, x, y = self.bala.get_datos()
             _buffer = '%sBP*%s %s %s%s' % (_buffer, a, x, y, TERMINATOR)
-        else:
+        elif not self.bala and not self.disparo:
             _buffer = '%sBP*%s' % (_buffer, TERMINATOR)
         self.client.enviar(_buffer)
 
     def __process_data(self, mensajes):
-        if PR:
-            print "CLIENT Recibe:", mensajes
-
         for mensaje in mensajes:
             m = mensaje.strip()
             if m.startswith('PLAYER*'):
                 self.__process_player(m)
 
     def __process_player(self, m):
-        ip, nick, path, ang, x, y, energia, vidas, puntos, bala = (
-            '', '', '', 0, 0, 0, 0, 0, 0, ())
+        ip, nick, path = ('', '', '')
+        ang, x, y, energia, vidas, puntos = (0, 0, 0, 0, 0, 0)
+
         datos = m.split('||')
         for dato in datos:
             if dato.startswith('PLAYER*'):
@@ -146,17 +143,18 @@ class Juego(GObject.Object):
                         xb = int(xb)
                         yb = int(yb)
                         self.__update_bala(ip, ab, xb, yb)
-            #        else:
-            #            self.__kill_bala(ip)
-            #    else:
-            #        self.__kill_bala(ip)
+                    else:
+                        self.__kill_bala(ip)
+                else:
+                    self.__kill_bala(ip)
 
         self.__update_player(ip, nick, path, ang, x, y, energia, vidas, puntos)
 
-    #def __kill_bala(self, ip):
-    #    if JUGADORES[ip]['bala']:
-    #        JUGADORES[ip]['bala'].kill()
-    #        JUGADORES[ip]['bala'] = ''
+    def __kill_bala(self, ip):
+        print "**", ip#type(JUGADORES[ip].get('bala', False))
+        #if JUGADORES[ip]['bala']:
+        #    JUGADORES[ip]['bala'].kill()
+        #    JUGADORES[ip]['bala'] = ''
 
     def __update_bala(self, ip, ang, x, y):
         if not JUGADORES[ip]['bala']:
@@ -255,8 +253,8 @@ class Juego(GObject.Object):
 
     def update_events(self, eventos):
         self.jugador.update_events(eventos)
-        #if "space" in eventos and not self.bala and not self.disparo:
-        #     self.disparo = self.jugador.get_datos()
+        if "space" in eventos and not self.bala and not self.disparo:
+             self.disparo = self.jugador.get_datos()
 
     def config(self):
         pygame.init()
