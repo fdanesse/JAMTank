@@ -8,10 +8,7 @@ import socket
 import time
 from gi.repository import GObject
 
-GObject.threads_init()
-
-TERMINATOR = "\r\n\r\n"
-PR = False
+#GObject.threads_init()
 
 
 class Client(GObject.Object):
@@ -33,25 +30,17 @@ class Client(GObject.Object):
         time.sleep(0.5)
 
     def enviar(self, datos):
-        if PR:
-            print "CLIENT Envia:", datos.split(TERMINATOR)
         self.socket.send(datos)
         time.sleep(0.02)
 
     def recibir(self):
         entrada = ""
-        mensajes = []
         #while not entrada:
         try:
-            entrada = self.socket.recv(512)
-            mensajes = entrada.split(TERMINATOR)
-            #print "CLIENT:", mensajes
+            entrada = self.socket.recv(256)
         except socket.error, err:
-            #print "ERROR CLIENT recibir", err
-            pass
-        if PR:
-            print "CLIENT Recibe:", mensajes
-        return mensajes
+            print "ERROR CLIENT recibir", err
+        return entrada
 
 
 #if __name__ == "__main__":

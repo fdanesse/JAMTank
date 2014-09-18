@@ -117,20 +117,20 @@ class Jugador(Sprite):
         self.image = pygame.transform.rotate(
             self.imagen_original, -self.angulo)
 
-    def __get_tanques_rects(self, group):
-        recs = []
-        for jugador in group.sprites():
-            if jugador != self:
-                recs.append(jugador.rect)
-        return recs
+    #def __get_tanques_rects(self, group):
+    #    recs = []
+    #    for jugador in group.sprites():
+    #        if jugador != self:
+    #            recs.append(jugador.rect)
+    #    return recs
 
-    def __check_collision(self, lista):
-        rect = pygame.Rect(self.rect.x, self.rect.y,
-            self.rect.width + 10, self.rect.height + 10)
-        for rectangulo in lista:
-            if rect.colliderect(rectangulo):
-                return True
-        return False
+    #def __check_collision(self, lista):
+    #    rect = pygame.Rect(self.rect.x, self.rect.y,
+    #        self.rect.width + 10, self.rect.height + 10)
+    #    for rectangulo in lista:
+    #        if rect.colliderect(rectangulo):
+    #            return True
+    #    return False
 
     def get_datos(self):
         # FIXME: Activar y Corregir:
@@ -142,7 +142,7 @@ class Jugador(Sprite):
         #        return (self.temp_angulo, self.temp_x, self.temp_y)
         #else:
         #    return (self.temp_angulo, self.temp_x, self.temp_y)
-        return (self.temp_angulo, self.temp_x, self.temp_y)
+        return (int(self.temp_angulo), int(self.temp_x), int(self.temp_y))
 
     def update_data(self, angulo=0, centerx=0, centery=0, energia=100):
         self.energia = energia

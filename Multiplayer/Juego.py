@@ -40,7 +40,7 @@ def get_ip():
     import socket
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("gmail.com", 80))
+        s.connect(("google.com", 80))
         return str(s.getsockname()[0]).strip()
     except:
         return ""
@@ -57,24 +57,20 @@ class Juego(GObject.Object):
         GObject.Object.__init__(self)
 
         # _dict = {
-        #   'enemigos': 10,             **** Sólo lo recibe en caso de ser HOST
-        #   'tanque': '. . . /JAMTank/Tanques/tanque_3.png',
+        #   'tanque': '. . . /JAMTank/Tanques    anque_3.png',
         #   'mapa': '. . . /JAMTank/Mapas/fondo2.png',
         #   'nick': 'un_nombre',
         #   'vidas': 50,
         #   'server': '192.168.1.9'}
 
         GAME['mapa'] = str(_dict['mapa'])
-        #GAME['vidas'] = int(_dict['vidas'])
 
         self.ip = get_ip()
         JUGADORES[self.ip] = {
             'nick': '',
             'tanque': '',
-            'sprite': False,
             'vidas': 0,
             'puntos': 0,
-            'bala': '',
             }
         JUGADORES[self.ip]['nick'] = str(_dict['nick'])
         JUGADORES[self.ip]['tanque'] = str(_dict['tanque'])
@@ -92,9 +88,9 @@ class Juego(GObject.Object):
         self.disparo = False
 
         self.jugadores = pygame.sprite.RenderUpdates()
-        self.balas = pygame.sprite.RenderUpdates()
-        self.explosiones = pygame.sprite.RenderUpdates()
-
+        #self.balas = pygame.sprite.RenderUpdates()
+        #self.explosiones = pygame.sprite.RenderUpdates()
+    '''
     def __client_send_data(self, a, x, y):
         _buffer = 'TP*%s %s %s%s' % (a, x, y, TERMINATOR)
         if self.disparo and not self.bala:
@@ -106,13 +102,15 @@ class Juego(GObject.Object):
         elif not self.bala and not self.disparo:
             _buffer = '%sBP*%s' % (_buffer, TERMINATOR)
         self.client.enviar(_buffer)
-
+    '''
+    '''
     def __process_data(self, mensajes):
         for mensaje in mensajes:
             m = mensaje.strip()
             if m.startswith('PLAYER*'):
                 self.__process_player(m)
-
+    '''
+    '''
     def __process_player(self, m):
         ip, nick, path = ('', '', '')
         ang, x, y, energia, vidas, puntos = (0, 0, 0, 0, 0, 0)
@@ -143,33 +141,14 @@ class Juego(GObject.Object):
                         xb = int(xb)
                         yb = int(yb)
                         self.__update_bala(ip, ab, xb, yb)
-                    else:
-                        self.__kill_bala(ip)
-                else:
-                    self.__kill_bala(ip)
+                    #else:
+                    #    self.__kill_bala(ip)
+                #else:
+                #    self.__kill_bala(ip)
 
         self.__update_player(ip, nick, path, ang, x, y, energia, vidas, puntos)
-
-    def __kill_bala(self, ip):
-        print "**", ip#type(JUGADORES[ip].get('bala', False))
-        #if JUGADORES[ip]['bala']:
-        #    JUGADORES[ip]['bala'].kill()
-        #    JUGADORES[ip]['bala'] = ''
-
-    def __update_bala(self, ip, ang, x, y):
-        if not JUGADORES[ip]['bala']:
-            path = os.path.dirname(os.path.dirname(GAME['mapa']))
-            image_path = os.path.join(path, "Iconos", "bala.png")
-            bala = Bala(ang, x, y, image_path, RESOLUCION_INICIAL)
-            self.balas.add(bala)
-            JUGADORES[ip]['bala'] = bala
-            if ip == self.ip:
-                self.bala = bala
-                self.disparo = False
-                # FIXME: Agregar control de tiempo para próximo disparo
-        else:
-            JUGADORES[ip]['bala'].set_posicion(centerx=x, centery=y)
-
+    '''
+    '''
     def __update_player(self, ip, nick, path, ang, x, y, energia, vidas,
         puntos):
         if not ip in JUGADORES.keys():
@@ -194,7 +173,7 @@ class Juego(GObject.Object):
         else:
             JUGADORES[ip]['sprite'].update_data(angulo=ang, centerx=x,
                 centery=y, energia=energia)
-
+    '''
     def salir(self):
         # FIXME: Enviar Desconectarse y Finalizar al Servidor
         self.estado = False
@@ -216,28 +195,24 @@ class Juego(GObject.Object):
                 while Gtk.events_pending():
                     Gtk.main_iteration()
                 self.jugadores.clear(self.ventana, self.escenario)
-                self.balas.clear(self.ventana, self.escenario)
-                self.explosiones.clear(self.ventana, self.escenario)
+                #self.balas.clear(self.ventana, self.escenario)
+                #self.explosiones.clear(self.ventana, self.escenario)
 
-                self.jugador.update()
-                a, x, y = self.jugador.get_datos()
+                #self.jugador.update()
+                #a, x, y = self.jugador.get_datos()
 
-                if self.bala:
-                    self.bala = self.bala.update()
-                    if not self.bala:
-                        JUGADORES[self.ip]['bala'] = ''
+                #self.__client_send_data(a, x, y)
+                #mensajes = self.client.recibir()
+                #self.__process_data(mensajes)
 
-                if self.client:
-                    self.__client_send_data(a, x, y)  # enviar
-                    mensajes = self.client.recibir()  # recibir
-                    self.__process_data(mensajes)  # procesar y actualizar
+                #self.jugador.update_data(a,x,y)
 
                 pygame.event.pump()
                 pygame.event.clear()
 
                 self.jugadores.draw(self.ventana)
-                self.balas.draw(self.ventana)
-                self.explosiones.draw(self.ventana)
+                #self.balas.draw(self.ventana)
+                #self.explosiones.draw(self.ventana)
 
                 self.ventana_real.blit(pygame.transform.scale(self.ventana,
                     self.resolucionreal), (0, 0))
@@ -253,8 +228,8 @@ class Juego(GObject.Object):
 
     def update_events(self, eventos):
         self.jugador.update_events(eventos)
-        if "space" in eventos and not self.bala and not self.disparo:
-             self.disparo = self.jugador.get_datos()
+        #if "space" in eventos and not self.bala and not self.disparo:
+        #     self.disparo = self.jugador.get_datos()
 
     def config(self):
         pygame.init()
@@ -298,10 +273,10 @@ class Juego(GObject.Object):
         pygame.mixer.music.set_volume(1.0)
         #sonido_juego.play(-1)
 
-        self.jugador = Jugador(JUGADORES[self.ip]['tanque'],
-            RESOLUCION_INICIAL)
-        self.jugadores.add(self.jugador)
-        JUGADORES[self.ip]['sprite'] = self.jugador
+        #self.jugador = Jugador(JUGADORES[self.ip]['tanque'],
+        #    RESOLUCION_INICIAL)
+        #self.jugadores.add(self.jugador)
+        #JUGADORES[self.ip]['sprite'] = self.jugador
 
 
 #if __name__ == "__main__":
