@@ -3,7 +3,6 @@
 
 import os
 import time
-import threading
 
 from gi.repository import Gtk
 from gi.repository import GdkX11
@@ -11,16 +10,6 @@ from gi.repository import GObject
 
 from Network.Client import Client
 from Juego import Juego
-
-TERMINATOR = "\r\n\r\n"
-
-"""
-_dict = {
-    'nick': "",
-    'tanque': "",
-    'server': ""
-    }
-"""
 
 
 class GameWidget(Gtk.DrawingArea):
@@ -33,75 +22,60 @@ class GameWidget(Gtk.DrawingArea):
 
         Gtk.DrawingArea.__init__(self)
 
-        #self.game_thread = False
-        #self.client_thread = False
         self.client = False
         self.juego = False
 
         self.show_all()
 
     def __run_client(self, _dict):
+        """
+        El Cliente remoto intenta conectarse al server pasandole:
+                tanque y nick (propios)
+        """
         self.client = Client(str(_dict['server']))
         self.client.conectarse()
-        #self.client_thread = threading.Thread(target=self.client.conectarse,
-        #    name='client')
-        #self.client_thread.setDaemon(True)
-        #self.client_thread.start()
 
-        _buffer = 'CONNECT*%s' % (TERMINATOR)
+        tanque = os.path.basename(str(_dict['tanque']))
+        _buffer = "JOIN,%s,%s" % (tanque, str(_dict['nick']))
+
         self.client.enviar(_buffer)
-        mensajes = self.client.recibir()
-        for mensaje in mensajes:
-            if mensaje.startswith('CONNECT*'):
-                mapa, vidas = mensaje.replace('CONNECT*', "").split()
-                dirpath = os.path.dirname(os.path.dirname(
-                    str(_dict['tanque'])))
-                _dict['mapa'] = os.path.join(dirpath, "Mapas", mapa)
-                _dict['vidas'] = int(vidas)
+        retorno = self.client.recibir()
 
-                tanque = os.path.basename(str(_dict['tanque']))
-                _buffer = ''
-                _buffer = '%sN*%s%s' % (_buffer,
-                    str(_dict['nick']), TERMINATOR)
-                _buffer = '%sT*%s%s' % (_buffer, tanque, TERMINATOR)
-                self.client.enviar(_buffer)
-                retorno = self.client.recibir()
-
-                time.sleep(0.5)
-                self.__run_game(dict(_dict))
-                return False
-            if mensaje.startswith('CLOSE*'):
-                # FIXME: Si llega hasta acá, no se puede lanzar el juego
-                print "FIXME: El Servidor no admite mas Jugadores"
-                return False
-        # FIXME: Si llega hasta acá, no se puede lanzar el juego
-        print "Este mensaje no corresponde en esta instancia de cliente"
-        print mensajes
-        return False
+        if retorno == "CLOSE":
+            print "No se admiten más Jugadores"
+        else:
+            dirpath = os.path.dirname(os.path.dirname(str(_dict['tanque'])))
+            _dict['mapa'] = os.path.join(dirpath, "Mapas", retorno)
+            time.sleep(0.5)
+            self.__run_game(dict(_dict))
 
     def __run_game(self, _dict):
+        """
+        Comienza a correr el Juego.
+        """
         xid = self.get_property('window').get_xid()
         os.putenv('SDL_WINDOWID', str(xid))
-
         self.juego = Juego(dict(_dict), self.client)
         self.juego.config()
         time.sleep(0.5)
         self.juego.run()
-        #self.game_thread = threading.Thread(
-        #    target=self.juego.run, name='game')
-        #self.game_thread.setDaemon(True)
-        #self.game_thread.start()
 
     def setup_init(self, _dict):
         self.__run_client(dict(_dict))
         return False
 
     def do_draw(self, context):
+        """
+        Reescalado en gtk, reescala en pygame.
+        """
         rect = self.get_allocation()
         if self.juego:
             self.juego.escalar((rect.width, rect.height))
 
     def update_events(self, eventos):
+        """
+        Eventos gtk, se pasan a pygame
+        """
         if "Escape" in eventos:
             self.salir()
         else:

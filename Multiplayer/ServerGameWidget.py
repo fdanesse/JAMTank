@@ -14,17 +14,6 @@ from Network.Server import RequestHandler
 from Network.Client import Client
 from Juego import Juego
 
-"""
-_dict = {
-    'server': get_ip(),
-    'nick': '',
-    'mapa': "",
-    'tanque': "",
-    'enemigos': 10,
-    'vidas': 50,
-    }
-"""
-
 
 class GameWidget(Gtk.DrawingArea):
 
@@ -65,6 +54,9 @@ class GameWidget(Gtk.DrawingArea):
         self.__run_game(dict(_dict))
 
     def __run_game(self, _dict):
+        """
+        Comienza a correr el Juego.
+        """
         xid = self.get_property('window').get_xid()
         os.putenv('SDL_WINDOWID', str(xid))
         self.juego = Juego(dict(_dict), self.client)
@@ -73,6 +65,9 @@ class GameWidget(Gtk.DrawingArea):
         self.juego.run()
 
     def setup_init(self, _dict):
+        """
+        Comienza a correr el Server.
+        """
         self.server = Server((str(_dict['server']), 5000), RequestHandler)
         self.server.allow_reuse_address = True
         self.server.socket.setblocking(0)
@@ -84,16 +79,24 @@ class GameWidget(Gtk.DrawingArea):
         return False
 
     def do_draw(self, context):
+        """
+        Reescalado en gtk, reescala en pygame.
+        """
         rect = self.get_allocation()
         if self.juego:
             self.juego.escalar((rect.width, rect.height))
 
     def update_events(self, eventos):
+        """
+        Eventos gtk, se pasan a pygame
+        """
         if "Escape" in eventos:
             self.salir()
         else:
             if self.juego:
                 self.juego.update_events(eventos)
+        if "space" in eventos:
+            eventos.remove("space")
 
     def salir(self):
         if self.juego:

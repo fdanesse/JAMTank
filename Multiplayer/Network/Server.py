@@ -17,12 +17,12 @@ MODEL = {
     'nick': '',
     'tanque': {
         'path': '',
-        'pos': (0, 0, 0),
+        'pos': '0,0,0',
         'energia': 100,
         },
     'vidas': 0,
     'puntos': 0,
-    'bala': ''
+    'bala': '-,-,-'
     }
 
 OCUPADO = False
@@ -57,7 +57,6 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                     print "SERVER Envia:", respuesta
 
                 self.request.send(respuesta)
-                #OCUPADO = False
 
             except socket.error, err:
                 print "Error en Server: ", err, self.client_address[0]
@@ -70,10 +69,8 @@ class RequestHandler(SocketServer.StreamRequestHandler):
     def __procesar(self, entrada, ip):
         datos = entrada.split(",")
         if datos:
-            #OCUPADO = True
-
             if datos[0] == "Config":
-            # Host Configurando el juego y sus datos como cliente
+                # Host Configurando el juego y sus datos como cliente
                 GAME['mapa'] = datos[1]
                 GAME['enemigos'] = int(datos[2])
                 GAME['vidas'] = int(datos[3])
@@ -82,61 +79,46 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                 JUGADORES[ip]['nick'] = datos[5]
                 return "OK"
 
-            else:
-                #self.__update_player(str(mensaje.split('TP*')[-1].strip()), ip)
-                pass
+            elif datos[0] == "UPDATE":
+                # Jugador actualizando sus datos
+                a, x, y = datos[1:4]
+                JUGADORES[ip]['tanque']['pos'] = "%s,%s,%s" % (a, x, y)
+                if len(datos) > 4:
+                    aa, xx, yy = datos[4:]
+                    JUGADORES[ip]['bala'] = "%s,%s,%s" % (aa, xx, yy)
 
-            return self.__return_data()
+                return self.__get_data()
+
+            elif datos[0] == "JOIN":
+                # Nuevo Jugador desea conectarse.
+                ips = JUGADORES.keys()
+                if not ip in JUGADORES.keys():
+                    if len(ips) < GAME['enemigos']:
+                        JUGADORES[ip] = dict(MODEL)
+                        JUGADORES[ip]['tanque']['path'] = datos[1]
+                        JUGADORES[ip]['nick'] = datos[2]
+                        return "%s" % str(GAME['mapa'])
+                    else:
+                        return "CLOSE"
+                else:
+                    print "El Jugador ya estaba en game", ip
+
+            else:
+                print "Mensaje no considerado en el server"
+
         else:
             return False
 
-    #def __add(self, tanque, nick, ip):
-    #    if not ip in JUGADORES.keys():
-    #        JUGADORES[ip] = dict(MODEL)
-    #    JUGADORES[ip]['tanque']['path'] = tanque
-    #    JUGADORES[ip]['nick'] = nick
+    def __get_data(self):
+        ip = str(self.client_address[0])
+        nick = JUGADORES[ip]['nick']
+        tanque = JUGADORES[ip]['tanque']['path']
 
-    #def __check_enemigos(self, ip):
-    #    ips = JUGADORES.keys()
-    #    #if ip in ips:
-    #    #    return "Config,%s" % GAME['mapa']
-    #    if len(ips) < GAME['enemigos']:
-    #        return "Config,%s" % GAME['mapa']
-    #    else:
-    #        return "CLOSE,"
-    '''
-    def __return_data(self):
-        _buffer = ""
-        for ip in JUGADORES.keys():
-            _buffer = "%sPLAYER*%s||" % (_buffer, ip)
-            _buffer = "%snick*%s||" % (_buffer, JUGADORES[ip]['nick'])
+        retorno = "%s,%s,%s,%s,%s" % (ip, nick, tanque,
+            JUGADORES[ip]['tanque']['pos'], JUGADORES[ip]['bala'])
+        return retorno
 
-            path = JUGADORES[ip]['tanque']['path']
-            a, x, y = JUGADORES[ip]['tanque']['pos']
-            energia = JUGADORES[ip]['tanque']['energia']
-            _buffer = "%stanque*%s %s %s %s %s||" % (
-                _buffer, path, a, x, y, energia)
 
-            _buffer = "%svidas*%s||" % (_buffer, JUGADORES[ip]['vidas'])
-            _buffer = "%spuntos*%s||" % (_buffer, JUGADORES[ip]['puntos'])
-            if JUGADORES[ip]['bala']:
-                a, x, y = JUGADORES[ip]['bala']
-                _buffer = "%sbala*%s %s %s||%s" % (
-                    _buffer, a, x, y, TERMINATOR)
-            else:
-                _buffer = "%sbala*||%s" % (_buffer, TERMINATOR)
-
-        return _buffer
-    '''
-    '''
-    def __update_player(self, mensaje, ip):
-        self.__check_jugador(ip)
-        try:
-            angulo, x, y = mensaje.split()
-            JUGADORES[ip]['tanque']['pos'] = (int(angulo), int(x), int(y))
-        except:
-            print "ERROR:", self.__update_player
-    '''
 '''
 if __name__ == "__main__":
     ret = ''
