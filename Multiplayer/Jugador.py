@@ -15,7 +15,7 @@ INDICE_ROTACION = 5
 
 class Jugador(Sprite):
 
-    def __init__(self, imagen_path, resolucion):
+    def __init__(self, imagen_path, resolucion, ip):
 
         Sprite.__init__(self)
 
@@ -24,6 +24,7 @@ class Jugador(Sprite):
         #disparo = pygame.mixer.Sound(motor2)
         #disparo.play(-1)
 
+        self.ip = ip
         self.eventos = []
         self.energia = 100
         self.imagen_original = None

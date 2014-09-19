@@ -20,17 +20,11 @@ GAME = {
     #'vidas': 0,
     }
 
-'''
 MODEL = {
     'nick': '',
     'tanque': '',
-    'sprite': False,  #'pos': (0, 0, 0), 'energia': 100,
-    'vidas': 0,
     'puntos': 0,
-    'bala': '',
-    'bala-sprite', ''
     }
-'''
 
 JUGADORES = {}
 
@@ -55,25 +49,13 @@ class Juego(GObject.Object):
 
         GObject.Object.__init__(self)
 
-        # _dict = {
-        #   'tanque': '. . . /JAMTank/Tanques    anque_3.png',
-        #   'mapa': '. . . /JAMTank/Mapas/fondo2.png',
-        #   'nick': 'un_nombre',
-        #   'vidas': 50,
-        #   'server': '192.168.1.9'}
-
         GAME['mapa'] = str(_dict['mapa'])
 
         self.ip = get_ip()
-        JUGADORES[self.ip] = {
-            'nick': '',
-            'tanque': '',
-            'vidas': 0,
-            'puntos': 0,
-            }
+        JUGADORES[self.ip] = dict(MODEL)
         JUGADORES[self.ip]['nick'] = str(_dict['nick'])
         JUGADORES[self.ip]['tanque'] = str(_dict['tanque'])
-        JUGADORES[self.ip]['vidas'] = int(_dict['vidas'])
+        BALAS = {}
 
         self.client = client
 
@@ -90,14 +72,97 @@ class Juego(GObject.Object):
         self.balas = pygame.sprite.RenderUpdates()
         #self.explosiones = pygame.sprite.RenderUpdates()
 
-    def salir(self):
-        # FIXME: Enviar Desconectarse y Finalizar al Servidor
-        self.estado = False
-        pygame.quit()
-        if self.client:
-            self.client.desconectarse()
-            del(self.client)
-            self.client = False
+    def __enviar_datos(self):
+        self.jugador.update()
+        a, x, y = self.jugador.get_datos()
+
+        datos = "UPDATE,%s,%s,%s" % (a, x, y)
+        if self.disparo:
+            datos = "%s,%s,%s,%s" % (datos, a, x, y)
+            self.disparo = False
+        elif self.bala:
+            self.bala.update()
+            a, x, y = self.bala.get_datos()
+            datos = "%s,%s,%s,%s" % (datos, a, x, y)
+        else:
+            datos = "%s,-,-,-" % datos
+
+        self.client.enviar(datos)
+
+    def __recibir_datos(self):
+        datos = self.client.recibir()
+
+        for client in datos.split("||"):
+            if not client:
+                return
+
+            ip, nick, tanque, a, x, y, aa, xx, yy = client.split(",")
+            a = int(a)
+            x = int(x)
+            y = int(y)
+
+            if ip == self.ip:
+                if aa != '-' and xx != '-' and yy != '-':
+                    aa = int(aa)
+                    xx = int(xx)
+                    yy = int(yy)
+                    if not self.bala:
+                        BALAS[ip] = True
+                        image_path = os.path.join(os.path.dirname(
+                            os.path.dirname(GAME['mapa'])),
+                            'Iconos', 'bala.png')
+                        self.bala = Bala(aa, xx, yy, image_path,
+                            RESOLUCION_INICIAL, ip)
+                        self.balas.add(self.bala)
+                    else:
+                        valor = self.bala.set_posicion(centerx=xx, centery=yy)
+                        if not valor:
+                            del(self.bala)
+                            self.bala = False
+                            del(BALAS[ip])
+                self.jugador.update_data(a, x, y)
+
+            else:
+                if not ip in JUGADORES.keys():
+                    JUGADORES[ip] = dict(MODEL)
+                    JUGADORES[ip]['nick'] = nick
+                    JUGADORES[ip]['tanque'] = tanque
+                    j = Jugador(JUGADORES[ip]['tanque'],
+                        RESOLUCION_INICIAL, ip)
+                    self.jugadores.add(j)
+                    #x, y = RESOLUCION_INICIAL
+                    #j.update_data(centerx=x/2, centery=y/2)
+                    j.update_data(a, x, y)
+                else:
+                    for j in self.jugadores:
+                        if ip == j.ip:
+                            j.update_data(a, x, y)
+                            break
+
+                if aa != '-' and xx != '-' and yy != '-':
+                    aa = int(aa)
+                    xx = int(xx)
+                    yy = int(yy)
+                    if not ip in BALAS.keys():
+                        BALAS[ip] = True
+                        image_path = os.path.join(os.path.dirname(
+                            os.path.dirname(GAME['mapa'])),
+                            'Iconos', 'bala.png')
+                        bala = Bala(aa, xx, yy, image_path,
+                            RESOLUCION_INICIAL, ip)
+                        self.balas.add(bala)
+                    else:
+                        for bala in self.balas:
+                            if ip == bala.ip:
+                                valor = bala.set_posicion(
+                                    centerx=xx, centery=yy)
+                                if not valor:
+                                    del(bala)
+                                    bala = False
+                                    del(BALAS[ip])
+                                break
+                else:
+                    pass
 
     def run(self):
         self.estado = "En Juego"
@@ -114,45 +179,8 @@ class Juego(GObject.Object):
                 self.balas.clear(self.ventana, self.escenario)
                 #self.explosiones.clear(self.ventana, self.escenario)
 
-                self.jugador.update()
-                a, x, y = self.jugador.get_datos()
-
-                datos = "UPDATE,%s,%s,%s" % (a, x, y)
-                if self.disparo:
-                    datos = "%s,%s,%s,%s" % (datos, a, x, y)
-                    self.disparo = False
-                elif self.bala:
-                    self.bala.update()
-                    a, x, y = self.bala.get_datos()
-                    datos = "%s,%s,%s,%s" % (datos, a, x, y)
-                else:
-                    datos = "%s,-,-,-" % datos
-
-                self.client.enviar(datos)
-
-                mensajes = self.client.recibir()
-                ip, nick, tanque, a, x, y, aa, xx, yy = mensajes.split(",")
-                a = int(a)
-                x = int(x)
-                y = int(y)
-                if aa != '-' and xx != '-' and yy != '-':
-                    aa = int(aa)
-                    xx = int(xx)
-                    yy = int(yy)
-                    if not self.bala:
-                        image_path = os.path.join(os.path.dirname(
-                            os.path.dirname(GAME['mapa'])),
-                            'Iconos', 'bala.png')
-                        self.bala = Bala(aa, xx, yy, image_path,
-                            RESOLUCION_INICIAL)
-                        self.balas.add(self.bala)
-                    else:
-                        valor = self.bala.set_posicion(centerx=xx, centery=yy)
-                        if not valor:
-                            del(self.bala)
-                            self.bala = False
-
-                self.jugador.update_data(a,x,y)
+                self.__enviar_datos()
+                self.__recibir_datos()
 
                 pygame.event.pump()
                 pygame.event.clear()
@@ -221,11 +249,20 @@ class Juego(GObject.Object):
         #sonido_juego.play(-1)
 
         self.jugador = Jugador(JUGADORES[self.ip]['tanque'],
-            RESOLUCION_INICIAL)
+            RESOLUCION_INICIAL, self.ip)
         self.jugadores.add(self.jugador)
         x, y = RESOLUCION_INICIAL
         self.jugador.update_data(centerx=x/2, centery=y/2)
         #JUGADORES[self.ip]['sprite'] = self.jugador
+
+    def salir(self):
+        # FIXME: Enviar Desconectarse y Finalizar al Servidor
+        self.estado = False
+        pygame.quit()
+        if self.client:
+            self.client.desconectarse()
+            del(self.client)
+            self.client = False
 
 
 #if __name__ == "__main__":

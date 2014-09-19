@@ -110,13 +110,14 @@ class RequestHandler(SocketServer.StreamRequestHandler):
             return False
 
     def __get_data(self):
-        ip = str(self.client_address[0])
-        nick = JUGADORES[ip]['nick']
-        tanque = JUGADORES[ip]['tanque']['path']
-
-        retorno = "%s,%s,%s,%s,%s" % (ip, nick, tanque,
-            JUGADORES[ip]['tanque']['pos'], JUGADORES[ip]['bala'])
-        return retorno
+        retorno = ""
+        for ip in JUGADORES.keys():
+            nick = JUGADORES[ip]['nick']
+            tanque = JUGADORES[ip]['tanque']['path']
+            datos = "%s,%s,%s,%s,%s" % (ip, nick, tanque,
+                JUGADORES[ip]['tanque']['pos'], JUGADORES[ip]['bala'])
+            retorno = "%s%s||" % (retorno, datos)
+        return retorno.strip()
 
 
 '''

@@ -14,10 +14,11 @@ VELOCIDAD = 18
 
 class Bala(Sprite):
 
-    def __init__(self, angulo, x, y, image_path, resolucion):
+    def __init__(self, angulo, x, y, image_path, resolucion, ip):
 
         Sprite.__init__(self)
 
+        self.ip = ip
         self.image = pygame.image.load(image_path)
         self.rect = self.image.get_rect()
 
