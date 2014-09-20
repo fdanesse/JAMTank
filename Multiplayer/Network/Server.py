@@ -27,7 +27,7 @@ MODEL = {
 
 OCUPADO = False
 JUGADORES = {}
-PR = True
+PR = False
 
 
 class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):

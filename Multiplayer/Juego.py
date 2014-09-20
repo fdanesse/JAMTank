@@ -27,6 +27,7 @@ MODEL = {
     }
 
 JUGADORES = {}
+BALAS = {}
 
 
 def get_ip():
@@ -55,7 +56,6 @@ class Juego(GObject.Object):
         JUGADORES[self.ip] = dict(MODEL)
         JUGADORES[self.ip]['nick'] = str(_dict['nick'])
         JUGADORES[self.ip]['tanque'] = str(_dict['tanque'])
-        BALAS = {}
 
         self.client = client
 
@@ -101,68 +101,74 @@ class Juego(GObject.Object):
             x = int(x)
             y = int(y)
 
-            if ip == self.ip:
-                if aa != '-' and xx != '-' and yy != '-':
-                    aa = int(aa)
-                    xx = int(xx)
-                    yy = int(yy)
-                    if not self.bala:
-                        BALAS[ip] = True
-                        image_path = os.path.join(os.path.dirname(
-                            os.path.dirname(GAME['mapa'])),
-                            'Iconos', 'bala.png')
-                        self.bala = Bala(aa, xx, yy, image_path,
-                            RESOLUCION_INICIAL, ip)
-                        self.balas.add(self.bala)
-                    else:
-                        valor = self.bala.set_posicion(centerx=xx, centery=yy)
-                        if not valor:
-                            del(self.bala)
-                            self.bala = False
-                            del(BALAS[ip])
-                self.jugador.update_data(a, x, y)
+            self.__actualizar_tanque(ip, nick, tanque, a, x, y)
+
+            if aa != '-' and xx != '-' and yy != '-':
+                aa = int(aa)
+                xx = int(xx)
+                yy = int(yy)
+
+                self.__actualizar_bala(ip, aa, xx, yy)
 
             else:
-                if not ip in JUGADORES.keys():
-                    JUGADORES[ip] = dict(MODEL)
-                    JUGADORES[ip]['nick'] = nick
-                    JUGADORES[ip]['tanque'] = tanque
-                    j = Jugador(JUGADORES[ip]['tanque'],
-                        RESOLUCION_INICIAL, ip)
-                    self.jugadores.add(j)
-                    #x, y = RESOLUCION_INICIAL
-                    #j.update_data(centerx=x/2, centery=y/2)
-                    j.update_data(a, x, y)
-                else:
-                    for j in self.jugadores:
-                        if ip == j.ip:
-                            j.update_data(a, x, y)
-                            break
+                for bala in self.balas.sprites():
+                    if ip == bala.ip:
+                        self.__eliminar_bala(bala, ip)
+                        break
 
-                if aa != '-' and xx != '-' and yy != '-':
-                    aa = int(aa)
-                    xx = int(xx)
-                    yy = int(yy)
-                    if not ip in BALAS.keys():
-                        BALAS[ip] = True
-                        image_path = os.path.join(os.path.dirname(
-                            os.path.dirname(GAME['mapa'])),
-                            'Iconos', 'bala.png')
-                        bala = Bala(aa, xx, yy, image_path,
-                            RESOLUCION_INICIAL, ip)
-                        self.balas.add(bala)
-                    else:
-                        for bala in self.balas:
-                            if ip == bala.ip:
-                                valor = bala.set_posicion(
-                                    centerx=xx, centery=yy)
-                                if not valor:
-                                    del(bala)
-                                    bala = False
-                                    del(BALAS[ip])
-                                break
-                else:
-                    pass
+    def __actualizar_tanque(self, ip, nick, tanque, a, x, y):
+        """
+        Actualiza posiciòn de tanque.
+        """
+        if not ip in JUGADORES.keys():
+            JUGADORES[ip] = dict(MODEL)
+            JUGADORES[ip]['nick'] = nick
+            JUGADORES[ip]['tanque'] = tanque
+            j = Jugador(JUGADORES[ip]['tanque'],
+                RESOLUCION_INICIAL, ip)
+            self.jugadores.add(j)
+            j.update_data(a, x, y)
+        else:
+            for j in self.jugadores.sprites():
+                if ip == j.ip:
+                    j.update_data(a, x, y)
+                    break
+
+    def __actualizar_bala(self, ip, aa, xx, yy):
+        """
+        Actualiza la posiciòn de las balas.
+        """
+        if not ip in BALAS.keys():
+            BALAS[ip] = True
+            image_path = os.path.join(os.path.dirname(
+                os.path.dirname(GAME['mapa'])),
+                'Iconos', 'bala.png')
+            bala = Bala(aa, xx, yy, image_path,
+                RESOLUCION_INICIAL, ip)
+            self.balas.add(bala)
+            if ip == self.ip:
+                self.bala = bala
+
+        else:
+            for bala in self.balas.sprites():
+                if ip == bala.ip:
+                    valor = bala.set_posicion(centerx=xx, centery=yy)
+                    if not valor:
+                        self.__eliminar_bala(bala, ip)
+                    break
+
+    def __eliminar_bala(self, bala, ip):
+        """
+        Elimina una bala.
+        """
+        bala.kill()
+        del(bala)
+        bala = False
+        if BALAS.get(ip, False):
+            del(BALAS[ip])
+        if ip == self.ip:
+            del(self.bala)
+            self.bala = False
 
     def run(self):
         self.estado = "En Juego"

@@ -56,11 +56,5 @@ class Bala(Sprite):
     def update(self):
         x = self.rect.centerx + self.dx
         y = self.rect.centery + self.dy
-        #if x > 0 and x < self.ancho_monitor and \
-        #    y > 0 and y < self.alto_monitor:
-        #    self.temp_x = int(x)
-        #    self.temp_y = int(y)
-        #else:
-        #    self.kill()
         self.temp_x = int(x)
         self.temp_y = int(y)
