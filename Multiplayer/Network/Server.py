@@ -120,12 +120,11 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         return retorno.strip()
 
 
-'''
 if __name__ == "__main__":
     ret = ''
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("gmail.com", 80))
+        s.connect(("google.com", 80))
         ret = s.getsockname()[0]
         s.close()
     except:
@@ -145,4 +144,3 @@ if __name__ == "__main__":
         server_thread = threading.Thread(target=server.serve_forever)
         server_thread.setDaemon(True)
         server_thread.start()
-'''
