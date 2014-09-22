@@ -4,34 +4,42 @@
 #   Server.py por:
 #   Flavio Danesse <fdanesse@gmail.com>
 
+import os
 import socket
 import SocketServer
 
-GAME = {
-    'mapa': "",
-    'enemigos': 0,
-    'vidas': 0,
-    }
-
-MODEL = {
-    'nick': '',
-    'tanque': {
-        'path': '',
-        'pos': '0,0,0',
-        'energia': 100,
-        },
-    'vidas': 0,
-    'puntos': 0,
-    'bala': '-,-,-'
-    }
-
-OCUPADO = False
-JUGADORES = {}
-PR = False
-
 
 class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
-    pass
+
+    global GAME
+    global MODEL
+    global JUGADORES
+    global LOG
+
+    path = os.path.join(os.environ["HOME"], "server.log")
+    if os.path.exists(path):
+        os.remove(path)
+    LOG = open(path, "w")
+
+    GAME = {
+        'mapa': "",
+        'enemigos': 0,
+        'vidas': 0,
+        }
+
+    MODEL = {
+        'nick': '',
+        'tanque': {
+            'path': '',
+            'pos': '0,0,0',
+            'energia': 100,
+            },
+        'vidas': 0,
+        'puntos': 0,
+        'bala': '-,-,-'
+        }
+
+    JUGADORES = {}
 
 
 class RequestHandler(SocketServer.StreamRequestHandler):
@@ -39,44 +47,43 @@ class RequestHandler(SocketServer.StreamRequestHandler):
     def handle(self):
         while 1:
             try:
-                entrada = self.request.recv(256)
+                entrada = self.rfile.readline().strip()
+                #LOG.write("Recibo: %s\n" % entrada)
                 if not entrada:
                     self.request.close()
                     return
 
-                if PR:
-                    print "SERVER Recibe:", entrada
-
                 respuesta = self.__procesar(entrada,
                     str(self.client_address[0]))
-                if not respuesta:
+                if respuesta:
+                    #LOG.write("Envio: %s\n" % respuesta)
+                    while len(respuesta) < 512:
+                        respuesta = "%s*" % respuesta
+                    self.wfile.write(respuesta)
+                else:
+                    LOG.write("Cierre de Conexion: %s\n" % self.client_address[0])
                     self.request.close()
-                    return
-
-                if PR:
-                    print "SERVER Envia:", respuesta
-
-                self.request.send(respuesta)
+                    #return
 
             except socket.error, err:
-                print "Error en Server: ", err, self.client_address[0]
+                LOG.write("Error: %s %s\n" % (err, self.client_address[0]))
                 self.request.close()
                 # El HOST cierra: [Errno 104]
                 #   Conexión reinicializada por la máquina remota
                 # Client se desconecta: [Errno 32] Tubería rota
-                return
+                #return
 
     def __procesar(self, entrada, ip):
         datos = entrada.split(",")
         if datos:
             if datos[0] == "Config":
                 # Host Configurando el juego y sus datos como cliente
-                GAME['mapa'] = datos[1]
-                GAME['enemigos'] = int(datos[2])
-                GAME['vidas'] = int(datos[3])
+                GAME['mapa'] = datos[1].strip()
+                GAME['enemigos'] = int(datos[2].strip())
+                GAME['vidas'] = int(datos[3].strip())
                 JUGADORES[ip] = dict(MODEL)
-                JUGADORES[ip]['tanque']['path'] = datos[4]
-                JUGADORES[ip]['nick'] = datos[5]
+                JUGADORES[ip]['tanque']['path'] = datos[4].strip()
+                JUGADORES[ip]['nick'] = datos[5].strip()
                 return "OK"
 
             elif datos[0] == "UPDATE":
@@ -86,7 +93,6 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                 #if len(datos) > 4:
                 #    aa, xx, yy = datos[4:]
                 #    JUGADORES[ip]['bala'] = "%s,%s,%s" % (aa, xx, yy)
-
                 return self.__get_data()
 
             elif datos[0] == "JOIN":
@@ -95,20 +101,23 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                 if not ip in JUGADORES.keys():
                     if len(ips) < GAME['enemigos']:
                         JUGADORES[ip] = dict(MODEL)
-                        JUGADORES[ip]['tanque']['path'] = datos[1]
-                        JUGADORES[ip]['nick'] = datos[2]
-                        return "%s" % str(GAME['mapa'])
+                        JUGADORES[ip]['tanque']['path'] = datos[1].strip()
+                        JUGADORES[ip]['nick'] = datos[2].strip()
+                        retorno = "%s" % str(GAME['mapa'].strip())
+                        return retorno
                     else:
                         return "CLOSE"
                 else:
                     print "El Jugador ya estaba en game", ip
-                    return "%s" % str(GAME['mapa'])
+                    retorno = "%s" % str(GAME['mapa'].strip())
+                    return retorno
 
             else:
-                print "Mensaje no considerado en el server"
+                LOG.write("Mensaje no considerado en el server: %s\n" % datos)
+                return "*" * 512
 
         else:
-            return False
+            return ""
 
     def __get_data(self):
         retorno = ""

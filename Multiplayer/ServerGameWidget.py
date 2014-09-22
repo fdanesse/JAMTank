@@ -101,5 +101,5 @@ class GameWidget(Gtk.DrawingArea):
     def salir(self):
         if self.juego:
             self.juego.salir()
-        #self.server.shutdown()
+        self.server.shutdown()
         self.emit('salir')

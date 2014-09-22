@@ -30,14 +30,16 @@ class Client(GObject.Object):
         time.sleep(0.5)
 
     def enviar(self, datos):
-        self.socket.send(datos)
+        datos = "%s\n" % datos
+        self.socket.sendall(datos)
         time.sleep(0.02)
 
     def recibir(self):
         entrada = ""
         #while not entrada:
         try:
-            entrada = self.socket.recv(256)
+            entrada = self.socket.recv(512)
+            entrada = entrada.replace("*", "").strip()
         except socket.error, err:
             print "ERROR CLIENT recibir", err
         return entrada

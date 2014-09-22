@@ -77,23 +77,19 @@ class Juego(GObject.Object):
         a, x, y = self.jugador.get_datos()
 
         datos = "UPDATE,%s,%s,%s" % (a, x, y)
-        if self.disparo:
-            datos = "%s,%s,%s,%s" % (datos, a, x, y)
-            self.disparo = False
-        elif self.bala:
-            self.bala.update()
-            a, x, y = self.bala.get_datos()
-            datos = "%s,%s,%s,%s" % (datos, a, x, y)
-        else:
-            datos = "%s,-,-,-" % datos
+        #if self.disparo:
+        #    datos = "%s,%s,%s,%s" % (datos, a, x, y)
+        #    self.disparo = False
+        #elif self.bala:
+        #    self.bala.update()
+        #    a, x, y = self.bala.get_datos()
+        #    datos = "%s,%s,%s,%s" % (datos, a, x, y)
+        #else:
+        #    datos = "%s,-,-,-" % datos
 
-        if self.client:
-            self.client.enviar(datos)
+        self.client.enviar(datos)
 
     def __recibir_datos(self):
-        if not self.client:
-            return
-
         datos = self.client.recibir()
 
         if not datos:
