@@ -83,9 +83,9 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                 # Jugador actualizando sus datos
                 a, x, y = datos[1:4]
                 JUGADORES[ip]['tanque']['pos'] = "%s,%s,%s" % (a, x, y)
-                if len(datos) > 4:
-                    aa, xx, yy = datos[4:]
-                    JUGADORES[ip]['bala'] = "%s,%s,%s" % (aa, xx, yy)
+                #if len(datos) > 4:
+                #    aa, xx, yy = datos[4:]
+                #    JUGADORES[ip]['bala'] = "%s,%s,%s" % (aa, xx, yy)
 
                 return self.__get_data()
 
@@ -102,6 +102,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                         return "CLOSE"
                 else:
                     print "El Jugador ya estaba en game", ip
+                    return "%s" % str(GAME['mapa'])
 
             else:
                 print "Mensaje no considerado en el server"
@@ -114,8 +115,10 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         for ip in JUGADORES.keys():
             nick = JUGADORES[ip]['nick']
             tanque = JUGADORES[ip]['tanque']['path']
-            datos = "%s,%s,%s,%s,%s" % (ip, nick, tanque,
-                JUGADORES[ip]['tanque']['pos'], JUGADORES[ip]['bala'])
+            #datos = "%s,%s,%s,%s,%s" % (ip, nick, tanque,
+            #    JUGADORES[ip]['tanque']['pos'], JUGADORES[ip]['bala'])
+            datos = "%s,%s,%s,%s" % (ip, nick, tanque,
+                JUGADORES[ip]['tanque']['pos'])
             retorno = "%s%s||" % (retorno, datos)
         return retorno.strip()
 

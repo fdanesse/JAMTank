@@ -87,34 +87,58 @@ class Juego(GObject.Object):
         else:
             datos = "%s,-,-,-" % datos
 
-        self.client.enviar(datos)
+        if self.client:
+            self.client.enviar(datos)
 
     def __recibir_datos(self):
+        if not self.client:
+            return
+
         datos = self.client.recibir()
+
+        if not datos:
+            return
 
         for client in datos.split("||"):
             if not client:
-                return
+                break
 
-            ip, nick, tanque, a, x, y, aa, xx, yy = client.split(",")
+            #ip, nick, tanque, a, x, y, aa, xx, yy = client.split(",")
+            ip, nick, tanque, a, x, y = client.split(",")
             a = int(a)
             x = int(x)
             y = int(y)
 
             self.__actualizar_tanque(ip, nick, tanque, a, x, y)
 
-            if aa != '-' and xx != '-' and yy != '-':
-                aa = int(aa)
-                xx = int(xx)
-                yy = int(yy)
+            #if aa != '-' and xx != '-' and yy != '-':
+            #    aa = int(aa)
+            #    xx = int(xx)
+            #    yy = int(yy)
 
-                self.__actualizar_bala(ip, aa, xx, yy)
+            #    self.__actualizar_bala(ip, aa, xx, yy)
 
-            else:
-                for bala in self.balas.sprites():
-                    if ip == bala.ip:
-                        self.__eliminar_bala(bala, ip)
-                        break
+            #else:
+            #    for bala in self.balas.sprites():
+            #        if ip == bala.ip:
+            #            self.__eliminar_bala(bala, ip)
+            #            break
+
+        #self.__checkear_colisiones()
+
+    def __checkear_colisiones(self):
+        """
+        Checkea colisiones entre balas y de balas agenas con mi tanque.
+        """
+        # colisiones entre balas
+        rect = self.jugador.rect
+        for bala in self.balas.sprites():
+            if self.ip == bala.ip:
+                continue
+            x, y = bala.rect.centerx, bala.rect.centery
+            if rect.collidepoint(x, y):
+                self.jugador.tocado()
+                # explosion
 
     def __actualizar_tanque(self, ip, nick, tanque, a, x, y):
         """
@@ -123,9 +147,9 @@ class Juego(GObject.Object):
         if not ip in JUGADORES.keys():
             JUGADORES[ip] = dict(MODEL)
             JUGADORES[ip]['nick'] = nick
-            JUGADORES[ip]['tanque'] = tanque
-            j = Jugador(JUGADORES[ip]['tanque'],
-                RESOLUCION_INICIAL, ip)
+            JUGADORES[ip]['tanque'] = os.path.join(
+                os.path.dirname(BASE_PATH), "Tanques", tanque)
+            j = Jugador(JUGADORES[ip]['tanque'], RESOLUCION_INICIAL, ip)
             self.jugadores.add(j)
             j.update_data(a, x, y)
         else:
@@ -141,10 +165,8 @@ class Juego(GObject.Object):
         if not ip in BALAS.keys():
             BALAS[ip] = True
             image_path = os.path.join(os.path.dirname(
-                os.path.dirname(GAME['mapa'])),
-                'Iconos', 'bala.png')
-            bala = Bala(aa, xx, yy, image_path,
-                RESOLUCION_INICIAL, ip)
+                os.path.dirname(GAME['mapa'])), 'Iconos', 'bala.png')
+            bala = Bala(aa, xx, yy, image_path, RESOLUCION_INICIAL, ip)
             self.balas.add(bala)
             if ip == self.ip:
                 self.bala = bala
@@ -175,7 +197,6 @@ class Juego(GObject.Object):
         self.ventana.blit(self.escenario, (0, 0))
         pygame.display.update()
         pygame.time.wait(3)
-
         while self.estado == "En Juego":
             try:
                 self.reloj.tick(35)
@@ -241,7 +262,6 @@ class Juego(GObject.Object):
             (0, 0), pygame.DOUBLEBUF | pygame.FULLSCREEN, 0)
 
         pygame.display.set_caption("JAMtank")
-
         imagen = pygame.image.load(GAME['mapa'])
         self.escenario = pygame.transform.scale(imagen,
             RESOLUCION_INICIAL).convert_alpha()
