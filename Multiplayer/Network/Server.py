@@ -68,10 +68,6 @@ class RequestHandler(SocketServer.StreamRequestHandler):
             except socket.error, err:
                 LOG.write("Error: %s %s\n" % (err, self.client_address[0]))
                 self.request.close()
-                # El HOST cierra: [Errno 104]
-                #   Conexión reinicializada por la máquina remota
-                # Client se desconecta: [Errno 32] Tubería rota
-                #return
 
     def __procesar(self, entrada, ip):
         datos = entrada.split(",")
@@ -84,6 +80,8 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                 JUGADORES[ip] = dict(MODEL)
                 JUGADORES[ip]['tanque']['path'] = datos[4].strip()
                 JUGADORES[ip]['nick'] = datos[5].strip()
+                LOG.write("Configuración: %s\n" % GAME)
+                LOG.write("Configuración: %s\n" % JUGADORES)
                 return "OK"
 
             elif datos[0] == "UPDATE":
@@ -104,6 +102,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                         JUGADORES[ip]['tanque']['path'] = datos[1].strip()
                         JUGADORES[ip]['nick'] = datos[2].strip()
                         retorno = "%s" % str(GAME['mapa'].strip())
+                        LOG.write("JOIN: %s\n" % JUGADORES)
                         return retorno
                     else:
                         return "CLOSE"
@@ -121,13 +120,13 @@ class RequestHandler(SocketServer.StreamRequestHandler):
 
     def __get_data(self):
         retorno = ""
-        for ip in JUGADORES.keys():
-            nick = JUGADORES[ip]['nick']
-            tanque = JUGADORES[ip]['tanque']['path']
-            #datos = "%s,%s,%s,%s,%s" % (ip, nick, tanque,
-            #    JUGADORES[ip]['tanque']['pos'], JUGADORES[ip]['bala'])
-            datos = "%s,%s,%s,%s" % (ip, nick, tanque,
-                JUGADORES[ip]['tanque']['pos'])
+        for i_p in JUGADORES.keys():
+            nick = JUGADORES[i_p]['nick']
+            tanque = JUGADORES[i_p]['tanque']['path']
+            #datos = "%s,%s,%s,%s,%s" % (i_p, nick, tanque,
+            #    JUGADORES[i_p]['tanque']['pos'], JUGADORES[i_p]['bala'])
+            datos = "%s,%s,%s,%s" % (i_p, nick, tanque,
+                JUGADORES[i_p]['tanque']['pos'])
             retorno = "%s%s||" % (retorno, datos)
         return retorno.strip()
 

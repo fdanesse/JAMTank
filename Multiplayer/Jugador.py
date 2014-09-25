@@ -24,6 +24,11 @@ class Jugador(Sprite):
         #disparo = pygame.mixer.Sound(motor2)
         #disparo.play(-1)
 
+        path = os.path.join(os.environ["HOME"], "jugador-%s.log" % ip)
+        if os.path.exists(path):
+            os.remove(path)
+        self.LOG = open(path, "w")
+
         self.ip = ip
         self.eventos = []
         self.energia = 100
@@ -50,6 +55,9 @@ class Jugador(Sprite):
         self.temp_angulo = 0
         self.temp_x = self.ancho_monitor / 2
         self.temp_y = self.alto_monitor / 2
+
+        self.LOG.write("Creado: %s %s %s %s %s\n" % (self.angulo, self.rect,
+            imagen_path, resolucion, ip))
 
     def __derecha(self):
         self.temp_angulo += int(0.7 * INDICE_ROTACION)
@@ -150,9 +158,15 @@ class Jugador(Sprite):
         self.__set_posicion(angulo=angulo, centerx=centerx, centery=centery)
 
     def update_events(self, eventos):
+        """
+        Solo Jugador Local.
+        """
         self.eventos = list(eventos)
 
     def update(self):
+        """
+        Solo Jugador Local.
+        """
         if not self.eventos:
             return
 

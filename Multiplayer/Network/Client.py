@@ -4,6 +4,7 @@
 #   Client.py por:
 #   Flavio Danesse <fdanesse@gmail.com>
 
+import os
 import socket
 import time
 from gi.repository import GObject
@@ -16,6 +17,11 @@ class Client(GObject.Object):
     def __init__(self, ip):
 
         GObject.Object.__init__(self)
+
+        path = os.path.join(os.environ["HOME"], "client.log")
+        if os.path.exists(path):
+            os.remove(path)
+        self.LOG = open(path, "w")
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.dir = (ip, 5000)
@@ -31,17 +37,27 @@ class Client(GObject.Object):
 
     def enviar(self, datos):
         datos = "%s\n" % datos
-        self.socket.sendall(datos)
-        time.sleep(0.02)
+        enviado = False
+        while not enviado:
+            try:
+                self.socket.sendall(datos)
+                #time.sleep(0.02)
+                enviado = True
+            except socket.error, err:
+                print "ERROR CLIENT Enviar", err
+                self.LOG.write("Error al Enviar: %s\n" % err)
+            time.sleep(0.02)
 
     def recibir(self):
         entrada = ""
-        #while not entrada:
-        try:
-            entrada = self.socket.recv(512)
-            entrada = entrada.replace("*", "").strip()
-        except socket.error, err:
-            print "ERROR CLIENT recibir", err
+        while not entrada:
+            try:
+                entrada = self.socket.recv(512)
+                entrada = entrada.replace("*", "").strip()
+            except socket.error, err:
+                print "ERROR CLIENT recibir", err
+                self.LOG.write("Error al Recibir: %s\n" % err)
+                time.sleep(0.02)
         return entrada
 
 
