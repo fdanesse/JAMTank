@@ -23,14 +23,6 @@ MODEL = {
 
 
 def get_ip():
-    #import socket
-    #try:
-    #    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    #    s.connect(("google.com", 80))
-    #    return str(s.getsockname()[0]).strip()
-    #except socket.error, err:
-    #    print "Error", get_ip, err
-    #    return "localhost"
     import commands
     text = commands.getoutput('ifconfig wlan0').splitlines()
     datos = ''
@@ -62,8 +54,6 @@ def APPEND_LOG(_dict):
     for key in _dict.keys():
         new[key] = _dict[key]
     WRITE_LOG(new)
-
-#GObject.threads_init()
 
 
 class Juego(GObject.Object):

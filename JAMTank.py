@@ -19,9 +19,6 @@ Requiere:
     python-pygame
 """
 
-#GObject.threads_init()
-#Gdk.threads_init()
-
 
 class JAMTank(Gtk.Window):
     """

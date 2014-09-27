@@ -35,9 +35,6 @@ def APPEND_LOG(_dict):
     WRITE_LOG(new)
 
 
-#GObject.threads_init()
-
-
 class Client(GObject.Object):
 
     def __init__(self, ip):

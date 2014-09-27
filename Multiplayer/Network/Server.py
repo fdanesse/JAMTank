@@ -99,60 +99,20 @@ class RequestHandler(SocketServer.StreamRequestHandler):
     def __procesar(self, entrada, ip):
         datos = entrada.split(",")
         if datos:
-            if datos[0] == "Config":
-                # Host Configurando el juego y sus datos como cliente
-                GAME['mapa'] = datos[1].strip()
-                GAME['enemigos'] = int(datos[2].strip())
-                GAME['vidas'] = int(datos[3].strip())
-                JUGADORES[ip] = get_model()
-                JUGADORES[ip]['tanque']['path'] = datos[4].strip()
-                JUGADORES[ip]['nick'] = datos[5].strip()
-                if MAKELOG:
-                    APPEND_LOG({"Configuracion Juego": dict(GAME)})
-                    APPEND_LOG({"Configuracion Jugadores": dict(JUGADORES)})
-                return "OK"
-
-            elif datos[0] == "UPDATE":
-                # Jugador actualizando sus datos
-                a, x, y = datos[1:4]
-                JUGADORES[ip]['tanque']['pos'] = "%s,%s,%s" % (a, x, y)
-                #if len(datos) > 4:
-                #    aa, xx, yy = datos[4:]
-                #    JUGADORES[ip]['bala'] = "%s,%s,%s" % (aa, xx, yy)
+            if datos[0] == "UPDATE":
+                self.__actualizar_jugador(ip, datos)
                 return self.__get_data()
 
-            elif datos[0] == "JOIN":
-                # Nuevo Jugador desea conectarse.
-                ips = JUGADORES.keys()
-                if not ip in JUGADORES.keys():
-                    if len(ips) < GAME['enemigos']:
-                        JUGADORES[ip] = get_model()
-                        JUGADORES[ip]['tanque']['path'] = datos[1].strip()
-                        JUGADORES[ip]['nick'] = datos[2].strip()
-                        retorno = "%s" % str(GAME['mapa'].strip())
-                        if MAKELOG:
-                            APPEND_LOG({"JOIN %s" % ip: dict(JUGADORES)})
-                        return retorno
-                    else:
-                        if MAKELOG:
-                            key = "Jugador Rechazado %s" % time.time()
-                            APPEND_LOG({key: ip})
-                        return "CLOSE"
-                else:
-                    if MAKELOG:
-                        key = "El Jugador ya estaba en game %s" % time.time()
-                        APPEND_LOG({key: ip})
-                    retorno = "%s" % str(GAME['mapa'].strip())
-                    return retorno
-
             elif datos[0] == "REMOVE":
-                # Jugador Abandonando el Juego.
-                if MAKELOG:
-                    key = "Jugador Removido %s" % time.time()
-                    APPEND_LOG({key: ip})
-                #del(JUGADORES[ip])
-                JUGADORES[ip]['tanque']['pos'] = "-,-,-"
+                self.__remover_jugador(ip, datos)
                 return "REMOVIDO"
+
+            elif datos[0] == "Config":
+                self.__config_server(ip, datos)
+                return "OK"
+
+            elif datos[0] == "JOIN":
+                return self.__connect_client(ip, datos)
 
             else:
                 if MAKELOG:
@@ -162,6 +122,67 @@ class RequestHandler(SocketServer.StreamRequestHandler):
 
         else:
             return ""
+
+    def __actualizar_jugador(self, ip, datos):
+        """
+        Jugador actualizando sus datos.
+        """
+        a, x, y = datos[1:4]
+        JUGADORES[ip]['tanque']['pos'] = "%s,%s,%s" % (a, x, y)
+        #if len(datos) > 4:
+        #    aa, xx, yy = datos[4:]
+        #    JUGADORES[ip]['bala'] = "%s,%s,%s" % (aa, xx, yy)
+
+    def __remover_jugador(self, ip, datos):
+        """
+        Jugador Abandonando el Juego.
+        """
+        if MAKELOG:
+            key = "Jugador Removido %s" % time.time()
+            APPEND_LOG({key: ip})
+        #del(JUGADORES[ip])
+        JUGADORES[ip]['tanque']['pos'] = "-,-,-"
+        JUGADORES[ip]['bala'] = "-,-,-"
+
+    def __connect_client(self, ip, datos):
+        """
+        Nuevo Jugador desea conectarse.
+        """
+        ips = JUGADORES.keys()
+        if not ip in JUGADORES.keys():
+            if len(ips) < GAME['enemigos']:
+                JUGADORES[ip] = get_model()
+                JUGADORES[ip]['tanque']['path'] = datos[1].strip()
+                JUGADORES[ip]['nick'] = datos[2].strip()
+                retorno = "%s" % str(GAME['mapa'].strip())
+                if MAKELOG:
+                    APPEND_LOG({"JOIN %s" % ip: dict(JUGADORES)})
+                return retorno
+            else:
+                if MAKELOG:
+                    key = "Jugador Rechazado %s" % time.time()
+                    APPEND_LOG({key: ip})
+                return "CLOSE"
+        else:
+            if MAKELOG:
+                key = "El Jugador ya estaba en game %s" % time.time()
+                APPEND_LOG({key: ip})
+            retorno = "%s" % str(GAME['mapa'].strip())
+            return retorno
+
+    def __config_server(self, ip, datos):
+        """
+        Host Configurando el juego y sus datos como cliente.
+        """
+        GAME['mapa'] = datos[1].strip()
+        GAME['enemigos'] = int(datos[2].strip())
+        GAME['vidas'] = int(datos[3].strip())
+        JUGADORES[ip] = get_model()
+        JUGADORES[ip]['tanque']['path'] = datos[4].strip()
+        JUGADORES[ip]['nick'] = datos[5].strip()
+        if MAKELOG:
+            APPEND_LOG({"Configuracion Juego": dict(GAME)})
+            APPEND_LOG({"Configuracion Jugadores": dict(JUGADORES)})
 
     def __get_data(self):
         retorno = ""
