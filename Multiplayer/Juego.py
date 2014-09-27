@@ -173,8 +173,7 @@ class Juego(GObject.Object):
                 self.jugadores.add(j)
 
             key = "Jugador Remoto Agregado en Juego.py %s" % ip
-            new = {
-                key: [(a, x, y), {"Actuales:": dict(self.JUGADORES)}]}
+            new = {key: {"Actuales:": dict(self.JUGADORES)}}
             APPEND_LOG(new)
 
         for j in self.jugadores.sprites():
