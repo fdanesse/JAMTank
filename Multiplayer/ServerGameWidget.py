@@ -17,7 +17,6 @@ from Network.Client import Client
 from Juego import Juego
 
 MAKELOG = True
-
 LOGPATH = os.path.join(os.environ["HOME"], "JAMTank_load.log")
 if os.path.exists(LOGPATH):
     os.remove(LOGPATH)
@@ -70,30 +69,35 @@ class GameWidget(Gtk.DrawingArea):
         nick = str(_dict['nick'])
 
         self.client = Client(server)
-        self.client.conectarse()
+        connected = self.client.conectarse()
 
-        _buffer = "Config,%s,%s,%s,%s,%s" % (mapa, enemigos,
-            vidas, tanque, nick)
+        if connected:
+            _buffer = "Config,%s,%s,%s,%s,%s" % (mapa, enemigos,
+                vidas, tanque, nick)
 
-        self.client.enviar(_buffer)
-        retorno = self.client.recibir()
+            self.client.enviar(_buffer)
+            retorno = self.client.recibir()
 
-        if retorno == "OK":
-            tanque = str(_dict['tanque'])
-            mapa = str(_dict['mapa'])
+            if retorno == "OK":
+                tanque = str(_dict['tanque'])
+                mapa = str(_dict['mapa'])
 
-            new_dict = {
-                'tanque': tanque,
-                'nick': nick,
-                'mapa': mapa,
-                }
+                new_dict = {
+                    'tanque': tanque,
+                    'nick': nick,
+                    'mapa': mapa,
+                    }
 
-            if MAKELOG:
-                APPEND_LOG({'client': new_dict})
-            time.sleep(0.5)
-            self.__run_game(new_dict)
+                if MAKELOG:
+                    APPEND_LOG({'client': new_dict})
+                time.sleep(0.5)
+                self.__run_game(new_dict)
+            else:
+                print "FIXME: Algo salió mal al configurar el Server."
+
         else:
-            print "FIXME: Algo salió mal al configurar el Server."
+            print "EL Cliente no pudo conectarse al socket"
+            self.salir()
 
     def __run_game(self, _dict):
         """

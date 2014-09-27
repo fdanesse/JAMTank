@@ -93,7 +93,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
             except socket.error, err:
                 if MAKELOG:
                     key = "Error: %s" % time.time()
-                    APPEND_LOG({key: (err, self.client_address[0])})
+                    APPEND_LOG({key: (str(err), self.client_address[0])})
                 self.request.close()
 
     def __procesar(self, entrada, ip):

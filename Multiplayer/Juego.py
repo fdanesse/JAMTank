@@ -28,7 +28,7 @@ def get_ip():
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("google.com", 80))
         return str(s.getsockname()[0]).strip()
-    except:
+    except socket.error, err:
         return "localhost"
 
 

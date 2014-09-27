@@ -13,10 +13,7 @@ from Network.Client import Client
 from Juego import Juego
 
 MAKELOG = True
-
 LOGPATH = os.path.join(os.environ["HOME"], "JAMTank_load.log")
-if os.path.exists(LOGPATH):
-    os.remove(LOGPATH)
 
 
 def WRITE_LOG(_dict):
@@ -24,6 +21,17 @@ def WRITE_LOG(_dict):
     archivo.write(json.dumps(
         _dict, indent=4, separators=(", ", ":"), sort_keys=True))
     archivo.close()
+
+
+def APPEND_LOG(_dict):
+    new = {}
+    if os.path.exists(LOGPATH):
+        archivo = codecs.open(LOGPATH, "r", "utf-8")
+        new = json.JSONDecoder("utf-8").decode(archivo.read())
+        archivo.close()
+    for key in _dict.keys():
+        new[key] = _dict[key]
+    WRITE_LOG(new)
 
 
 class GameWidget(Gtk.DrawingArea):
@@ -52,30 +60,35 @@ class GameWidget(Gtk.DrawingArea):
         dirpath = os.path.dirname(os.path.dirname(str(_dict['tanque'])))
 
         self.client = Client(server)
-        self.client.conectarse()
+        connected = self.client.conectarse()
 
-        _buffer = "JOIN,%s,%s" % (tanque, nick)
+        if connected:
+            _buffer = "JOIN,%s,%s" % (tanque, nick)
 
-        self.client.enviar(_buffer)
-        retorno = self.client.recibir()
+            self.client.enviar(_buffer)
+            retorno = self.client.recibir()
 
-        mapa = os.path.join(dirpath, "Mapas", retorno)
-        tanque = str(_dict['tanque'])
+            mapa = os.path.join(dirpath, "Mapas", retorno)
+            tanque = str(_dict['tanque'])
 
-        new_dict = {
-            'tanque': tanque,
-            'nick': nick,
-            'mapa': mapa,
-            }
+            new_dict = {
+                'tanque': tanque,
+                'nick': nick,
+                'mapa': mapa,
+                }
 
-        if MAKELOG:
-            WRITE_LOG({'client': new_dict})
+            if MAKELOG:
+                APPEND_LOG({'client': new_dict})
 
-        if retorno == "CLOSE":
-            print "FIXME: No se admiten más Jugadores"
+            if retorno == "CLOSE":
+                print "FIXME: No se admiten más Jugadores"
+            else:
+                time.sleep(0.5)
+                self.__run_game(new_dict)
+
         else:
-            time.sleep(0.5)
-            self.__run_game(new_dict)
+            print "EL Cliente no pudo conectarse al socket"
+            self.salir()
 
     def __run_game(self, _dict):
         """
