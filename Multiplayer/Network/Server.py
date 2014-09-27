@@ -145,6 +145,15 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                     retorno = "%s" % str(GAME['mapa'].strip())
                     return retorno
 
+            elif datos[0] == "REMOVE":
+                # Jugador Abandonando el Juego.
+                if MAKELOG:
+                    key = "Jugador Removido %s" % time.time()
+                    APPEND_LOG({key: ip})
+                #del(JUGADORES[ip])
+                JUGADORES[ip]['tanque']['pos'] = "-,-,-"
+                return "REMOVIDO"
+
             else:
                 if MAKELOG:
                     key = "Mensaje no considerado %s" % time.time()

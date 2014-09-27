@@ -4,6 +4,7 @@
 import os
 import time
 import json
+import codecs
 
 from gi.repository import Gtk
 from gi.repository import GdkX11

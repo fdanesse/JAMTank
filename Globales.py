@@ -21,12 +21,24 @@
 
 
 def get_ip():
-    import socket
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("google.com", 80))
-        ret = s.getsockname()[0]
-        s.close()
-        return ret
-    except:
-        return ""
+    #import socket
+    #try:
+    #    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    #    s.connect(("google.com", 80))
+    #    ret = s.getsockname()[0]
+    #    s.close()
+    #    return ret
+    #except socket.error, err:
+    #    print "Error", get_ip, err
+    #    return "localhost"
+    import commands
+    text = commands.getoutput('ifconfig wlan0').splitlines()
+    datos = ''
+    for linea in text:
+        if 'Direc. inet:' in linea and 'Difus.:' in linea and 'Másc:' in linea:
+            datos = linea
+            break
+    ip = 'localhost'
+    if datos:
+        ip = datos.split('Direc. inet:')[1].split('Difus.:')[0].strip()
+    return ip

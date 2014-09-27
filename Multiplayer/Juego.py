@@ -23,13 +23,25 @@ MODEL = {
 
 
 def get_ip():
-    import socket
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("google.com", 80))
-        return str(s.getsockname()[0]).strip()
-    except socket.error, err:
-        return "localhost"
+    #import socket
+    #try:
+    #    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    #    s.connect(("google.com", 80))
+    #    return str(s.getsockname()[0]).strip()
+    #except socket.error, err:
+    #    print "Error", get_ip, err
+    #    return "localhost"
+    import commands
+    text = commands.getoutput('ifconfig wlan0').splitlines()
+    datos = ''
+    for linea in text:
+        if 'Direc. inet:' in linea and 'Difus.:' in linea and 'Másc:' in linea:
+            datos = linea
+            break
+    ip = 'localhost'
+    if datos:
+        ip = datos.split('Direc. inet:')[1].split('Difus.:')[0].strip()
+    return ip
 
 
 MAKELOG = True
@@ -117,11 +129,18 @@ class Juego(GObject.Object):
 
             #ip, nick, tanque, a, x, y, aa, xx, yy = client.split(",")
             ip, nick, tanque, a, x, y = client.split(",")
-            a = int(a)
-            x = int(x)
-            y = int(y)
 
-            self.__actualizar_tanque(ip, nick, tanque, a, x, y)
+            if a == '-' and x == '-' and y == '-':
+                for j in self.jugadores.sprites():
+                    if ip == j.ip:
+                        self.__eliminar_jugador(j, ip)
+                        break
+            else:
+                a = int(a)
+                x = int(x)
+                y = int(y)
+
+                self.__actualizar_tanque(ip, nick, tanque, a, x, y)
 
             #if aa != '-' and xx != '-' and yy != '-':
             #    aa = int(aa)
@@ -216,6 +235,15 @@ class Juego(GObject.Object):
             del(self.bala)
             self.bala = False
     '''
+
+    def __eliminar_jugador(self, j, ip):
+        j.kill()
+        del(j)
+        del(self.JUGADORES[ip])
+        if ip == self.ip:
+            del(self.jugador)
+            self.jugador = False
+
     def run(self):
         self.estado = "En Juego"
         self.ventana.blit(self.escenario, (0, 0))
@@ -308,6 +336,8 @@ class Juego(GObject.Object):
         self.estado = False
         pygame.quit()
         if self.client:
+            self.client.enviar("REMOVE,")
+            datos = self.client.recibir()
             self.client.desconectarse()
             del(self.client)
             self.client = False
