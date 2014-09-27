@@ -165,13 +165,13 @@ class RequestHandler(SocketServer.StreamRequestHandler):
 
     def __get_data(self):
         retorno = ""
-        for i_p in JUGADORES.keys():
-            nick = JUGADORES[i_p]['nick']
-            tanque = JUGADORES[i_p]['tanque']['path']
-            #datos = "%s,%s,%s,%s,%s" % (i_p, nick, tanque,
-            #    JUGADORES[i_p]['tanque']['pos'], JUGADORES[i_p]['bala'])
-            datos = "%s,%s,%s,%s" % (i_p, nick, tanque,
-                JUGADORES[i_p]['tanque']['pos'])
+        for ip in JUGADORES.keys():
+            nick = JUGADORES[ip]['nick']
+            tanque = JUGADORES[ip]['tanque']['path']
+            #datos = "%s,%s,%s,%s,%s" % (ip, nick, tanque,
+            #    JUGADORES[ip]['tanque']['pos'], JUGADORES[ip]['bala'])
+            datos = "%s,%s,%s,%s" % (ip, nick, tanque,
+                JUGADORES[ip]['tanque']['pos'])
             retorno = "%s%s||" % (retorno, datos)
         return retorno.strip()
 
