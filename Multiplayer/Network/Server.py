@@ -7,27 +7,37 @@
 import os
 import socket
 import SocketServer
+import time
+import json
+import codecs
 
 
-class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
+MAKELOG = True
+LOGPATH = os.path.join(os.environ["HOME"], "JAMTank_server.log")
+if os.path.exists(LOGPATH):
+    os.remove(LOGPATH)
 
-    global GAME
-    global MODEL
-    global JUGADORES
-    global LOG
 
-    path = os.path.join(os.environ["HOME"], "server.log")
-    if os.path.exists(path):
-        os.remove(path)
-    LOG = open(path, "w")
+def WRITE_LOG(_dict):
+    archivo = open(LOGPATH, "w")
+    archivo.write(json.dumps(
+        _dict, indent=4, separators=(", ", ":"), sort_keys=True))
+    archivo.close()
 
-    GAME = {
-        'mapa': "",
-        'enemigos': 0,
-        'vidas': 0,
-        }
 
-    MODEL = {
+def APPEND_LOG(_dict):
+    new = {}
+    if os.path.exists(LOGPATH):
+        archivo = codecs.open(LOGPATH, "r", "utf-8")
+        new = json.JSONDecoder("utf-8").decode(archivo.read())
+        archivo.close()
+    for key in _dict.keys():
+        new[key] = _dict[key]
+    WRITE_LOG(new)
+
+
+def get_model():
+    return {
         'nick': '',
         'tanque': {
             'path': '',
@@ -39,6 +49,18 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         'bala': '-,-,-'
         }
 
+
+class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
+
+    global GAME
+    global JUGADORES
+
+    GAME = {
+        'mapa': "",
+        'enemigos': 0,
+        'vidas': 0,
+        }
+
     JUGADORES = {}
 
 
@@ -48,25 +70,30 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         while 1:
             try:
                 entrada = self.rfile.readline().strip()
-                #LOG.write("Recibo: %s\n" % entrada)
                 if not entrada:
                     self.request.close()
                     return
 
                 respuesta = self.__procesar(entrada,
                     str(self.client_address[0]))
+
                 if respuesta:
-                    #LOG.write("Envio: %s\n" % respuesta)
                     while len(respuesta) < 512:
                         respuesta = "%s*" % respuesta
                     self.wfile.write(respuesta)
                 else:
-                    LOG.write("Cierre de Conexion: %s\n" % self.client_address[0])
+                    if MAKELOG:
+                        key = 'server %s' % time.time()
+                        ip = self.client_address[0]
+                        valor = "Cierre de Conexion: %s" % ip
+                        APPEND_LOG({key: valor})
                     self.request.close()
                     #return
 
             except socket.error, err:
-                LOG.write("Error: %s %s\n" % (err, self.client_address[0]))
+                if MAKELOG:
+                    key = "Error: %s" % time.time()
+                    APPEND_LOG({key: (err, self.client_address[0])})
                 self.request.close()
 
     def __procesar(self, entrada, ip):
@@ -77,11 +104,12 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                 GAME['mapa'] = datos[1].strip()
                 GAME['enemigos'] = int(datos[2].strip())
                 GAME['vidas'] = int(datos[3].strip())
-                JUGADORES[ip] = dict(MODEL)
+                JUGADORES[ip] = get_model()
                 JUGADORES[ip]['tanque']['path'] = datos[4].strip()
                 JUGADORES[ip]['nick'] = datos[5].strip()
-                LOG.write("Configuración: %s\n" % GAME)
-                LOG.write("Configuración: %s\n" % JUGADORES)
+                if MAKELOG:
+                    APPEND_LOG({"Configuracion Juego": dict(GAME)})
+                    APPEND_LOG({"Configuracion Jugadores": dict(JUGADORES)})
                 return "OK"
 
             elif datos[0] == "UPDATE":
@@ -98,21 +126,29 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                 ips = JUGADORES.keys()
                 if not ip in JUGADORES.keys():
                     if len(ips) < GAME['enemigos']:
-                        JUGADORES[ip] = dict(MODEL)
+                        JUGADORES[ip] = get_model()
                         JUGADORES[ip]['tanque']['path'] = datos[1].strip()
                         JUGADORES[ip]['nick'] = datos[2].strip()
                         retorno = "%s" % str(GAME['mapa'].strip())
-                        LOG.write("JOIN: %s\n" % JUGADORES)
+                        if MAKELOG:
+                            APPEND_LOG({"JOIN %s" % ip: dict(JUGADORES)})
                         return retorno
                     else:
+                        if MAKELOG:
+                            key = "Jugador Rechazado %s" % time.time()
+                            APPEND_LOG({key: ip})
                         return "CLOSE"
                 else:
-                    print "El Jugador ya estaba en game", ip
+                    if MAKELOG:
+                        key = "El Jugador ya estaba en game %s" % time.time()
+                        APPEND_LOG({key: ip})
                     retorno = "%s" % str(GAME['mapa'].strip())
                     return retorno
 
             else:
-                LOG.write("Mensaje no considerado en el server: %s\n" % datos)
+                if MAKELOG:
+                    key = "Mensaje no considerado %s" % time.time()
+                    APPEND_LOG({key: datos})
                 return "*" * 512
 
         else:

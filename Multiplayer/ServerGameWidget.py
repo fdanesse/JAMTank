@@ -4,6 +4,8 @@
 import os
 import time
 import threading
+import json
+import codecs
 
 from gi.repository import Gtk
 from gi.repository import GdkX11
@@ -13,6 +15,28 @@ from Network.Server import Server
 from Network.Server import RequestHandler
 from Network.Client import Client
 from Juego import Juego
+
+MAKELOG = True
+
+LOGPATH = os.path.join(os.environ["HOME"], "JAMTank_load.log")
+if os.path.exists(LOGPATH):
+    os.remove(LOGPATH)
+
+
+def WRITE_LOG(_dict):
+    archivo = open(LOGPATH, "w")
+    archivo.write(json.dumps(
+        _dict, indent=4, separators=(", ", ":"), sort_keys=True))
+    archivo.close()
+
+
+def APPEND_LOG(_dict):
+    archivo = codecs.open(LOGPATH, "r", "utf-8")
+    new = json.JSONDecoder("utf-8").decode(archivo.read())
+    archivo.close()
+    for key in _dict.keys():
+        new[key] = _dict[key]
+    WRITE_LOG(new)
 
 
 class GameWidget(Gtk.DrawingArea):
@@ -38,20 +62,38 @@ class GameWidget(Gtk.DrawingArea):
             mapa, vidas, enemigos,
                 tanque y nick (propios)
         """
-
-        self.client = Client(str(_dict['server']))
-        self.client.conectarse()
-
+        server = str(_dict['server'])
         mapa = os.path.basename(str(_dict['mapa']))
         tanque = os.path.basename(str(_dict['tanque']))
-        _buffer = "Config,%s,%s,%s,%s,%s" % (mapa, str(_dict['enemigos']),
-            str(_dict['vidas']), tanque, str(_dict['nick']))
+        enemigos = str(_dict['enemigos'])
+        vidas = str(_dict['vidas'])
+        nick = str(_dict['nick'])
+
+        self.client = Client(server)
+        self.client.conectarse()
+
+        _buffer = "Config,%s,%s,%s,%s,%s" % (mapa, enemigos,
+            vidas, tanque, nick)
 
         self.client.enviar(_buffer)
         retorno = self.client.recibir()
 
-        time.sleep(0.5)
-        self.__run_game(dict(_dict))
+        if retorno == "OK":
+            tanque = str(_dict['tanque'])
+            mapa = str(_dict['mapa'])
+
+            new_dict = {
+                'tanque': tanque,
+                'nick': nick,
+                'mapa': mapa,
+                }
+
+            if MAKELOG:
+                APPEND_LOG({'client': new_dict})
+            time.sleep(0.5)
+            self.__run_game(new_dict)
+        else:
+            print "FIXME: Algo salió mal al configurar el Server."
 
     def __run_game(self, _dict):
         """
@@ -75,6 +117,9 @@ class GameWidget(Gtk.DrawingArea):
         self.server_thread.setDaemon(True)
         self.server_thread.start()
         time.sleep(0.5)
+
+        if MAKELOG:
+            WRITE_LOG({'server': _dict})
         self.__run_client(dict(_dict))
         return False
 
@@ -101,5 +146,6 @@ class GameWidget(Gtk.DrawingArea):
     def salir(self):
         if self.juego:
             self.juego.salir()
+        # FIXME: El server debe avisar desconexion a todos los clientes
         self.server.shutdown()
         self.emit('salir')

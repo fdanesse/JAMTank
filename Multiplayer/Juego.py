@@ -3,6 +3,8 @@
 
 import os
 import pygame
+import json
+import codecs
 
 from gi.repository import GObject
 from gi.repository import Gtk
@@ -30,6 +32,25 @@ def get_ip():
         return "localhost"
 
 
+MAKELOG = True
+LOGPATH = os.path.join(os.environ["HOME"], "JAMTank_load.log")
+
+
+def WRITE_LOG(_dict):
+    archivo = open(LOGPATH, "w")
+    archivo.write(json.dumps(
+        _dict, indent=4, separators=(", ", ":"), sort_keys=True))
+    archivo.close()
+
+
+def APPEND_LOG(_dict):
+    archivo = codecs.open(LOGPATH, "r", "utf-8")
+    new = json.JSONDecoder("utf-8").decode(archivo.read())
+    archivo.close()
+    for key in _dict.keys():
+        new[key] = _dict[key]
+    WRITE_LOG(new)
+
 #GObject.threads_init()
 
 
@@ -42,11 +63,6 @@ class Juego(GObject.Object):
     def __init__(self, _dict, client):
 
         GObject.Object.__init__(self)
-
-        path = os.path.join(os.environ["HOME"], "juego.log")
-        if os.path.exists(path):
-            os.remove(path)
-        self.LOG = open(path, "w")
 
         self.GAME = {}
         self.GAME['mapa'] = str(_dict['mapa'].strip())
@@ -152,11 +168,14 @@ class Juego(GObject.Object):
                     ips.append(j.ip)
 
             if not ip in ips:
-                j = Jugador(self.JUGADORES[ip]['tanque'], RESOLUCION_INICIAL, ip)
+                j = Jugador(self.JUGADORES[ip]['tanque'],
+                    RESOLUCION_INICIAL, ip)
                 self.jugadores.add(j)
-                self.LOG.write("Jugador Creado: %s %s %s %s\n" % (ip, a, x, y))
-                self.LOG.write("Jugadores: %s\n" % self.JUGADORES)
-                self.LOG.write("Jugadores: %s\n" % self.jugadores)
+
+            key = "Jugador Remoto Agregado en Juego.py %s" % ip
+            new = {
+                key: [(a, x, y), {"Actuales:": dict(self.JUGADORES)}]}
+            APPEND_LOG(new)
 
         for j in self.jugadores.sprites():
             if ip == j.ip:
@@ -234,8 +253,8 @@ class Juego(GObject.Object):
         self.resolucionreal = resolucion
 
     def update_events(self, eventos):
-        if "space" in eventos and not self.bala:
-            self.disparo = True
+        #if "space" in eventos and not self.bala:
+        #    self.disparo = True
         self.jugador.update_events(eventos)
 
     def config(self):
@@ -284,17 +303,15 @@ class Juego(GObject.Object):
         self.jugadores.add(self.jugador)
         x, y = RESOLUCION_INICIAL
         self.jugador.update_data(centerx=x/2, centery=y/2)
-        #self.JUGADORES[self.ip]['sprite'] = self.jugador
+        APPEND_LOG({"Jugador Local": self.ip})
 
     def salir(self):
-        # FIXME: Enviar Desconectarse y Finalizar al Servidor
         self.estado = False
         pygame.quit()
         if self.client:
             self.client.desconectarse()
             del(self.client)
             self.client = False
-        self.LOG.close()
 
 
 #if __name__ == "__main__":

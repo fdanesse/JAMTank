@@ -3,6 +3,7 @@
 
 import os
 import time
+import json
 
 from gi.repository import Gtk
 from gi.repository import GdkX11
@@ -10,6 +11,19 @@ from gi.repository import GObject
 
 from Network.Client import Client
 from Juego import Juego
+
+MAKELOG = True
+
+LOGPATH = os.path.join(os.environ["HOME"], "JAMTank_load.log")
+if os.path.exists(LOGPATH):
+    os.remove(LOGPATH)
+
+
+def WRITE_LOG(_dict):
+    archivo = open(LOGPATH, "w")
+    archivo.write(json.dumps(
+        _dict, indent=4, separators=(", ", ":"), sort_keys=True))
+    archivo.close()
 
 
 class GameWidget(Gtk.DrawingArea):
@@ -32,22 +46,36 @@ class GameWidget(Gtk.DrawingArea):
         El Cliente remoto intenta conectarse al server pasandole:
                 tanque y nick (propios)
         """
-        self.client = Client(str(_dict['server']))
+        server = str(_dict['server'])
+        tanque = os.path.basename(str(_dict['tanque']))
+        nick = str(_dict['nick'])
+        dirpath = os.path.dirname(os.path.dirname(str(_dict['tanque'])))
+
+        self.client = Client(server)
         self.client.conectarse()
 
-        tanque = os.path.basename(str(_dict['tanque']))
-        _buffer = "JOIN,%s,%s" % (tanque, str(_dict['nick']))
+        _buffer = "JOIN,%s,%s" % (tanque, nick)
 
         self.client.enviar(_buffer)
         retorno = self.client.recibir()
 
+        mapa = os.path.join(dirpath, "Mapas", retorno)
+        tanque = str(_dict['tanque'])
+
+        new_dict = {
+            'tanque': tanque,
+            'nick': nick,
+            'mapa': mapa,
+            }
+
+        if MAKELOG:
+            WRITE_LOG({'client': new_dict})
+
         if retorno == "CLOSE":
-            print "No se admiten más Jugadores"
+            print "FIXME: No se admiten más Jugadores"
         else:
-            dirpath = os.path.dirname(os.path.dirname(str(_dict['tanque'])))
-            _dict['mapa'] = os.path.join(dirpath, "Mapas", retorno)
             time.sleep(0.5)
-            self.__run_game(dict(_dict))
+            self.__run_game(new_dict)
 
     def __run_game(self, _dict):
         """

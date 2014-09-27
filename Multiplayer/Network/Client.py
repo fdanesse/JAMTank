@@ -18,11 +18,6 @@ class Client(GObject.Object):
 
         GObject.Object.__init__(self)
 
-        path = os.path.join(os.environ["HOME"], "client.log")
-        if os.path.exists(path):
-            os.remove(path)
-        self.LOG = open(path, "w")
-
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.dir = (ip, 5000)
 
@@ -45,7 +40,6 @@ class Client(GObject.Object):
                 enviado = True
             except socket.error, err:
                 print "ERROR CLIENT Enviar", err
-                self.LOG.write("Error al Enviar: %s\n" % err)
             time.sleep(0.02)
 
     def recibir(self):
@@ -56,7 +50,6 @@ class Client(GObject.Object):
                 entrada = entrada.replace("*", "").strip()
             except socket.error, err:
                 print "ERROR CLIENT recibir", err
-                self.LOG.write("Error al Recibir: %s\n" % err)
                 time.sleep(0.02)
         return entrada
 
