@@ -117,6 +117,7 @@ class Juego(GObject.Object):
             return
 
         if datos == "END":
+            # host ha salido del juego, clientes deben salir también.
             self.estado = False
             pygame.quit()
             if self.client:

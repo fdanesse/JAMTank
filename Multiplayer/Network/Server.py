@@ -63,11 +63,12 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         }
 
     JUGADORES = {}
-
+    print "Server ON . . ."
 
 class RequestHandler(SocketServer.StreamRequestHandler):
 
     def handle(self):
+
         while 1:
             try:
                 entrada = self.rfile.readline().strip()

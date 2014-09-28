@@ -9,6 +9,7 @@ import codecs
 from gi.repository import Gtk
 from gi.repository import GdkX11
 from gi.repository import GObject
+from gi.repository import GLib
 
 from Network.Client import Client
 from Juego import Juego
@@ -82,30 +83,43 @@ class GameWidget(Gtk.DrawingArea):
                 APPEND_LOG({'client': new_dict})
 
             if retorno == "CLOSE":
-                print "No se admiten más Jugadores"
+                dialog = Dialogo(parent=self.get_toplevel(),
+                    text="El Servidor no Admite más Jugadores.")
+                dialog.run()
                 self.salir()
             else:
                 time.sleep(0.5)
                 self.__run_game(new_dict)
 
         else:
-            print "EL Cliente no pudo conectarse al socket"
+            dialog = Dialogo(parent=self.get_toplevel(),
+                text="EL Cliente no pudo Conectarse con el Servidor.")
+            dialog.run()
             self.salir()
 
     def __end_game(self, juego):
+        """
+        El juego recibe salir desde el server pues host ha salido del juego.
+        """
         self.emit('salir')
 
     def __run_game(self, _dict):
         """
         Comienza a correr el Juego.
         """
-        xid = self.get_property('window').get_xid()
-        os.putenv('SDL_WINDOWID', str(xid))
-        self.juego = Juego(dict(_dict), self.client)
-        self.juego.connect("end", self.__end_game)
-        self.juego.config()
-        time.sleep(0.5)
-        self.juego.run()
+        try:
+            xid = self.get_property('window').get_xid()
+            os.putenv('SDL_WINDOWID', str(xid))
+            self.juego = Juego(dict(_dict), self.client)
+            self.juego.connect("end", self.__end_game)
+            self.juego.config()
+            time.sleep(0.5)
+            self.juego.run()
+        except:
+            dialog = Dialogo(parent=self.get_toplevel(),
+                text="EL Juego no pudo Iniciar.")
+            dialog.run()
+            self.salir()
 
     def setup_init(self, _dict):
         self.__run_client(dict(_dict))
@@ -132,4 +146,38 @@ class GameWidget(Gtk.DrawingArea):
     def salir(self):
         if self.juego:
             self.juego.salir("REMOVE,")
+            time.sleep(0.5)
+            del(self.juego)
+            self.juego = False
+        if self.client:
+            self.client.desconectarse()
+            del(self.client)
+            self.client = False
         self.emit('salir')
+
+
+class Dialogo(Gtk.Dialog):
+
+    def __init__(self, parent=None, text=""):
+
+        Gtk.Dialog.__init__(self,
+            parent=parent,
+            flags=Gtk.DialogFlags.MODAL)
+
+        #self.set_decorated(False)
+        #self.modify_bg(0, get_colors("window"))
+        self.set_border_width(15)
+
+        label = Gtk.Label(text)
+        label.show()
+
+        self.vbox.pack_start(label, True, True, 5)
+
+        self.connect("realize", self.__do_realize)
+
+    def __do_realize(self, widget):
+        GLib.timeout_add(2000, self.__destroy)
+
+    def __destroy(self):
+        self.destroy()
+        return False
