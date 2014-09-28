@@ -63,7 +63,9 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         }
 
     JUGADORES = {}
+
     print "Server ON . . ."
+
 
 class RequestHandler(SocketServer.StreamRequestHandler):
 

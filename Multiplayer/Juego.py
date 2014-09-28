@@ -195,9 +195,10 @@ class Juego(GObject.Object):
                     RESOLUCION_INICIAL, ip)
                 self.jugadores.add(j)
 
-            key = "Jugador Remoto Agregado en Juego.py %s" % ip
-            new = {key: {"Actuales:": dict(self.JUGADORES)}}
-            APPEND_LOG(new)
+            if MAKELOG:
+                key = "Jugador Remoto Agregado en Juego.py %s" % ip
+                new = {key: {"Actuales:": dict(self.JUGADORES)}}
+                APPEND_LOG(new)
 
         for j in self.jugadores.sprites():
             if ip == j.ip:
@@ -352,7 +353,8 @@ class Juego(GObject.Object):
         x, y = RESOLUCION_INICIAL
         self.jugador.update_data(self.JUGADORES[self.ip]['tanque'],
             angulo=0, centerx=x/2, centery=y/2, energia=100)
-        APPEND_LOG({"Jugador Local": self.ip})
+        if MAKELOG:
+            APPEND_LOG({"Jugador Local": self.ip})
 
 
 #if __name__ == "__main__":
