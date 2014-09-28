@@ -176,6 +176,8 @@ class RequestHandler(SocketServer.StreamRequestHandler):
             if MAKELOG:
                 key = "El Jugador ya estaba en game %s" % time.time()
                 APPEND_LOG({key: ip})
+            JUGADORES[ip]['tanque']['path'] = datos[1].strip()
+            JUGADORES[ip]['nick'] = datos[2].strip()
             retorno = "%s" % str(GAME['mapa'].strip())
             return retorno
 

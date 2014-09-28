@@ -200,6 +200,7 @@ class Juego(GObject.Object):
 
         for j in self.jugadores.sprites():
             if ip == j.ip:
+                # FIXME: nick y tanque deben actualizarse
                 j.update_data(a, x, y)
                 break
 
@@ -287,6 +288,19 @@ class Juego(GObject.Object):
         #    self.disparo = True
         self.jugador.update_events(eventos)
 
+    def salir(self, valor):
+        """
+        La Interfaz gtk manda salir del juego.
+        """
+        self.estado = False
+        pygame.quit()
+        if self.client:
+            self.client.enviar(valor)
+            datos = self.client.recibir()
+            self.client.desconectarse()
+            del(self.client)
+            self.client = False
+
     def config(self):
         pygame.init()
         self.reloj = pygame.time.Clock()
@@ -334,16 +348,6 @@ class Juego(GObject.Object):
         x, y = RESOLUCION_INICIAL
         self.jugador.update_data(centerx=x/2, centery=y/2)
         APPEND_LOG({"Jugador Local": self.ip})
-
-    def salir(self, valor):
-        self.estado = False
-        pygame.quit()
-        if self.client:
-            self.client.enviar(valor)
-            datos = self.client.recibir()
-            self.client.desconectarse()
-            del(self.client)
-            self.client = False
 
 
 #if __name__ == "__main__":
