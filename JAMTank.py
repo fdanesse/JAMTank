@@ -185,7 +185,7 @@ class JAMTank(Gtk.Window):
 
         elif valor == 3:
             # Selección nick, mapa, tanque, oponentes y vidas.
-            print "FIXME: Esta PC será Servidor"
+            print "Esta PC será Servidor"
             self.select_widget = SelectServer()
             self.add(self.select_widget)
             #GLib.idle_add(self.select_widget.load, os.path.join(
@@ -194,7 +194,7 @@ class JAMTank(Gtk.Window):
 
         elif valor == 4:
             # Selección de nick, ip y tanque para unirse a partida multiplayer.
-            print "FIXME: Esta PC será Cliente"
+            print "Esta PC será Cliente"
             self.select_widget = SelectClient()
             self.add(self.select_widget)
             #GLib.idle_add(self.select_widget.load, os.path.join(

@@ -82,7 +82,8 @@ class GameWidget(Gtk.DrawingArea):
                 APPEND_LOG({'client': new_dict})
 
             if retorno == "CLOSE":
-                print "FIXME: No se admiten más Jugadores"
+                print "No se admiten más Jugadores"
+                self.salir()
             else:
                 time.sleep(0.5)
                 self.__run_game(new_dict)

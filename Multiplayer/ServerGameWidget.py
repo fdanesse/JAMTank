@@ -93,7 +93,8 @@ class GameWidget(Gtk.DrawingArea):
                 time.sleep(0.5)
                 self.__run_game(new_dict)
             else:
-                print "FIXME: Algo salió mal al configurar el Server."
+                print "Algo salió mal al configurar el Server."
+                self.salir()
 
         else:
             print "EL Cliente no pudo conectarse al socket"
@@ -150,6 +151,5 @@ class GameWidget(Gtk.DrawingArea):
     def salir(self):
         if self.juego:
             self.juego.salir("END,")
-        # FIXME: El server debe avisar desconexion a todos los clientes
         self.server.shutdown()
         self.emit('salir')

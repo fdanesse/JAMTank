@@ -148,7 +148,6 @@ class Jugador(Sprite):
 
     def update_data(self, tanque, angulo=0, centerx=0, centery=0, energia=100):
         if self.imagen_path != tanque:
-            print "OK"
             self.imagen_path = tanque
             imagen = pygame.image.load(self.imagen_path)
             imagen_escalada = pygame.transform.scale(imagen, (50, 50))
