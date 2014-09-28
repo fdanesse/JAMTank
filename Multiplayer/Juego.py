@@ -60,6 +60,8 @@ class Juego(GObject.Object):
 
     __gsignals__ = {
     "update": (GObject.SIGNAL_RUN_LAST,
+        GObject.TYPE_NONE, []),
+    "end": (GObject.SIGNAL_RUN_LAST,
         GObject.TYPE_NONE, [])}
 
     def __init__(self, _dict, client):
@@ -111,6 +113,17 @@ class Juego(GObject.Object):
         datos = self.client.recibir()
 
         if not datos:
+            print "Se recibió datos vacíos en el Juego"
+            return
+
+        if datos == "END":
+            self.estado = False
+            pygame.quit()
+            if self.client:
+                self.client.desconectarse()
+                del(self.client)
+                self.client = False
+            self.emit("end")
             return
 
         for client in datos.split("||"):
@@ -322,11 +335,11 @@ class Juego(GObject.Object):
         self.jugador.update_data(centerx=x/2, centery=y/2)
         APPEND_LOG({"Jugador Local": self.ip})
 
-    def salir(self):
+    def salir(self, valor):
         self.estado = False
         pygame.quit()
         if self.client:
-            self.client.enviar("REMOVE,")
+            self.client.enviar(valor)
             datos = self.client.recibir()
             self.client.desconectarse()
             del(self.client)

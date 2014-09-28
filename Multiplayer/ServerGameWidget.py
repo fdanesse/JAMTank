@@ -149,7 +149,7 @@ class GameWidget(Gtk.DrawingArea):
 
     def salir(self):
         if self.juego:
-            self.juego.salir()
+            self.juego.salir("END,")
         # FIXME: El server debe avisar desconexion a todos los clientes
         self.server.shutdown()
         self.emit('salir')

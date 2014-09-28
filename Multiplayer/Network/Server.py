@@ -59,6 +59,7 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         'mapa': "",
         'enemigos': 0,
         'vidas': 0,
+        'estado': True,
         }
 
     JUGADORES = {}
@@ -97,6 +98,8 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                 self.request.close()
 
     def __procesar(self, entrada, ip):
+        if not GAME['estado']:
+            return "END"
         datos = entrada.split(",")
         if datos:
             if datos[0] == "UPDATE":
@@ -106,6 +109,12 @@ class RequestHandler(SocketServer.StreamRequestHandler):
             elif datos[0] == "REMOVE":
                 self.__remover_jugador(ip, datos)
                 return "REMOVIDO"
+
+            elif datos[0] == "END":
+                self.__remover_jugador(ip, datos)
+                # FIXME: Todos los clientes deben desconectarse
+                GAME['estado'] = False
+                return "END"
 
             elif datos[0] == "Config":
                 self.__config_server(ip, datos)

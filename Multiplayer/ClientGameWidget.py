@@ -91,6 +91,9 @@ class GameWidget(Gtk.DrawingArea):
             print "EL Cliente no pudo conectarse al socket"
             self.salir()
 
+    def __end_game(self, juego):
+        self.emit('salir')
+
     def __run_game(self, _dict):
         """
         Comienza a correr el Juego.
@@ -98,6 +101,7 @@ class GameWidget(Gtk.DrawingArea):
         xid = self.get_property('window').get_xid()
         os.putenv('SDL_WINDOWID', str(xid))
         self.juego = Juego(dict(_dict), self.client)
+        self.juego.connect("end", self.__end_game)
         self.juego.config()
         time.sleep(0.5)
         self.juego.run()
@@ -126,5 +130,5 @@ class GameWidget(Gtk.DrawingArea):
 
     def salir(self):
         if self.juego:
-            self.juego.salir()
+            self.juego.salir("REMOVE,")
         self.emit('salir')
