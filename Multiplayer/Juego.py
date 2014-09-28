@@ -200,8 +200,11 @@ class Juego(GObject.Object):
 
         for j in self.jugadores.sprites():
             if ip == j.ip:
-                # FIXME: nick y tanque deben actualizarse
-                j.update_data(a, x, y)
+                tank = os.path.join(os.path.dirname(BASE_PATH),
+                    "Tanques", tanque)
+                self.JUGADORES[ip]['nick'] = nick
+                self.JUGADORES[ip]['tanque'] = tank
+                j.update_data(tank, a, x, y)
                 break
 
     '''
@@ -346,7 +349,8 @@ class Juego(GObject.Object):
             RESOLUCION_INICIAL, self.ip)
         self.jugadores.add(self.jugador)
         x, y = RESOLUCION_INICIAL
-        self.jugador.update_data(centerx=x/2, centery=y/2)
+        self.jugador.update_data(self.JUGADORES[self.ip]['tanque'],
+            angulo=0, centerx=x/2, centery=y/2, energia=100)
         APPEND_LOG({"Jugador Local": self.ip})
 
 

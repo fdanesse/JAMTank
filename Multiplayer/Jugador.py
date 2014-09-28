@@ -31,7 +31,8 @@ class Jugador(Sprite):
         self.image = None
         self.rect = None
 
-        imagen = pygame.image.load(imagen_path)
+        self.imagen_path = imagen_path
+        imagen = pygame.image.load(self.imagen_path)
         imagen_escalada = pygame.transform.scale(imagen, (50, 50))
         self.imagen_original = imagen_escalada.convert_alpha()
 
@@ -145,7 +146,15 @@ class Jugador(Sprite):
         #    return (self.temp_angulo, self.temp_x, self.temp_y)
         return (int(self.temp_angulo), int(self.temp_x), int(self.temp_y))
 
-    def update_data(self, angulo=0, centerx=0, centery=0, energia=100):
+    def update_data(self, tanque, angulo=0, centerx=0, centery=0, energia=100):
+        if self.imagen_path != tanque:
+            print "OK"
+            self.imagen_path = tanque
+            imagen = pygame.image.load(self.imagen_path)
+            imagen_escalada = pygame.transform.scale(imagen, (50, 50))
+            self.imagen_original = imagen_escalada.convert_alpha()
+            self.image = self.imagen_original.copy()
+            self.rect = self.image.get_rect()
         self.energia = energia
         self.__set_posicion(angulo=angulo, centerx=centerx, centery=centery)
 
