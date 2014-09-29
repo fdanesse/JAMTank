@@ -97,7 +97,6 @@ class RequestHandler(SocketServer.StreamRequestHandler):
 
             elif datos[0] == "END":
                 self.__remover_jugador(ip, datos)
-                # FIXME: Todos los clientes deben desconectarse
                 self.server.GAME['estado'] = False
                 return "END"
 
