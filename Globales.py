@@ -32,7 +32,7 @@ def get_ip():
     #    print "Error", get_ip, err
     #    return "localhost"
     import commands
-    text = commands.getoutput('ifconfig wlan0').splitlines()
+    text = commands.getoutput('ifconfig eth0').splitlines()
     datos = ''
     for linea in text:
         if 'Direc. inet:' in linea and 'Difus.:' in linea and 'Másc:' in linea:

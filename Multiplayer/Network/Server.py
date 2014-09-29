@@ -50,27 +50,20 @@ def get_model():
         }
 
 
-class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
+GAME = {
+    'mapa': "",
+    'enemigos': 0,
+    'vidas': 0,
+    'estado': True,
+    }
 
-    global GAME
-    global JUGADORES
-
-    GAME = {
-        'mapa': "",
-        'enemigos': 0,
-        'vidas': 0,
-        'estado': True,
-        }
-
-    JUGADORES = {}
-
-    print "Server ON . . ."
+JUGADORES = {}
 
 
 class RequestHandler(SocketServer.StreamRequestHandler):
 
     def handle(self):
-
+        self.connection.setblocking(0)
         while 1:
             try:
                 entrada = self.rfile.readline().strip()
@@ -211,6 +204,22 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         return retorno.strip()
 
 
+class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
+
+    def __init__(self, logger=None, host='localhost',
+        port=5000, handler=RequestHandler):
+
+        SocketServer.ThreadingTCPServer.__init__(self, (host, port), handler)
+        self.allow_reuse_address = True
+        self.socket.setblocking(0)
+        self.coso = True
+        print "Server ON . . ."
+
+    def shutdown(self):
+        print "Server OFF"
+        SocketServer.ThreadingTCPServer.shutdown(self)
+
+
 if __name__ == "__main__":
     ret = ''
     try:
@@ -227,7 +236,7 @@ if __name__ == "__main__":
 
     if ret:
         import threading
-        server = Server((ret, 5000), RequestHandler)
+        server = Server(host=ret, port=5000, handler=RequestHandler)
         server.allow_reuse_address = True
         server.socket.setblocking(0)
         server.serve_forever()

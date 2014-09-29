@@ -24,7 +24,7 @@ MODEL = {
 
 def get_ip():
     import commands
-    text = commands.getoutput('ifconfig wlan0').splitlines()
+    text = commands.getoutput('ifconfig eth0').splitlines()
     datos = ''
     for linea in text:
         if 'Direc. inet:' in linea and 'Difus.:' in linea and 'Másc:' in linea:
