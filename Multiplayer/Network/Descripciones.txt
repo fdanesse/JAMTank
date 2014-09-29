@@ -7,8 +7,8 @@ Carga y Configuración del Juego:
         RECIBE: "%s" % str(self.server.GAME['mapa'].strip()) (o "CLOSE" Si el server está lleno.)
 
 Host y Remoto durante el juego:
-    ENVIAN: "UPDATE,%s,%s,%s" % (angulo, centerx, centery)
-    RECIBEN: "%s,%s,%s,%s,%s,%s" % (ip, nick, tanque, a, x, y) de todos los jugadores, separados por ||
+    ENVIAN: "UPDATE,%s,%s,%s,%s,%s,%s" % (angulo, centerx, centery, angulo, centerx, centery) (Los datos corresponden a tanque y bala)
+    RECIBEN: "%s,%s,%s,%s,%s,%s" % (ip, nick, tanque, a, x, y, a, x, y) de todos los jugadores, separados por ||
 
 Cuando Cliente Remoto se desconecta:
     ENVIA: "REMOVE," (En el server posicion y bala se ponen en "-,-,-")
