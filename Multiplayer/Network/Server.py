@@ -50,20 +50,9 @@ def get_model():
         }
 
 
-GAME = {
-    'mapa': "",
-    'enemigos': 0,
-    'vidas': 0,
-    'estado': True,
-    }
-
-JUGADORES = {}
-
-
 class RequestHandler(SocketServer.StreamRequestHandler):
 
     def handle(self):
-        self.connection.setblocking(0)
         while 1:
             try:
                 entrada = self.rfile.readline().strip()
@@ -94,7 +83,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                 self.request.close()
 
     def __procesar(self, entrada, ip):
-        if not GAME['estado']:
+        if not self.server.GAME['estado']:
             return "END"
         datos = entrada.split(",")
         if datos:
@@ -109,7 +98,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
             elif datos[0] == "END":
                 self.__remover_jugador(ip, datos)
                 # FIXME: Todos los clientes deben desconectarse
-                GAME['estado'] = False
+                self.server.GAME['estado'] = False
                 return "END"
 
             elif datos[0] == "Config":
@@ -133,7 +122,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         Jugador actualizando sus datos.
         """
         a, x, y = datos[1:4]
-        JUGADORES[ip]['tanque']['pos'] = "%s,%s,%s" % (a, x, y)
+        self.server.JUGADORES[ip]['tanque']['pos'] = "%s,%s,%s" % (a, x, y)
         #if len(datos) > 4:
         #    aa, xx, yy = datos[4:]
         #    JUGADORES[ip]['bala'] = "%s,%s,%s" % (aa, xx, yy)
@@ -146,22 +135,22 @@ class RequestHandler(SocketServer.StreamRequestHandler):
             key = "Jugador Removido %s" % time.time()
             APPEND_LOG({key: ip})
         #del(JUGADORES[ip])
-        JUGADORES[ip]['tanque']['pos'] = "-,-,-"
-        JUGADORES[ip]['bala'] = "-,-,-"
+        self.server.JUGADORES[ip]['tanque']['pos'] = "-,-,-"
+        self.server.JUGADORES[ip]['bala'] = "-,-,-"
 
     def __connect_client(self, ip, datos):
         """
         Nuevo Jugador desea conectarse.
         """
-        ips = JUGADORES.keys()
-        if not ip in JUGADORES.keys():
-            if len(ips) < GAME['enemigos']:
-                JUGADORES[ip] = get_model()
-                JUGADORES[ip]['tanque']['path'] = datos[1].strip()
-                JUGADORES[ip]['nick'] = datos[2].strip()
-                retorno = "%s" % str(GAME['mapa'].strip())
+        ips = self.server.JUGADORES.keys()
+        if not ip in self.server.JUGADORES.keys():
+            if len(ips) < self.server.GAME['enemigos']:
+                self.server.JUGADORES[ip] = get_model()
+                self.server.JUGADORES[ip]['tanque']['path'] = datos[1].strip()
+                self.server.JUGADORES[ip]['nick'] = datos[2].strip()
+                retorno = "%s" % str(self.server.GAME['mapa'].strip())
                 if MAKELOG:
-                    APPEND_LOG({"JOIN %s" % ip: dict(JUGADORES)})
+                    APPEND_LOG({"JOIN %s" % ip: dict(self.server.JUGADORES)})
                 return retorno
             else:
                 if MAKELOG:
@@ -172,34 +161,35 @@ class RequestHandler(SocketServer.StreamRequestHandler):
             if MAKELOG:
                 key = "El Jugador ya estaba en game %s" % time.time()
                 APPEND_LOG({key: ip})
-            JUGADORES[ip]['tanque']['path'] = datos[1].strip()
-            JUGADORES[ip]['nick'] = datos[2].strip()
-            retorno = "%s" % str(GAME['mapa'].strip())
+            self.server.JUGADORES[ip]['tanque']['path'] = datos[1].strip()
+            self.server.JUGADORES[ip]['nick'] = datos[2].strip()
+            retorno = "%s" % str(self.server.GAME['mapa'].strip())
             return retorno
 
     def __config_server(self, ip, datos):
         """
         Host Configurando el juego y sus datos como cliente.
         """
-        GAME['mapa'] = datos[1].strip()
-        GAME['enemigos'] = int(datos[2].strip())
-        GAME['vidas'] = int(datos[3].strip())
-        JUGADORES[ip] = get_model()
-        JUGADORES[ip]['tanque']['path'] = datos[4].strip()
-        JUGADORES[ip]['nick'] = datos[5].strip()
+        self.server.GAME['mapa'] = datos[1].strip()
+        self.server.GAME['enemigos'] = int(datos[2].strip())
+        self.server.GAME['vidas'] = int(datos[3].strip())
+        self.server.JUGADORES[ip] = get_model()
+        self.server.JUGADORES[ip]['tanque']['path'] = datos[4].strip()
+        self.server.JUGADORES[ip]['nick'] = datos[5].strip()
         if MAKELOG:
-            APPEND_LOG({"Configuracion Juego": dict(GAME)})
-            APPEND_LOG({"Configuracion Jugadores": dict(JUGADORES)})
+            APPEND_LOG({"Configuracion Juego": dict(self.server.GAME)})
+            APPEND_LOG({
+                "Configuracion Jugadores": dict(self.server.JUGADORES)})
 
     def __get_data(self):
         retorno = ""
-        for ip in JUGADORES.keys():
-            nick = JUGADORES[ip]['nick']
-            tanque = JUGADORES[ip]['tanque']['path']
+        for ip in self.server.JUGADORES.keys():
+            nick = self.server.JUGADORES[ip]['nick']
+            tanque = self.server.JUGADORES[ip]['tanque']['path']
             #datos = "%s,%s,%s,%s,%s" % (ip, nick, tanque,
             #    JUGADORES[ip]['tanque']['pos'], JUGADORES[ip]['bala'])
             datos = "%s,%s,%s,%s" % (ip, nick, tanque,
-                JUGADORES[ip]['tanque']['pos'])
+                self.server.JUGADORES[ip]['tanque']['pos'])
             retorno = "%s%s||" % (retorno, datos)
         return retorno.strip()
 
@@ -212,7 +202,16 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         SocketServer.ThreadingTCPServer.__init__(self, (host, port), handler)
         self.allow_reuse_address = True
         self.socket.setblocking(0)
-        self.coso = True
+
+        self.GAME = {
+            'mapa': "",
+            'enemigos': 0,
+            'vidas': 0,
+            'estado': True,
+            }
+
+        self.JUGADORES = {}
+
         print "Server ON . . ."
 
     def shutdown(self):
@@ -221,26 +220,21 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
 
 
 if __name__ == "__main__":
-    ret = ''
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("google.com", 80))
-        ret = s.getsockname()[0]
-        s.close()
-    except:
-        ret = ''
+    ip = ''
+    import commands
+    text = commands.getoutput('ifconfig wlan0').splitlines()
+    datos = ''
+    for linea in text:
+        if 'Direc. inet:' in linea and 'Difus.:' in linea and 'Másc:' in linea:
+            datos = linea
+            break
+    ip = 'localhost'
+    if datos:
+        ip = datos.split('Direc. inet:')[1].split('Difus.:')[0].strip()
 
-    GAME['mapa'] = "fondo1.png"
-    GAME['enemigos'] = 10
-    GAME['vidas'] = 50
-
-    if ret:
-        import threading
-        server = Server(host=ret, port=5000, handler=RequestHandler)
-        server.allow_reuse_address = True
-        server.socket.setblocking(0)
+    if ip:
+        server = Server(host=ip, port=5000, handler=RequestHandler)
+        server.GAME['mapa'] = "fondo1.png"
+        server.GAME['enemigos'] = 10
+        server.GAME['vidas'] = 50
         server.serve_forever()
-
-        server_thread = threading.Thread(target=server.serve_forever)
-        server_thread.setDaemon(True)
-        server_thread.start()

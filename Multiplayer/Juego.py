@@ -24,7 +24,7 @@ MODEL = {
 
 def get_ip():
     import commands
-    text = commands.getoutput('ifconfig eth0').splitlines()
+    text = commands.getoutput('ifconfig wlan0').splitlines()
     datos = ''
     for linea in text:
         if 'Direc. inet:' in linea and 'Difus.:' in linea and 'Másc:' in linea:
@@ -352,7 +352,7 @@ class Juego(GObject.Object):
         self.jugadores.add(self.jugador)
         x, y = RESOLUCION_INICIAL
         self.jugador.update_data(self.JUGADORES[self.ip]['tanque'],
-            angulo=0, centerx=x/2, centery=y/2, energia=100)
+            angulo=0, centerx=x / 2, centery=y / 2, energia=100)
         if MAKELOG:
             APPEND_LOG({"Jugador Local": self.ip})
 

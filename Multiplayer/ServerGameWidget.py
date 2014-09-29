@@ -152,11 +152,10 @@ class GameWidget(Gtk.DrawingArea):
         Comienza a correr el Server.
         """
         try:
-            #self.server = Server((str(_dict['server']), 5000), RequestHandler)
-            self.server = Server(host=str(_dict['server']), port=5000, handler=RequestHandler)
-            #self.server.allow_reuse_address = True
-            #self.server.socket.setblocking(0)
-            self.server_thread = threading.Thread(target=self.server.serve_forever)
+            self.server = Server(host=str(_dict['server']),
+                port=5000, handler=RequestHandler)
+            self.server_thread = threading.Thread(
+                target=self.server.serve_forever)
             self.server_thread.setDaemon(True)
             self.server_thread.start()
             time.sleep(0.5)
