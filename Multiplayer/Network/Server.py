@@ -122,9 +122,9 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         """
         a, x, y = datos[1:4]
         self.server.JUGADORES[ip]['tanque']['pos'] = "%s,%s,%s" % (a, x, y)
-        #if len(datos) > 4:
-        #    aa, xx, yy = datos[4:]
-        #    JUGADORES[ip]['bala'] = "%s,%s,%s" % (aa, xx, yy)
+        if len(datos) > 4:
+            a, x, y = datos[4:]
+            self.server.JUGADORES[ip]['bala'] = "%s,%s,%s" % (a, x, y)
 
     def __remover_jugador(self, ip, datos):
         """
@@ -185,10 +185,11 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         for ip in self.server.JUGADORES.keys():
             nick = self.server.JUGADORES[ip]['nick']
             tanque = self.server.JUGADORES[ip]['tanque']['path']
-            #datos = "%s,%s,%s,%s,%s" % (ip, nick, tanque,
-            #    JUGADORES[ip]['tanque']['pos'], JUGADORES[ip]['bala'])
-            datos = "%s,%s,%s,%s" % (ip, nick, tanque,
-                self.server.JUGADORES[ip]['tanque']['pos'])
+            datos = "%s,%s,%s,%s,%s" % (ip, nick, tanque,
+                self.server.JUGADORES[ip]['tanque']['pos'],
+                self.server.JUGADORES[ip]['bala'])
+            #datos = "%s,%s,%s,%s" % (ip, nick, tanque,
+            #    self.server.JUGADORES[ip]['tanque']['pos'])
             retorno = "%s%s||" % (retorno, datos)
         return retorno.strip()
 

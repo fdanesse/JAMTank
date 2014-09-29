@@ -10,7 +10,7 @@ from gi.repository import GObject
 from gi.repository import Gtk
 
 from Jugador import Jugador
-#from Bala import Bala
+from Bala import Bala
 
 RESOLUCION_INICIAL = (800, 600)
 BASE_PATH = os.path.dirname(__file__)
@@ -77,6 +77,8 @@ class Juego(GObject.Object):
         self.JUGADORES[self.ip]['nick'] = str(_dict['nick'].strip())
         self.JUGADORES[self.ip]['tanque'] = str(_dict['tanque'].strip())
 
+        self.BALAS = {}
+
         self.client = client
 
         self.resolucionreal = RESOLUCION_INICIAL
@@ -85,11 +87,11 @@ class Juego(GObject.Object):
         self.reloj = False
         self.estado = False
         self.jugador = False
-        #self.bala = False
-        #self.disparo = False
+        self.bala = False
+        self.disparo = False
 
         self.jugadores = pygame.sprite.RenderUpdates()
-        #self.balas = pygame.sprite.RenderUpdates()
+        self.balas = pygame.sprite.RenderUpdates()
         #self.explosiones = pygame.sprite.RenderUpdates()
 
     def __enviar_datos(self):
@@ -97,15 +99,15 @@ class Juego(GObject.Object):
         a, x, y = self.jugador.get_datos()
 
         datos = "UPDATE,%s,%s,%s" % (a, x, y)
-        #if self.disparo:
-        #    datos = "%s,%s,%s,%s" % (datos, a, x, y)
-        #    self.disparo = False
-        #elif self.bala:
-        #    self.bala.update()
-        #    a, x, y = self.bala.get_datos()
-        #    datos = "%s,%s,%s,%s" % (datos, a, x, y)
-        #else:
-        #    datos = "%s,-,-,-" % datos
+        if self.disparo:
+            datos = "%s,%s,%s,%s" % (datos, a, x, y)
+            self.disparo = False
+        elif self.bala:
+            self.bala.update()
+            a, x, y = self.bala.get_datos()
+            datos = "%s,%s,%s,%s" % (datos, a, x, y)
+        else:
+            datos = "%s,-,-,-" % datos
 
         self.client.enviar(datos)
 
@@ -131,8 +133,8 @@ class Juego(GObject.Object):
             if not client:
                 return
 
-            #ip, nick, tanque, a, x, y, aa, xx, yy = client.split(",")
-            ip, nick, tanque, a, x, y = client.split(",")
+            ip, nick, tanque, a, x, y, aa, xx, yy = client.split(",")
+            #ip, nick, tanque, a, x, y = client.split(",")
 
             if a == '-' and x == '-' and y == '-':
                 for j in self.jugadores.sprites():
@@ -146,18 +148,18 @@ class Juego(GObject.Object):
 
                 self.__actualizar_tanque(ip, nick, tanque, a, x, y)
 
-            #if aa != '-' and xx != '-' and yy != '-':
-            #    aa = int(aa)
-            #    xx = int(xx)
-            #    yy = int(yy)
+            if aa != '-' and xx != '-' and yy != '-':
+                aa = int(aa)
+                xx = int(xx)
+                yy = int(yy)
 
-            #    self.__actualizar_bala(ip, aa, xx, yy)
+                self.__actualizar_bala(ip, aa, xx, yy)
 
-            #else:
-            #    for bala in self.balas.sprites():
-            #        if ip == bala.ip:
-            #            self.__eliminar_bala(bala, ip)
-            #            break
+            else:
+                for bala in self.balas.sprites():
+                    if ip == bala.ip:
+                        self.__eliminar_bala(bala, ip)
+                        break
 
         #self.__checkear_colisiones()
 
@@ -209,13 +211,12 @@ class Juego(GObject.Object):
                 j.update_data(tank, a, x, y)
                 break
 
-    '''
     def __actualizar_bala(self, ip, aa, xx, yy):
         """
         Actualiza la posiciòn de las balas.
         """
-        if not ip in BALAS.keys():
-            BALAS[ip] = True
+        if not ip in self.BALAS.keys():
+            self.BALAS[ip] = True
             image_path = os.path.join(os.path.dirname(
                 os.path.dirname(self.GAME['mapa'])), 'Iconos', 'bala.png')
             bala = Bala(aa, xx, yy, image_path, RESOLUCION_INICIAL, ip)
@@ -238,12 +239,11 @@ class Juego(GObject.Object):
         bala.kill()
         del(bala)
         bala = False
-        if BALAS.get(ip, False):
-            del(BALAS[ip])
+        if self.BALAS.get(ip, False):
+            del(self.BALAS[ip])
         if ip == self.ip:
             del(self.bala)
             self.bala = False
-    '''
 
     def __eliminar_jugador(self, j, ip):
         j.kill()
@@ -264,14 +264,14 @@ class Juego(GObject.Object):
                 while Gtk.events_pending():
                     Gtk.main_iteration()
                 self.jugadores.clear(self.ventana, self.escenario)
-                #self.balas.clear(self.ventana, self.escenario)
+                self.balas.clear(self.ventana, self.escenario)
                 #self.explosiones.clear(self.ventana, self.escenario)
 
                 self.__enviar_datos()
                 self.__recibir_datos()
 
                 self.jugadores.draw(self.ventana)
-                #self.balas.draw(self.ventana)
+                self.balas.draw(self.ventana)
                 #self.explosiones.draw(self.ventana)
 
                 self.ventana_real.blit(pygame.transform.scale(self.ventana,
@@ -289,8 +289,8 @@ class Juego(GObject.Object):
         self.resolucionreal = resolucion
 
     def update_events(self, eventos):
-        #if "space" in eventos and not self.bala:
-        #    self.disparo = True
+        if "space" in eventos and not self.bala:
+            self.disparo = True
         self.jugador.update_events(eventos)
 
     def salir(self, valor):
