@@ -15,11 +15,13 @@ from Bala import Bala
 RESOLUCION_INICIAL = (800, 600)
 BASE_PATH = os.path.dirname(__file__)
 
-MODEL = {
-    'nick': '',
-    'tanque': '',
-    'puntos': 0,
-    }
+
+def get_model():
+    return {
+        'nick': '',
+        'tanque': '',
+        'puntos': 0,
+        }
 
 
 def get_ip():
@@ -73,7 +75,7 @@ class Juego(GObject.Object):
 
         self.ip = get_ip()
         self.JUGADORES = {}
-        self.JUGADORES[self.ip] = dict(MODEL)
+        self.JUGADORES[self.ip] = get_model()
         self.JUGADORES[self.ip]['nick'] = str(_dict['nick'].strip())
         self.JUGADORES[self.ip]['tanque'] = str(_dict['tanque'].strip())
 
@@ -119,22 +121,15 @@ class Juego(GObject.Object):
             return
 
         if datos == "END":
-            # host ha salido del juego, clientes deben salir también.
-            self.estado = False
-            pygame.quit()
-            if self.client:
-                self.client.desconectarse()
-                del(self.client)
-                self.client = False
-            self.emit("end")
+            self.__end()
             return
 
         for client in datos.split("||"):
             if not client:
+                self.__checkear_colisiones()
                 return
 
             ip, nick, tanque, a, x, y, aa, xx, yy = client.split(",")
-            #ip, nick, tanque, a, x, y = client.split(",")
 
             if a == '-' and x == '-' and y == '-':
                 for j in self.jugadores.sprites():
@@ -161,28 +156,27 @@ class Juego(GObject.Object):
                         self.__eliminar_bala(bala, ip)
                         break
 
-        #self.__checkear_colisiones()
-
-    #def __checkear_colisiones(self):
-    #    """
-    #    Checkea colisiones entre balas y de balas agenas con mi tanque.
-    #    """
-    #    # colisiones entre balas
-    #    rect = self.jugador.rect
-    #    for bala in self.balas.sprites():
-    #        if self.ip == bala.ip:
-    #            continue
-    #        x, y = bala.rect.centerx, bala.rect.centery
-    #        if rect.collidepoint(x, y):
-    #            self.jugador.tocado()
-    #            # explosion
+    def __checkear_colisiones(self):
+        """
+        Checkea colisiones de mi bala con tanques enemigos.
+        """
+        if self.bala:
+            x, y = (self.bala.rect.centerx, self.bala.rect.centery)
+            for jugador in self.jugadores.sprites():
+                if jugador.ip == self.ip:
+                    continue
+                if jugador.rect.collidepoint((x, y)):
+                    #self.__eliminar_bala(self.bala, jugador.ip)
+                    print "explosion"
+                    # jugador tocado
+                    break
 
     def __actualizar_tanque(self, ip, nick, tanque, a, x, y):
         """
         Actualiza posiciòn de tanque.
         """
         if not ip in self.JUGADORES.keys():
-            self.JUGADORES[ip] = dict(MODEL)
+            self.JUGADORES[ip] = get_model()
             self.JUGADORES[ip]['nick'] = nick
             self.JUGADORES[ip]['tanque'] = os.path.join(
                 os.path.dirname(BASE_PATH), "Tanques", tanque)
@@ -242,6 +236,7 @@ class Juego(GObject.Object):
         if self.BALAS.get(ip, False):
             del(self.BALAS[ip])
         if ip == self.ip:
+            self.bala.kill()
             del(self.bala)
             self.bala = False
 
@@ -250,8 +245,18 @@ class Juego(GObject.Object):
         del(j)
         del(self.JUGADORES[ip])
         if ip == self.ip:
+            self.jugador.kill()
             del(self.jugador)
             self.jugador = False
+
+    def __end(self):
+        self.estado = False
+        pygame.quit()
+        if self.client:
+            self.client.desconectarse()
+            del(self.client)
+            self.client = False
+        self.emit("end")
 
     def run(self):
         self.estado = "En Juego"

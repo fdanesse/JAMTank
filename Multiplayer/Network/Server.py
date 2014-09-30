@@ -122,9 +122,8 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         """
         a, x, y = datos[1:4]
         self.server.JUGADORES[ip]['tanque']['pos'] = "%s,%s,%s" % (a, x, y)
-        if len(datos) > 4:
-            a, x, y = datos[4:]
-            self.server.JUGADORES[ip]['bala'] = "%s,%s,%s" % (a, x, y)
+        a, x, y = datos[4:7]
+        self.server.JUGADORES[ip]['bala'] = "%s,%s,%s" % (a, x, y)
 
     def __remover_jugador(self, ip, datos):
         """
