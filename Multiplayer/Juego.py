@@ -11,6 +11,7 @@ from gi.repository import Gtk
 
 from Jugador import Jugador
 from Bala import Bala
+from Explosion import Explosion
 
 RESOLUCION_INICIAL = (800, 600)
 BASE_PATH = os.path.dirname(__file__)
@@ -95,7 +96,7 @@ class Juego(GObject.Object):
 
         self.jugadores = pygame.sprite.RenderUpdates()
         self.balas = pygame.sprite.RenderUpdates()
-        #self.explosiones = pygame.sprite.RenderUpdates()
+        self.explosiones = pygame.sprite.RenderUpdates()
 
     def __enviar_datos(self):
         self.jugador.update()
@@ -167,8 +168,11 @@ class Juego(GObject.Object):
             # EXPLOSIONES
             explosiones = valores[9:]
             if explosiones:
+                dirpath = os.path.dirname(os.path.dirname(self.GAME['mapa']))
+                dir_path = os.path.join(dirpath, "Explosion")
                 for d in range(0, len(explosiones), 2):
-                    print explosiones[d], explosiones[d+1]
+                    self.explosiones.add(Explosion(int(explosiones[d]),
+                        int(explosiones[d+1]), dir_path))
 
     def __checkear_colisiones(self):
         """
@@ -285,14 +289,16 @@ class Juego(GObject.Object):
                     Gtk.main_iteration()
                 self.jugadores.clear(self.ventana, self.escenario)
                 self.balas.clear(self.ventana, self.escenario)
-                #self.explosiones.clear(self.ventana, self.escenario)
+                self.explosiones.clear(self.ventana, self.escenario)
 
                 self.__enviar_datos()
                 self.__recibir_datos()
 
+                self.explosiones.update()
+
                 self.jugadores.draw(self.ventana)
                 self.balas.draw(self.ventana)
-                #self.explosiones.draw(self.ventana)
+                self.explosiones.draw(self.ventana)
 
                 self.ventana_real.blit(pygame.transform.scale(self.ventana,
                     self.resolucionreal), (0, 0))
