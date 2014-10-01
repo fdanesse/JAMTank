@@ -21,6 +21,7 @@ def get_model():
         'nick': '',
         'tanque': '',
         'puntos': 0,
+        'explosion': '-,-,-',
         }
 
 
@@ -111,6 +112,9 @@ class Juego(GObject.Object):
         else:
             datos = "%s,-,-,-" % datos
 
+        datos = "%s,%s" % (datos, self.JUGADORES[self.ip]["explosion"])
+        self.JUGADORES[self.ip]["explosion"] = '-,-,-'
+
         self.client.enviar(datos)
 
     def __recibir_datos(self):
@@ -129,8 +133,10 @@ class Juego(GObject.Object):
                 self.__checkear_colisiones()
                 return
 
-            ip, nick, tanque, a, x, y, aa, xx, yy = client.split(",")
+            valores = client.split(",")
 
+            # TANQUE
+            ip, nick, tanque, a, x, y = valores[0:6]
             if a == '-' and x == '-' and y == '-':
                 for j in self.jugadores.sprites():
                     if ip == j.ip:
@@ -143,6 +149,8 @@ class Juego(GObject.Object):
 
                 self.__actualizar_tanque(ip, nick, tanque, a, x, y)
 
+            # BALA
+            aa, xx, yy = valores[6:9]
             if aa != '-' and xx != '-' and yy != '-':
                 aa = int(aa)
                 xx = int(xx)
@@ -156,19 +164,32 @@ class Juego(GObject.Object):
                         self.__eliminar_bala(bala, ip)
                         break
 
+            # EXPLOSIONES
+            '''
+            explosiones = valores[9:]
+            puntos = []
+            if len(explosiones) > 1:
+                for e in explosiones:
+                    if e != '':
+                        puntos.append(e)
+            if puntos:
+                for d in range(0, len(puntos), 2):
+                    print puntos[d], puntos[d+1]
+            '''
+
     def __checkear_colisiones(self):
         """
         Checkea colisiones de mi bala con tanques enemigos.
         """
         if self.bala:
-            x, y = (self.bala.rect.centerx, self.bala.rect.centery)
+            a, x, y = self.bala.get_datos()
             for jugador in self.jugadores.sprites():
                 if jugador.ip == self.ip:
                     continue
                 if jugador.rect.collidepoint((x, y)):
-                    #self.__eliminar_bala(self.bala, jugador.ip)
-                    print "explosion"
-                    # jugador tocado
+                    self.__eliminar_bala(self.bala, self.ip)
+                    self.JUGADORES[self.ip]["explosion"] = "%s,%s,%s" % (
+                        jugador.ip, x, y)
                     break
 
     def __actualizar_tanque(self, ip, nick, tanque, a, x, y):
@@ -222,6 +243,7 @@ class Juego(GObject.Object):
             for bala in self.balas.sprites():
                 if ip == bala.ip:
                     valor = bala.set_posicion(centerx=xx, centery=yy)
+                    # FIXME: Verificar si esto es necesario, quizas pueda hacerse en update de bala local
                     if not valor:
                         self.__eliminar_bala(bala, ip)
                     break
@@ -294,8 +316,10 @@ class Juego(GObject.Object):
         self.resolucionreal = resolucion
 
     def update_events(self, eventos):
-        if "space" in eventos and not self.bala:
-            self.disparo = True
+        if "space" in eventos:
+            if not self.bala:
+                self.disparo = True
+            eventos.remove("space")
         self.jugador.update_events(eventos)
 
     def salir(self, valor):

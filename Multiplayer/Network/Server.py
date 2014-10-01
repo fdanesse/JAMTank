@@ -46,7 +46,7 @@ def get_model():
             },
         'vidas': 0,
         'puntos': 0,
-        'bala': '-,-,-'
+        'bala': '-,-,-',
         }
 
 
@@ -124,6 +124,12 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         self.server.JUGADORES[ip]['tanque']['pos'] = "%s,%s,%s" % (a, x, y)
         a, x, y = datos[4:7]
         self.server.JUGADORES[ip]['bala'] = "%s,%s,%s" % (a, x, y)
+        ene, x, y = datos[7:10]
+        if ene != '-':
+            # quitar energia a ene (verificando vidas)
+            # sumar puntos a ip
+            # pasar x,y de explosiones a todos los jugadores.
+            print "%s,%s" % (x, y)
 
     def __remover_jugador(self, ip, datos):
         """
@@ -187,8 +193,6 @@ class RequestHandler(SocketServer.StreamRequestHandler):
             datos = "%s,%s,%s,%s,%s" % (ip, nick, tanque,
                 self.server.JUGADORES[ip]['tanque']['pos'],
                 self.server.JUGADORES[ip]['bala'])
-            #datos = "%s,%s,%s,%s" % (ip, nick, tanque,
-            #    self.server.JUGADORES[ip]['tanque']['pos'])
             retorno = "%s%s||" % (retorno, datos)
         return retorno.strip()
 
