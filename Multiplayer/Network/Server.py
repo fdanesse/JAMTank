@@ -37,6 +37,14 @@ def APPEND_LOG(_dict):
 
 
 def get_model():
+    """
+    explosiones guarda un diccionario cuyas keys son las ip de aquellos
+    jugadores a quienes no se les ha informado de dicha explosion
+    (la explosión en si, (x,y) se guarda como value de esa key)
+    Cuando se conecta alguien y se le pasa los datos de esta explosión,
+    se borra la key de este jugador ya que se considera informado de dicha
+    explosion.
+    """
     return {
         'nick': '',
         'tanque': {
@@ -47,6 +55,7 @@ def get_model():
         'vidas': 0,
         'puntos': 0,
         'bala': '-,-,-',
+        'explosiones': {},
         }
 
 
@@ -120,16 +129,20 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         """
         Jugador actualizando sus datos.
         """
+        # TANQUE
         a, x, y = datos[1:4]
         self.server.JUGADORES[ip]['tanque']['pos'] = "%s,%s,%s" % (a, x, y)
+        # BALA
         a, x, y = datos[4:7]
         self.server.JUGADORES[ip]['bala'] = "%s,%s,%s" % (a, x, y)
+        # EXPLOSION
         ene, x, y = datos[7:10]
         if ene != '-':
             # quitar energia a ene (verificando vidas)
             # sumar puntos a ip
-            # pasar x,y de explosiones a todos los jugadores.
-            print "%s,%s" % (x, y)
+            for i in self.server.JUGADORES.keys():
+                # pasar x,y de explosion a todos los jugadores.
+                self.server.JUGADORES[ip]['explosiones'][i] = "%s,%s" % (x, y)
 
     def __remover_jugador(self, ip, datos):
         """
@@ -186,6 +199,9 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                 "Configuracion Jugadores": dict(self.server.JUGADORES)})
 
     def __get_data(self):
+        """
+        Devuelve a quien se ha conectado, los datos de todos los jugadores.
+        """
         retorno = ""
         for ip in self.server.JUGADORES.keys():
             nick = self.server.JUGADORES[ip]['nick']
@@ -193,6 +209,14 @@ class RequestHandler(SocketServer.StreamRequestHandler):
             datos = "%s,%s,%s,%s,%s" % (ip, nick, tanque,
                 self.server.JUGADORES[ip]['tanque']['pos'],
                 self.server.JUGADORES[ip]['bala'])
+
+            explosion = self.server.JUGADORES[ip]['explosiones'].get(
+                self.client_address[0], False)
+            if explosion:
+                datos = "%s,%s" % (datos, explosion)
+                del(self.server.JUGADORES[ip][
+                    'explosiones'][self.client_address[0]])
+
             retorno = "%s%s||" % (retorno, datos)
         return retorno.strip()
 

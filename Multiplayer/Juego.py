@@ -165,17 +165,10 @@ class Juego(GObject.Object):
                         break
 
             # EXPLOSIONES
-            '''
             explosiones = valores[9:]
-            puntos = []
-            if len(explosiones) > 1:
-                for e in explosiones:
-                    if e != '':
-                        puntos.append(e)
-            if puntos:
-                for d in range(0, len(puntos), 2):
-                    print puntos[d], puntos[d+1]
-            '''
+            if explosiones:
+                for d in range(0, len(explosiones), 2):
+                    print explosiones[d], explosiones[d+1]
 
     def __checkear_colisiones(self):
         """
