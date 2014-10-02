@@ -36,27 +36,6 @@ def APPEND_LOG(_dict):
     WRITE_LOG(new)
 
 
-def get_model():
-    """
-    explosiones guarda un diccionario cuyas keys son las ip de aquellos
-    jugadores a quienes no se les ha informado de dicha explosion
-    (la explosión en si, (x,y) se guarda como value de esa key)
-    Cuando se conecta alguien y se le pasa los datos de esta explosión,
-    se borra la key de este jugador ya que se considera informado de dicha
-    explosion.
-    """
-    return {
-        'nick': '',
-        'path': '',
-        'pos': '0,0,0',
-        'energia': 100,
-        'vidas': 0,
-        'puntos': 0,
-        'bala': '-,-,-',
-        'explosiones': {},
-        }
-
-
 class RequestHandler(SocketServer.StreamRequestHandler):
 
     def handle(self):
@@ -145,18 +124,26 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         """
         ene, x, y = datos[7:10]
         if ene != '-':
-            #energia = self.server.JUGADORES[ene]['energia']
-            #self.server.JUGADORES[ene]['energia'] = energia - 1
+            # Quitar energía y/o vidas a quien es alcanzado por disparo
+            energia = self.server.JUGADORES[ene]['energia']
+            self.server.JUGADORES[ene]['energia'] = energia - 1
 
-            #if self.server.JUGADORES[ene]['energia'] < 1:
-            #    vidas = self.server.JUGADORES[ene]['vidas']
-            #    self.server.JUGADORES[ene]['vidas'] = vidas - 1
+            if self.server.JUGADORES[ene]['energia'] < 1:
+                vidas = self.server.JUGADORES[ene]['vidas']
+                self.server.JUGADORES[ene]['vidas'] = vidas - 1
 
-            #if self.server.JUGADORES[ene]['vidas'] < 1:
-            #    # game over para este jugador
+            game_over = False
+            if self.server.JUGADORES[ene]['vidas'] < 1:
+                game_over = True
 
-            # sumar puntos a ip
-            #self.server.JUGADORES[ene]['puntos'] += 10
+            if game_over:
+                self.server.JUGADORES[ip]['puntos'] += 10
+                # FIXME: Tanque desaparece y ya no puede jugar
+            else:
+                self.server.JUGADORES[ip]['puntos'] += 1
+                # FIXME: Tanque desaparece por unos segundos
+
+            print ene, "Energia:", self.server.JUGADORES[ene]['energia'], "Vidas:", self.server.JUGADORES[ene]['vidas'], ip, "Puntos:", self.server.JUGADORES[ip]['puntos']
 
             for i in self.server.JUGADORES.keys():
                 # pasar x,y de explosion a todos los jugadores.
@@ -180,7 +167,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         ips = self.server.JUGADORES.keys()
         if not ip in self.server.JUGADORES.keys():
             if len(ips) < self.server.GAME['enemigos']:
-                self.server.JUGADORES[ip] = get_model()
+                self.server.JUGADORES[ip] = dict(self.server.model)
                 self.server.JUGADORES[ip]['path'] = datos[1].strip()
                 self.server.JUGADORES[ip]['nick'] = datos[2].strip()
                 retorno = "%s" % str(self.server.GAME['mapa'].strip())
@@ -208,7 +195,8 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         self.server.GAME['mapa'] = datos[1].strip()
         self.server.GAME['enemigos'] = int(datos[2].strip())
         self.server.GAME['vidas'] = int(datos[3].strip())
-        self.server.JUGADORES[ip] = get_model()
+        self.server.model['vidas'] = int(datos[3].strip())
+        self.server.JUGADORES[ip] = dict(self.server.model)
         self.server.JUGADORES[ip]['path'] = datos[4].strip()
         self.server.JUGADORES[ip]['nick'] = datos[5].strip()
         self.server.JUGADORES[ip]['vidas'] = int(self.server.GAME['vidas'])
@@ -254,6 +242,17 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
             'enemigos': 0,
             'vidas': 0,
             'estado': True,
+            }
+
+        self.model = {
+            'nick': '',
+            'path': '',
+            'pos': '0,0,0',
+            'energia': 5,
+            'vidas': 0,
+            'puntos': 0,
+            'bala': '-,-,-',
+            'explosiones': {},
             }
 
         self.JUGADORES = {}

@@ -25,6 +25,7 @@ class Jugador(Sprite):
 
         self.ip = ip
         self.eventos = []
+        # FIXME: Verificar si energia es necesario y útil acá
         self.energia = 100
         self.imagen_original = None
         self.image = None
