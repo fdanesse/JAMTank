@@ -164,11 +164,12 @@ class Juego(GObject.Object):
                     a = random.randrange(-360, 360, 1)
                     x = RESOLUCION_INICIAL[0] / 2
                     y = RESOLUCION_INICIAL[1] / 2
-
                 self.__actualizar_tanque(ip, nick, tanque, a, x, y)
 
+            vidas, energia, puntos = valores[6:9]
+
             # BALA
-            aa, xx, yy = valores[6:9]
+            aa, xx, yy = valores[9:12]
             if aa == '-' and xx == '-' and yy == '-':
                 for bala in self.balas.sprites():
                     if ip == bala.ip:
@@ -181,7 +182,7 @@ class Juego(GObject.Object):
                 self.__actualizar_bala(ip, aa, xx, yy)
 
             # EXPLOSIONES
-            explosiones = valores[9:]
+            explosiones = valores[12:]
             if explosiones:
                 dirpath = os.path.dirname(os.path.dirname(self.GAME['mapa']))
                 dir_path = os.path.join(dirpath, "Explosion")

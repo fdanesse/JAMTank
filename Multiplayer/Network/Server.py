@@ -144,10 +144,12 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                 self.server.JUGADORES[ip]['puntos'] += 1
 
             if self.server.JUGADORES[ene]['vidas'] < 1:
+                # Game Over para este Jugador.
                 self.server.JUGADORES[ene]['pos'] = "-,-,-"
                 self.server.JUGADORES[ene]['estado'] = False
             else:
                 if self.server.JUGADORES[ene]['energia'] < 1:
+                    # Jugador pierde una Vida pero sigue en Juego.
                     self.server.JUGADORES[ene]['pos'] = "-,-,-"
                     self.server.JUGADORES[ene]['estado'] = False
                     GLib.timeout_add(4000, self.server.reactivar_jugador, ene)
@@ -163,7 +165,6 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         if MAKELOG:
             key = "Jugador Removido %s" % time.time()
             APPEND_LOG({key: ip})
-        #del(JUGADORES[ip])
         self.server.JUGADORES[ip]['pos'] = "-,-,-"
         self.server.JUGADORES[ip]['bala'] = "-,-,-"
 
@@ -220,9 +221,14 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         for ip in self.server.JUGADORES.keys():
             nick = self.server.JUGADORES[ip]['nick']
             tanque = self.server.JUGADORES[ip]['path']
-            datos = "%s,%s,%s,%s,%s" % (ip, nick, tanque,
-                self.server.JUGADORES[ip]['pos'],
-                self.server.JUGADORES[ip]['bala'])
+            energia = self.server.JUGADORES[ip]['energia']
+            vidas = self.server.JUGADORES[ip]['vidas']
+            puntos = self.server.JUGADORES[ip]['puntos']
+            posicion = self.server.JUGADORES[ip]['pos']
+            bala = self.server.JUGADORES[ip]['bala']
+
+            datos = "%s,%s,%s,%s,%s,%s,%s,%s" % (ip, nick, tanque,
+                posicion, vidas, energia, puntos, bala)
 
             explosion = self.server.JUGADORES[ip]['explosiones'].get(
                 self.client_address[0], False)
