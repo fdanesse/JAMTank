@@ -392,9 +392,7 @@ class Juego(GObject.Object):
         self.jugador = Jugador(self.JUGADORES[self.ip]['tanque'],
             RESOLUCION_INICIAL, self.ip)
         self.jugadores.add(self.jugador)
-        x, y = RESOLUCION_INICIAL
-        self.jugador.update_data(self.JUGADORES[self.ip]['tanque'],
-            angulo=0, centerx=x / 2, centery=y / 2, energia=100)
+
         if MAKELOG:
             APPEND_LOG({"Jugador Local": self.ip})
 
