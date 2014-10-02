@@ -47,11 +47,9 @@ def get_model():
     """
     return {
         'nick': '',
-        'tanque': {
-            'path': '',
-            'pos': '0,0,0',
-            'energia': 100,
-            },
+        'path': '',
+        'pos': '0,0,0',
+        'energia': 100,
         'vidas': 0,
         'puntos': 0,
         'bala': '-,-,-',
@@ -127,19 +125,39 @@ class RequestHandler(SocketServer.StreamRequestHandler):
 
     def __actualizar_jugador(self, ip, datos):
         """
-        Jugador actualizando sus datos.
+        Jugador actualizando su tanque.
         """
-        # TANQUE
         a, x, y = datos[1:4]
-        self.server.JUGADORES[ip]['tanque']['pos'] = "%s,%s,%s" % (a, x, y)
-        # BALA
+        self.server.JUGADORES[ip]['pos'] = "%s,%s,%s" % (a, x, y)
+        self.__actualizar_balas(ip, datos)
+
+    def __actualizar_balas(self, ip, datos):
+        """
+        Jugador actualizando sus Balas.
+        """
         a, x, y = datos[4:7]
         self.server.JUGADORES[ip]['bala'] = "%s,%s,%s" % (a, x, y)
-        # EXPLOSION
+        self.__actualizar_explosiones(ip, datos)
+
+    def __actualizar_explosiones(self, ip, datos):
+        """
+        Jugador actualizando explosiones.
+        """
         ene, x, y = datos[7:10]
         if ene != '-':
-            # quitar energia a ene (verificando vidas)
+            #energia = self.server.JUGADORES[ene]['energia']
+            #self.server.JUGADORES[ene]['energia'] = energia - 1
+
+            #if self.server.JUGADORES[ene]['energia'] < 1:
+            #    vidas = self.server.JUGADORES[ene]['vidas']
+            #    self.server.JUGADORES[ene]['vidas'] = vidas - 1
+
+            #if self.server.JUGADORES[ene]['vidas'] < 1:
+            #    # game over para este jugador
+
             # sumar puntos a ip
+            #self.server.JUGADORES[ene]['puntos'] += 10
+
             for i in self.server.JUGADORES.keys():
                 # pasar x,y de explosion a todos los jugadores.
                 self.server.JUGADORES[ip]['explosiones'][i] = "%s,%s" % (x, y)
@@ -152,7 +170,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
             key = "Jugador Removido %s" % time.time()
             APPEND_LOG({key: ip})
         #del(JUGADORES[ip])
-        self.server.JUGADORES[ip]['tanque']['pos'] = "-,-,-"
+        self.server.JUGADORES[ip]['pos'] = "-,-,-"
         self.server.JUGADORES[ip]['bala'] = "-,-,-"
 
     def __connect_client(self, ip, datos):
@@ -163,7 +181,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         if not ip in self.server.JUGADORES.keys():
             if len(ips) < self.server.GAME['enemigos']:
                 self.server.JUGADORES[ip] = get_model()
-                self.server.JUGADORES[ip]['tanque']['path'] = datos[1].strip()
+                self.server.JUGADORES[ip]['path'] = datos[1].strip()
                 self.server.JUGADORES[ip]['nick'] = datos[2].strip()
                 retorno = "%s" % str(self.server.GAME['mapa'].strip())
                 if MAKELOG:
@@ -178,7 +196,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
             if MAKELOG:
                 key = "El Jugador ya estaba en game %s" % time.time()
                 APPEND_LOG({key: ip})
-            self.server.JUGADORES[ip]['tanque']['path'] = datos[1].strip()
+            self.server.JUGADORES[ip]['path'] = datos[1].strip()
             self.server.JUGADORES[ip]['nick'] = datos[2].strip()
             retorno = "%s" % str(self.server.GAME['mapa'].strip())
             return retorno
@@ -191,8 +209,9 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         self.server.GAME['enemigos'] = int(datos[2].strip())
         self.server.GAME['vidas'] = int(datos[3].strip())
         self.server.JUGADORES[ip] = get_model()
-        self.server.JUGADORES[ip]['tanque']['path'] = datos[4].strip()
+        self.server.JUGADORES[ip]['path'] = datos[4].strip()
         self.server.JUGADORES[ip]['nick'] = datos[5].strip()
+        self.server.JUGADORES[ip]['vidas'] = int(self.server.GAME['vidas'])
         if MAKELOG:
             APPEND_LOG({"Configuracion Juego": dict(self.server.GAME)})
             APPEND_LOG({
@@ -205,9 +224,9 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         retorno = ""
         for ip in self.server.JUGADORES.keys():
             nick = self.server.JUGADORES[ip]['nick']
-            tanque = self.server.JUGADORES[ip]['tanque']['path']
+            tanque = self.server.JUGADORES[ip]['path']
             datos = "%s,%s,%s,%s,%s" % (ip, nick, tanque,
-                self.server.JUGADORES[ip]['tanque']['pos'],
+                self.server.JUGADORES[ip]['pos'],
                 self.server.JUGADORES[ip]['bala'])
 
             explosion = self.server.JUGADORES[ip]['explosiones'].get(
