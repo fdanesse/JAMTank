@@ -131,17 +131,17 @@ class RequestHandler(SocketServer.StreamRequestHandler):
             if self.server.JUGADORES[ene]['energia'] < 1:
                 vidas = self.server.JUGADORES[ene]['vidas']
                 self.server.JUGADORES[ene]['vidas'] = vidas - 1
-
-            game_over = False
-            if self.server.JUGADORES[ene]['vidas'] < 1:
-                game_over = True
-
-            if game_over:
                 self.server.JUGADORES[ip]['puntos'] += 10
-                # FIXME: Tanque desaparece y ya no puede jugar
             else:
                 self.server.JUGADORES[ip]['puntos'] += 1
-                # FIXME: Tanque desaparece por unos segundos
+
+            if self.server.JUGADORES[ene]['vidas'] < 1:
+                self.server.JUGADORES[ene]['pos'] = "-,-,-"
+                # FIXME: Tanque desaparece y ya no puede jugar
+            else:
+                if self.server.JUGADORES[ene]['energia'] < 1:
+                    self.server.JUGADORES[ene]['pos'] = "-,-,-"
+                    # FIXME: Tanque desaparece por unos segundos
 
             print ene, "Energia:", self.server.JUGADORES[ene]['energia'], "Vidas:", self.server.JUGADORES[ene]['vidas'], ip, "Puntos:", self.server.JUGADORES[ip]['puntos']
 
