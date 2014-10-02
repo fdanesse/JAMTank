@@ -11,6 +11,8 @@ import time
 import json
 import codecs
 
+from gi.repository import GLib
+
 
 MAKELOG = True
 LOGPATH = os.path.join(os.environ["HOME"], "JAMTank_server.log")
@@ -107,6 +109,12 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         Jugador actualizando su tanque.
         """
         a, x, y = datos[1:4]
+        if self.server.JUGADORES[ip]['activar']:
+            a, x, y = (0,0,0)
+            self.server.JUGADORES[ip]['estado'] = True
+            self.server.JUGADORES[ip]['activar'] = False
+        if not self.server.JUGADORES[ip]['estado']:
+            a, x, y = ("-","-","-")
         self.server.JUGADORES[ip]['pos'] = "%s,%s,%s" % (a, x, y)
         self.__actualizar_balas(ip, datos)
 
@@ -137,13 +145,12 @@ class RequestHandler(SocketServer.StreamRequestHandler):
 
             if self.server.JUGADORES[ene]['vidas'] < 1:
                 self.server.JUGADORES[ene]['pos'] = "-,-,-"
-                # FIXME: Tanque desaparece y ya no puede jugar
+                self.server.JUGADORES[ene]['estado'] = False
             else:
                 if self.server.JUGADORES[ene]['energia'] < 1:
                     self.server.JUGADORES[ene]['pos'] = "-,-,-"
-                    # FIXME: Tanque desaparece por unos segundos
-
-            print ene, "Energia:", self.server.JUGADORES[ene]['energia'], "Vidas:", self.server.JUGADORES[ene]['vidas'], ip, "Puntos:", self.server.JUGADORES[ip]['puntos']
+                    self.server.JUGADORES[ene]['estado'] = False
+                    GLib.timeout_add(4000, self.server.reactivar_jugador, ene)
 
             for i in self.server.JUGADORES.keys():
                 # pasar x,y de explosion a todos los jugadores.
@@ -253,11 +260,18 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
             'puntos': 0,
             'bala': '-,-,-',
             'explosiones': {},
+            'estado': True,
+            'activar': False,
             }
 
         self.JUGADORES = {}
 
         print "Server ON . . ."
+
+    def reactivar_jugador(self, ip):
+        self.JUGADORES[ip]['energia'] = int(self.model['energia'])
+        self.JUGADORES[ip]['activar'] = True
+        return False
 
     def shutdown(self):
         print "Server OFF"

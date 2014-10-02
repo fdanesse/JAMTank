@@ -5,6 +5,7 @@ import os
 import pygame
 import json
 import codecs
+import random
 
 from gi.repository import GObject
 from gi.repository import Gtk
@@ -26,17 +27,26 @@ def get_model():
         }
 
 
-def get_ip():
+def __return_ip(interfaz):
     import commands
-    text = commands.getoutput('ifconfig wlan0').splitlines()
+    text = commands.getoutput('ifconfig %s' % interfaz).splitlines()
     datos = ''
     for linea in text:
         if 'Direc. inet:' in linea and 'Difus.:' in linea and 'Másc:' in linea:
             datos = linea
             break
-    ip = 'localhost'
+    ip = ''
     if datos:
         ip = datos.split('Direc. inet:')[1].split('Difus.:')[0].strip()
+    return ip
+
+
+def get_ip():
+    ip = __return_ip("wlan0")
+    if not ip:
+        ip = __return_ip("eth0")
+    if not ip:
+        ip = 'localhost'
     return ip
 
 
@@ -99,8 +109,10 @@ class Juego(GObject.Object):
         self.explosiones = pygame.sprite.RenderUpdates()
 
     def __enviar_datos(self):
-        self.jugador.update()
-        a, x, y = self.jugador.get_datos()
+        a, x, y = ("-","-","-")
+        if self.jugador:
+            self.jugador.update()
+            a, x, y = self.jugador.get_datos()
 
         datos = "UPDATE,%s,%s,%s" % (a, x, y)
         if self.disparo:
@@ -147,23 +159,26 @@ class Juego(GObject.Object):
                 a = int(a)
                 x = int(x)
                 y = int(y)
+                if a == 0 and x == 0 and y == 0:
+                    random.seed()
+                    a = random.randrange(-360, 360, 1)
+                    x = RESOLUCION_INICIAL[0] / 2
+                    y = RESOLUCION_INICIAL[1] / 2
 
                 self.__actualizar_tanque(ip, nick, tanque, a, x, y)
 
             # BALA
             aa, xx, yy = valores[6:9]
-            if aa != '-' and xx != '-' and yy != '-':
-                aa = int(aa)
-                xx = int(xx)
-                yy = int(yy)
-
-                self.__actualizar_bala(ip, aa, xx, yy)
-
-            else:
+            if aa == '-' and xx == '-' and yy == '-':
                 for bala in self.balas.sprites():
                     if ip == bala.ip:
                         self.__eliminar_bala(bala, ip)
                         break
+            else:
+                aa = int(aa)
+                xx = int(xx)
+                yy = int(yy)
+                self.__actualizar_bala(ip, aa, xx, yy)
 
             # EXPLOSIONES
             explosiones = valores[9:]
@@ -193,34 +208,26 @@ class Juego(GObject.Object):
         """
         Actualiza posiciòn de tanque.
         """
+        tanque = os.path.join(os.path.dirname(BASE_PATH), "Tanques", tanque)
+
         if not ip in self.JUGADORES.keys():
             self.JUGADORES[ip] = get_model()
-            self.JUGADORES[ip]['nick'] = nick
-            self.JUGADORES[ip]['tanque'] = os.path.join(
-                os.path.dirname(BASE_PATH), "Tanques", tanque)
 
-            ips = []
-            for j in self.jugadores.sprites():
-                if not j.ip in ips:
-                    ips.append(j.ip)
-
-            if not ip in ips:
-                j = Jugador(self.JUGADORES[ip]['tanque'],
-                    RESOLUCION_INICIAL, ip)
-                self.jugadores.add(j)
-
-            if MAKELOG:
-                key = "Jugador Remoto Agregado en Juego.py %s" % ip
-                new = {key: {"Actuales:": dict(self.JUGADORES)}}
-                APPEND_LOG(new)
+        ips = []
+        for j in self.jugadores.sprites():
+            if not j.ip in ips:
+                ips.append(j.ip)
+        if not ip in ips:
+            j = Jugador(tanque, RESOLUCION_INICIAL, ip)
+            if j.ip == self.ip:
+                self.jugador = j
+            self.jugadores.add(j)
 
         for j in self.jugadores.sprites():
             if ip == j.ip:
-                tank = os.path.join(os.path.dirname(BASE_PATH),
-                    "Tanques", tanque)
                 self.JUGADORES[ip]['nick'] = nick
-                self.JUGADORES[ip]['tanque'] = tank
-                j.update_data(tank, a, x, y)
+                self.JUGADORES[ip]['tanque'] = tanque
+                j.update_data(tanque, a, x, y)
                 break
 
     def __actualizar_bala(self, ip, aa, xx, yy):
@@ -260,9 +267,15 @@ class Juego(GObject.Object):
             self.bala = False
 
     def __eliminar_jugador(self, j, ip):
+        """
+        Elimina un Jugador.
+        """
         j.kill()
         del(j)
-        del(self.JUGADORES[ip])
+        j = False
+        # Los jugadores nunca deben eliminarse del diccionario.
+        #if self.JUGADORES.get(ip, False):
+        #    del(self.JUGADORES[ip])
         if ip == self.ip:
             self.jugador.kill()
             del(self.jugador)
@@ -319,7 +332,8 @@ class Juego(GObject.Object):
             if not self.bala:
                 self.disparo = True
             eventos.remove("space")
-        self.jugador.update_events(eventos)
+        if self.jugador:
+            self.jugador.update_events(eventos)
 
     def salir(self, valor):
         """

@@ -37,6 +37,6 @@ class Explosion(Sprite):
         if self.contador == len(self.imagenes)-1:
             self.valor = -1
         else:
-            if self.contador == 0:
+            if self.contador < 1:
                 self.kill()
                 del(self)

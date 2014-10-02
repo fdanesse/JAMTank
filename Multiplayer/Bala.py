@@ -33,7 +33,7 @@ class Bala(Sprite):
         self.sound_path = os.path.dirname(os.path.dirname(image_path))
         sound_path = os.path.join(self.sound_path, "Audio", "disparo.ogg")
         disparo = pygame.mixer.Sound(sound_path)
-        disparo.play()
+        #disparo.play()
 
     def __get_vector(self, angulo):
         dx = int(cos(radians(angulo)) * VELOCIDAD)
