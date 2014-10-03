@@ -4,8 +4,6 @@
 import os
 import time
 import threading
-import json
-import codecs
 
 from gi.repository import Gtk
 from gi.repository import GdkX11
@@ -17,26 +15,12 @@ from Network.Server import RequestHandler
 from Network.Client import Client
 from Juego import Juego
 
-MAKELOG = True
-LOGPATH = os.path.join(os.environ["HOME"], "JAMTank_load.log")
-if os.path.exists(LOGPATH):
-    os.remove(LOGPATH)
+from Globales import MAKELOG
+from Globales import APPEND_LOG
 
-
-def WRITE_LOG(_dict):
-    archivo = open(LOGPATH, "w")
-    archivo.write(json.dumps(
-        _dict, indent=4, separators=(", ", ":"), sort_keys=True))
-    archivo.close()
-
-
-def APPEND_LOG(_dict):
-    archivo = codecs.open(LOGPATH, "r", "utf-8")
-    new = json.JSONDecoder("utf-8").decode(archivo.read())
-    archivo.close()
-    for key in _dict.keys():
-        new[key] = _dict[key]
-    WRITE_LOG(new)
+if MAKELOG:
+    from Globales import reset_log
+    reset_log()
 
 
 def terminate_thread(thread):
@@ -160,7 +144,7 @@ class GameWidget(Gtk.DrawingArea):
             self.server_thread.start()
             time.sleep(0.5)
             if MAKELOG:
-                WRITE_LOG({'server': _dict})
+                APPEND_LOG({'server': _dict})
             self.__run_client(dict(_dict))
         except:
             dialog = Dialogo(parent=self.get_toplevel(),

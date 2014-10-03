@@ -3,8 +3,6 @@
 
 import os
 import time
-import json
-import codecs
 
 from gi.repository import Gtk
 from gi.repository import GdkX11
@@ -14,26 +12,12 @@ from gi.repository import GLib
 from Network.Client import Client
 from Juego import Juego
 
-MAKELOG = True
-LOGPATH = os.path.join(os.environ["HOME"], "JAMTank_load.log")
+from Globales import MAKELOG
+from Globales import APPEND_LOG
 
-
-def WRITE_LOG(_dict):
-    archivo = open(LOGPATH, "w")
-    archivo.write(json.dumps(
-        _dict, indent=4, separators=(", ", ":"), sort_keys=True))
-    archivo.close()
-
-
-def APPEND_LOG(_dict):
-    new = {}
-    if os.path.exists(LOGPATH):
-        archivo = codecs.open(LOGPATH, "r", "utf-8")
-        new = json.JSONDecoder("utf-8").decode(archivo.read())
-        archivo.close()
-    for key in _dict.keys():
-        new[key] = _dict[key]
-    WRITE_LOG(new)
+if MAKELOG:
+    from Globales import reset_log
+    reset_log()
 
 
 class GameWidget(Gtk.DrawingArea):

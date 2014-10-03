@@ -7,7 +7,6 @@ from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import GObject
-from gi.repository import GLib
 
 from SelectWidgets import Lista
 from SelectWidgets import OponentesSelectBox
@@ -42,7 +41,7 @@ class SelectServer(Gtk.EventBox):
 
         Gtk.EventBox.__init__(self)
 
-        self.temp_path = "/tmp/jamtank_intro_img.png"
+        self.temp_path = "    mp/jamtank_intro_img.png"
         self.imagen = False
 
         self.game_dict = {
@@ -182,8 +181,8 @@ class SelectServer(Gtk.EventBox):
         self.lista_tanques.agregar_items(elementos)
 
     def __change_nick(self, widget):
-        nick = widget.get_text().replace('\n','').replace('\r', '')
-        nick = nick.replace('*','').replace(' ','_').replace('|', '')
+        nick = widget.get_text().replace('\n', '').replace('\r', '')
+        nick = nick.replace('*', '').replace(' ', '_').replace('|', '')
         self.game_dict['nick'] = nick
         self.__check_dict()
 
@@ -218,7 +217,6 @@ class SelectServer(Gtk.EventBox):
                 valor = False
                 break
         self.jugar.set_sensitive(valor)
-
 
     ''' FIXME: Pinta el fondo, no lo uso
     def load(self, path):

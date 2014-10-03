@@ -3,8 +3,6 @@
 
 import os
 import pygame
-import json
-import codecs
 import random
 
 from gi.repository import GObject
@@ -13,6 +11,10 @@ from gi.repository import Gtk
 from Jugador import Jugador
 from Bala import Bala
 from Explosion import Explosion
+
+from Globales import get_ip
+from Globales import MAKELOG
+from Globales import APPEND_LOG
 
 RESOLUCION_INICIAL = (800, 600)
 BASE_PATH = os.path.dirname(__file__)
@@ -25,59 +27,6 @@ def get_model():
         'puntos': 0,
         'explosion': '-,-,-',
         }
-
-
-def __return_ip(interfaz):
-    import commands
-    import platform
-    sistema = platform.platform()
-    text = commands.getoutput('ifconfig %s' % interfaz).splitlines()
-    datos = ''
-    for linea in text:
-        if 'olpc' in sistema:
-            if 'inet ' in linea and 'netmask ' in linea and 'broadcast ' in linea:
-                datos = linea
-                break
-        else:
-            if 'Direc. inet:' in linea and 'Difus.:' in linea and 'Másc:' in linea:
-                datos = linea
-                break
-    ip = ''
-    if datos:
-        if 'olpc' in sistema:
-            ip = datos.split('inet ')[1].split('netmask ')[0].strip()
-        else:
-            ip = datos.split('Direc. inet:')[1].split('Difus.:')[0].strip()
-    return ip
-
-
-def get_ip():
-    ip = __return_ip("wlan0")
-    if not ip:
-        ip = __return_ip("eth0")
-    if not ip:
-        ip = 'localhost'
-    return ip
-
-
-MAKELOG = True
-LOGPATH = os.path.join(os.environ["HOME"], "JAMTank_load.log")
-
-
-def WRITE_LOG(_dict):
-    archivo = open(LOGPATH, "w")
-    archivo.write(json.dumps(
-        _dict, indent=4, separators=(", ", ":"), sort_keys=True))
-    archivo.close()
-
-
-def APPEND_LOG(_dict):
-    archivo = codecs.open(LOGPATH, "r", "utf-8")
-    new = json.JSONDecoder("utf-8").decode(archivo.read())
-    archivo.close()
-    for key in _dict.keys():
-        new[key] = _dict[key]
-    WRITE_LOG(new)
 
 
 class Juego(GObject.Object):
@@ -119,7 +68,7 @@ class Juego(GObject.Object):
         self.explosiones = pygame.sprite.RenderUpdates()
 
     def __enviar_datos(self):
-        a, x, y = ("-","-","-")
+        a, x, y = ("-", "-", "-")
         if self.jugador:
             self.jugador.update()
             a, x, y = self.jugador.get_datos()
@@ -177,6 +126,9 @@ class Juego(GObject.Object):
                 self.__actualizar_tanque(ip, nick, tanque, a, x, y)
 
             vidas, energia, puntos = valores[6:9]
+            vidas = int(vidas)
+            energia = int(energia)
+            puntos = int(puntos)
 
             # BALA
             aa, xx, yy = valores[9:12]
@@ -198,7 +150,7 @@ class Juego(GObject.Object):
                 dir_path = os.path.join(dirpath, "Explosion")
                 for d in range(0, len(explosiones), 2):
                     self.explosiones.add(Explosion(int(explosiones[d]),
-                        int(explosiones[d+1]), dir_path))
+                        int(explosiones[d + 1]), dir_path))
 
     def __checkear_colisiones(self):
         """

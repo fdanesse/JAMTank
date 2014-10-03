@@ -17,6 +17,7 @@ LOGPATH = os.path.join(os.environ["HOME"], "JAMTank_load.log")
 if os.path.exists(LOGPATH):
     os.remove(LOGPATH)
 
+
 def WRITE_LOG(_dict):
     archivo = open(LOGPATH, "w")
     archivo.write(json.dumps(
@@ -83,9 +84,3 @@ class Client(GObject.Object):
                     APPEND_LOG({'Client Recibo %s' % time.time(): str(err)})
                 time.sleep(0.02)
         return entrada
-
-
-#if __name__ == "__main__":
-#    client = Client('192.168.1.9')
-#    client.enviar("A" * 200)
-#    client.recibir()

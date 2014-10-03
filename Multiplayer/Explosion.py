@@ -34,7 +34,7 @@ class Explosion(Sprite):
     def update(self):
         self.contador += self.valor
         self.image = self.imagenes[self.contador]
-        if self.contador == len(self.imagenes)-1:
+        if self.contador == len(self.imagenes) - 1:
             self.valor = -1
         else:
             if self.contador < 1:
