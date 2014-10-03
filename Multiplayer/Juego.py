@@ -29,15 +29,25 @@ def get_model():
 
 def __return_ip(interfaz):
     import commands
+    import platform
+    sistema = platform.platform()
     text = commands.getoutput('ifconfig %s' % interfaz).splitlines()
     datos = ''
     for linea in text:
-        if 'Direc. inet:' in linea and 'Difus.:' in linea and 'Másc:' in linea:
-            datos = linea
-            break
+        if 'olpc' in sistema:
+            if 'inet ' in linea and 'netmask ' in linea and 'broadcast ' in linea:
+                datos = linea
+                break
+        else:
+            if 'Direc. inet:' in linea and 'Difus.:' in linea and 'Másc:' in linea:
+                datos = linea
+                break
     ip = ''
     if datos:
-        ip = datos.split('Direc. inet:')[1].split('Difus.:')[0].strip()
+        if 'olpc' in sistema:
+            ip = datos.split('inet ')[1].split('netmask ')[0].strip()
+        else:
+            ip = datos.split('Direc. inet:')[1].split('Difus.:')[0].strip()
     return ip
 
 
