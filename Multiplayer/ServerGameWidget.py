@@ -49,7 +49,36 @@ def terminate_thread(thread):
         raise SystemError("PyThreadState_SetAsyncExc failed")
 
 
-class GameWidget(Gtk.DrawingArea):
+class GameWidget(Gtk.Paned):
+
+    __gsignals__ = {
+    "salir": (GObject.SIGNAL_RUN_LAST,
+        GObject.TYPE_NONE, [])}
+
+    def __init__(self):
+
+        Gtk.Paned.__init__(self, orientation=Gtk.Orientation.HORIZONTAL)
+
+        self.drawing = DrawingWidget()
+        self.drawing.connect('salir', self.__re_emit_salir)
+        self.pack1(self.drawing, resize=True, shrink=False)
+
+        self.show_all()
+
+    def __re_emit_salir(self, widget):
+        self.emit('salir')
+
+    def setup_init(self, _dict):
+        self.drawing.setup_init(_dict)
+
+    def update_events(self, eventos):
+        self.drawing.update_events(eventos)
+
+    def salir(self):
+        self.drawing.salir()
+
+
+class DrawingWidget(Gtk.DrawingArea):
 
     __gsignals__ = {
     "salir": (GObject.SIGNAL_RUN_LAST,
