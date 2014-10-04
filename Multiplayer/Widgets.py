@@ -36,38 +36,41 @@ class Derecha(Gtk.EventBox):
 
         Gtk.EventBox.__init__(self)
 
+        self.lista = Lista()
+
         scroll = Gtk.ScrolledWindow()
         scroll.set_policy(
             Gtk.PolicyType.AUTOMATIC,
             Gtk.PolicyType.NEVER)
-        scroll.add_with_viewport(Lista())
+        scroll.add_with_viewport(self.lista)
 
         self.add(scroll)
         self.show_all()
 
         self.set_size_request(150, -1)
 
+    def update(self, _dict):
+        self.lista.update(_dict)
 
 class Lista(Gtk.TreeView):
 
     def __init__(self):
 
         Gtk.TreeView.__init__(self, Gtk.ListStore(
-            GdkPixbuf.Pixbuf,
             GObject.TYPE_STRING,
-            GObject.TYPE_STRING))
+            GObject.TYPE_INT))
+
+        self.players = {}
 
         self.set_property("rules-hint", True)
-        #self.set_headers_clickable(True)
         self.set_headers_visible(False)
 
         self.__setear_columnas()
         self.show_all()
 
     def __setear_columnas(self):
-        self.append_column(self.__construir_columa_icono('', 0, True))
-        self.append_column(self.__construir_columa('Nombre', 1, True))
-        self.append_column(self.__construir_columa('', 2, False))
+        self.append_column(self.__construir_columa('Nick', 0, True))
+        self.append_column(self.__construir_columa('Puntos', 1, True))
 
     def __construir_columa(self, text, index, visible):
         render = Gtk.CellRendererText()
@@ -78,31 +81,26 @@ class Lista(Gtk.TreeView):
         columna.set_sizing(Gtk.TreeViewColumnSizing.AUTOSIZE)
         return columna
 
-    def __construir_columa_icono(self, text, index, visible):
-        render = Gtk.CellRendererPixbuf()
-        columna = Gtk.TreeViewColumn(text, render, pixbuf=index)
-        columna.set_property('visible', visible)
-        columna.set_property('resizable', False)
-        columna.set_sizing(Gtk.TreeViewColumnSizing.AUTOSIZE)
-        return columna
-
-    def limpiar(self):
-        self.get_model().clear()
-
-    def agregar_items(self, elementos):
-        self.get_toplevel().set_sensitive(False)
-        self.permitir_select = False
-        GLib.idle_add(self.__ejecutar_agregar_elemento, elementos)
-
     def __ejecutar_agregar_elemento(self, elementos):
         if not elementos:
             return False
 
-        texto, path = elementos[0]
-        icono = None
-
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(icono, 24, -1)
-        self.get_model().append([pixbuf, texto, path])
+        nick, puntos = elementos[0]
+        self.get_model().append([nick, puntos])
         elementos.remove(elementos[0])
         GLib.idle_add(self.__ejecutar_agregar_elemento, elementos)
         return False
+
+    def agregar_items(self, elementos):
+        GLib.idle_add(self.__ejecutar_agregar_elemento, elementos)
+
+    def update(self, _dict):
+        ips = _dict.keys()
+        items = []
+        for ip in ips:
+            if not ip in self.players.keys():
+                self.players[ip] = _dict[ip]
+                item = (self.players[ip]['nick'], self.players[ip]['puntos'])
+                items.append(item)
+        if items:
+            self.agregar_items(items)

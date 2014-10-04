@@ -7,6 +7,7 @@ import random
 
 from gi.repository import GObject
 from gi.repository import Gtk
+from gi.repository import GLib
 
 from Jugador import Jugador
 from Bala import Bala
@@ -33,9 +34,9 @@ class Juego(GObject.Object):
 
     __gsignals__ = {
     "update": (GObject.SIGNAL_RUN_LAST,
-        GObject.TYPE_NONE, []),
+        GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT, )),
     "end": (GObject.SIGNAL_RUN_LAST,
-        GObject.TYPE_NONE, [])}
+        GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT, ))}
 
     def __init__(self, _dict, client):
 
@@ -244,6 +245,12 @@ class Juego(GObject.Object):
             del(self.jugador)
             self.jugador = False
 
+    def __emit_update(self):
+        if bool(self.estado):
+            self.emit("update", dict(self.JUGADORES))
+            GLib.timeout_add(1500, self.__emit_update)
+        return False
+
     def __end(self):
         self.estado = False
         pygame.quit()
@@ -251,13 +258,14 @@ class Juego(GObject.Object):
             self.client.desconectarse()
             del(self.client)
             self.client = False
-        self.emit("end")
+        self.emit("end", dict(self.JUGADORES))
 
     def run(self):
         self.estado = "En Juego"
         self.ventana.blit(self.escenario, (0, 0))
         pygame.display.update()
         pygame.time.wait(3)
+        GLib.timeout_add(1500, self.__emit_update)
         while self.estado == "En Juego":
             try:
                 self.reloj.tick(35)
@@ -310,6 +318,8 @@ class Juego(GObject.Object):
             self.client.desconectarse()
             del(self.client)
             self.client = False
+            if datos == "END":
+                self.__end()
 
     def config(self):
         pygame.init()

@@ -40,10 +40,14 @@ class GameWidget(Gtk.Paned):
 
         self.show_all()
 
+        self.drawing.connect("update", self.__update_players)
         self.drawing.connect('salir', self.__re_emit_salir)
 
         # FIXME: Necesario
         self.set_sensitive(False)
+
+    def __update_players(self, widget, _dict):
+        self.derecha.update(_dict)
 
     def __re_emit_salir(self, widget):
         self.emit('salir')
@@ -61,6 +65,8 @@ class GameWidget(Gtk.Paned):
 class DrawingWidget(Gtk.DrawingArea):
 
     __gsignals__ = {
+    "update": (GObject.SIGNAL_RUN_LAST,
+        GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT, )),
     "salir": (GObject.SIGNAL_RUN_LAST,
         GObject.TYPE_NONE, [])}
 
@@ -120,10 +126,13 @@ class DrawingWidget(Gtk.DrawingArea):
             dialog.run()
             self.salir()
 
-    def __end_game(self, juego):
+    def __end_game(self, juego, _dict):
         """
-        El juego recibe salir desde el server pues host ha salido del juego.
+        El juego recibe salir desde el server.
         """
+        dialog = Dialogo(parent=self.get_toplevel(), text="Fin del Juego")
+        dialog.run()
+        dialog.destroy()
         self.emit('salir')
 
     def __run_game(self, _dict):
@@ -135,6 +144,7 @@ class DrawingWidget(Gtk.DrawingArea):
             os.putenv('SDL_WINDOWID', str(xid))
             self.juego = Juego(dict(_dict), self.client)
             self.juego.connect("end", self.__end_game)
+            self.juego.connect("update", self.__update_players)
             self.juego.config()
             time.sleep(0.5)
             self.juego.run()
@@ -143,6 +153,9 @@ class DrawingWidget(Gtk.DrawingArea):
                 text="EL Juego no pudo Iniciar.")
             dialog.run()
             self.salir()
+
+    def __update_players(self, juego, _dict):
+        self.emit("update", _dict)
 
     def setup_init(self, _dict):
         self.__run_client(dict(_dict))
@@ -176,6 +189,9 @@ class DrawingWidget(Gtk.DrawingArea):
             self.client.desconectarse()
             del(self.client)
             self.client = False
+        dialog = Dialogo(parent=self.get_toplevel(), text="Cliente Sale del Juego")
+        dialog.run()
+        dialog.destroy()
         self.emit('salir')
 
 
