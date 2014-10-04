@@ -12,6 +12,8 @@ from gi.repository import GLib
 from Network.Client import Client
 from Juego import Juego
 
+from Widgets import Derecha
+
 from Globales import MAKELOG
 from Globales import APPEND_LOG
 
@@ -20,7 +22,43 @@ if MAKELOG:
     reset_log()
 
 
-class GameWidget(Gtk.DrawingArea):
+class GameWidget(Gtk.Paned):
+
+    __gsignals__ = {
+    "salir": (GObject.SIGNAL_RUN_LAST,
+        GObject.TYPE_NONE, [])}
+
+    def __init__(self):
+
+        Gtk.Paned.__init__(self, orientation=Gtk.Orientation.HORIZONTAL)
+
+        self.drawing = DrawingWidget()
+        self.derecha = Derecha()
+
+        self.pack1(self.drawing, resize=True, shrink=False)
+        self.pack2(self.derecha, resize=False, shrink=False)
+
+        self.show_all()
+
+        self.drawing.connect('salir', self.__re_emit_salir)
+
+        # FIXME: Necesario
+        self.set_sensitive(False)
+
+    def __re_emit_salir(self, widget):
+        self.emit('salir')
+
+    def setup_init(self, _dict):
+        self.drawing.setup_init(_dict)
+
+    def update_events(self, eventos):
+        self.drawing.update_events(eventos)
+
+    def salir(self):
+        self.drawing.salir()
+
+
+class DrawingWidget(Gtk.DrawingArea):
 
     __gsignals__ = {
     "salir": (GObject.SIGNAL_RUN_LAST,
@@ -34,6 +72,7 @@ class GameWidget(Gtk.DrawingArea):
         self.juego = False
 
         self.show_all()
+        self.set_size_request(640, 480)
 
     def __run_client(self, _dict):
         """
