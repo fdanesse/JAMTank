@@ -232,8 +232,10 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         """
         Devuelve a quien se ha conectado, los datos de todos los jugadores.
         """
+        ips = self.server.JUGADORES.keys()
+        convida = list(ips)
         retorno = ""
-        for ip in self.server.JUGADORES.keys():
+        for ip in ips:
             nick = self.server.JUGADORES[ip]['nick']
             tanque = self.server.JUGADORES[ip]['path']
             energia = self.server.JUGADORES[ip]['energia']
@@ -253,7 +255,13 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                     'explosiones'][self.client_address[0]])
 
             retorno = "%s%s||" % (retorno, datos)
-        return retorno.strip()
+            if vidas == 0:
+                convida.remove(ip)
+
+        if len(ips) > 1 and len(convida) == 1:
+            return "END"
+        else:
+            return retorno.strip()
 
 
 class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
