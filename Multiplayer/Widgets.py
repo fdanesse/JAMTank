@@ -58,6 +58,7 @@ class Lista(Gtk.TreeView):
 
         Gtk.TreeView.__init__(self, Gtk.ListStore(
             GObject.TYPE_STRING,
+            GObject.TYPE_STRING,
             GObject.TYPE_INT))
 
         self.players = {}
@@ -69,8 +70,9 @@ class Lista(Gtk.TreeView):
         self.show_all()
 
     def __setear_columnas(self):
-        self.append_column(self.__construir_columa('Nick', 0, True))
-        self.append_column(self.__construir_columa('Puntos', 1, True))
+        self.append_column(self.__construir_columa('Ip', 0, False))
+        self.append_column(self.__construir_columa('Nick', 1, True))
+        self.append_column(self.__construir_columa('Puntos', 2, True))
 
     def __construir_columa(self, text, index, visible):
         render = Gtk.CellRendererText()
@@ -85,8 +87,8 @@ class Lista(Gtk.TreeView):
         if not elementos:
             return False
 
-        nick, puntos = elementos[0]
-        self.get_model().append([nick, puntos])
+        ip, nick, puntos = elementos[0]
+        self.get_model().append([ip, nick, puntos])
         elementos.remove(elementos[0])
         GLib.idle_add(self.__ejecutar_agregar_elemento, elementos)
         return False
@@ -100,7 +102,21 @@ class Lista(Gtk.TreeView):
         for ip in ips:
             if not ip in self.players.keys():
                 self.players[ip] = _dict[ip]
-                item = (self.players[ip]['nick'], self.players[ip]['puntos'])
+                item = (ip, self.players[ip]['nick'], self.players[ip]['puntos'])
                 items.append(item)
+            else:
+                self.players[ip] = _dict[ip]
+
         if items:
             self.agregar_items(items)
+
+        model = self.get_model()
+        item = model.get_iter_first()
+        _iter = None
+        while item:
+            _iter = item
+            ip = model.get_value(_iter, 0)
+            model.set_value(_iter, 1, self.players[ip]['nick'])
+            model.set_value(_iter, 2, self.players[ip]['puntos'])
+            item = model.iter_next(item)
+        model.set_sort_column_id(2, Gtk.SortType.DESCENDING)
