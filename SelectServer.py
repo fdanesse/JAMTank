@@ -59,7 +59,6 @@ class SelectServer(Gtk.EventBox):
 
         Gtk.EventBox.__init__(self)
 
-        self.temp_path = "    mp/jamtank_intro_img.png"
         self.imagen = False
 
         self.game_dict = {
@@ -67,8 +66,8 @@ class SelectServer(Gtk.EventBox):
             'nick': '',
             'mapa': "",
             'tanque': "",
-            'enemigos': 10,
-            'vidas': 50,
+            'enemigos': 2,
+            'vidas': 5,
             }
 
         self.modify_bg(0, Gdk.color_parse("#ffffff"))
@@ -157,24 +156,6 @@ class SelectServer(Gtk.EventBox):
 
         self.show_all()
 
-    ''' FIXME: Pinta el fondo, no lo uso
-    def __do_draw(self, widget, context):
-        rect = widget.get_allocation()
-
-        src = self.imagen.copy()
-        dst = GdkPixbuf.Pixbuf.new_from_file_at_size(
-            self.temp_path, rect.width, rect.height)
-
-        GdkPixbuf.Pixbuf.scale(src, dst, 0, 0, 100, 100, 0, 0, 1.5, 1.5,
-            GdkPixbuf.InterpType.BILINEAR)
-
-        x = rect.width / 2 - dst.get_width() / 2
-        y = rect.height / 2 - dst.get_height() / 2
-
-        Gdk.cairo_set_source_pixbuf(context, dst, x, y)
-        context.paint()
-    '''
-
     def __do_realize(self, widget):
         elementos = []
         mapas_path = os.path.join(BASE, "Mapas")
@@ -235,16 +216,3 @@ class SelectServer(Gtk.EventBox):
                 valor = False
                 break
         self.jugar.set_sensitive(valor)
-
-    ''' FIXME: Pinta el fondo, no lo uso
-    def load(self, path):
-        """
-        Carga una imagen para pintar el fondo.
-        """
-        if path:
-            if os.path.exists(path):
-                self.imagen = GdkPixbuf.Pixbuf.new_from_file(path)
-                self.imagen.savev(self.temp_path, "png", [], [])
-                self.set_size_request(-1, -1)
-        self.get_child().connect("draw", self.__do_draw)
-    '''

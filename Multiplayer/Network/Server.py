@@ -189,7 +189,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         """
         ips = self.server.JUGADORES.keys()
         if not ip in self.server.JUGADORES.keys():
-            if len(ips) < self.server.GAME['enemigos']:
+            if len(ips) < self.server.GAME['jugadores']:
                 self.server.JUGADORES[ip] = dict(self.server.model)
                 self.server.JUGADORES[ip]['path'] = datos[1].strip()
                 self.server.JUGADORES[ip]['nick'] = datos[2].strip()
@@ -216,7 +216,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         Host Configurando el juego y sus datos como cliente.
         """
         self.server.GAME['mapa'] = datos[1].strip()
-        self.server.GAME['enemigos'] = int(datos[2].strip())
+        self.server.GAME['jugadores'] = int(datos[2].strip()) + 1
         self.server.GAME['vidas'] = int(datos[3].strip())
         self.server.model['vidas'] = int(datos[3].strip())
         self.server.JUGADORES[ip] = dict(self.server.model)
@@ -275,8 +275,8 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
 
         self.GAME = {
             'mapa': "",
-            'enemigos': 0,
-            'vidas': 0,
+            'jugadores': 2,
+            'vidas': 5,
             'estado': True,
             }
 
@@ -323,6 +323,6 @@ if __name__ == "__main__":
     if ip:
         server = Server(host=ip, port=5000, handler=RequestHandler)
         server.GAME['mapa'] = "fondo1.png"
-        server.GAME['enemigos'] = 10
-        server.GAME['vidas'] = 50
+        server.GAME['jugadores'] = 2
+        server.GAME['vidas'] = 5
         server.serve_forever()

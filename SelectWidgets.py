@@ -46,7 +46,7 @@ class OponentesSelectBox(Gtk.VBox):
 
         hbox = Gtk.HBox()
         oponentes = Gtk.Label("Oponentes")
-        spin = NumBox(range(1, 11))
+        spin = NumBox(range(1, 10))
         spin.connect("valor", self.__emit_valor, "oponentes")
         hbox.pack_start(spin, False, False, 5)
         hbox.pack_start(oponentes, False, False, 5)
@@ -54,7 +54,7 @@ class OponentesSelectBox(Gtk.VBox):
 
         hbox = Gtk.HBox()
         limite = Gtk.Label("Vidas")
-        spin = NumBox(range(10, 51))
+        spin = NumBox(range(5, 51))
         spin.connect("valor", self.__emit_valor, "vidas")
         hbox.pack_start(spin, False, False, 5)
         hbox.pack_start(limite, False, False, 5)
@@ -80,7 +80,7 @@ class NumBox(Gtk.HBox):
         Gtk.HBox.__init__(self)
 
         self.rango = rango
-        self.valor = max(self.rango)
+        self.valor = min(self.rango)
 
         menos = Gtk.Button("-")
         menos.connect("clicked", self.__change)
