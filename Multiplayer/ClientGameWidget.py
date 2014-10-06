@@ -29,8 +29,8 @@ from gi.repository import GLib
 
 from Network.Client import Client
 from Juego import Juego
-
 from Widgets import Derecha
+from DialogoEndGame import DialogoEndGame
 
 from Globales import MAKELOG
 from Globales import APPEND_LOG
@@ -148,7 +148,7 @@ class DrawingWidget(Gtk.DrawingArea):
         """
         El juego recibe salir desde el server.
         """
-        dialog = Dialogo(parent=self.get_toplevel(), text="Fin del Juego")
+        dialog = DialogoEndGame(parent=self.get_toplevel(), _dict=_dict)
         dialog.run()
         dialog.destroy()
         self.emit('salir')
@@ -207,7 +207,8 @@ class DrawingWidget(Gtk.DrawingArea):
             self.client.desconectarse()
             del(self.client)
             self.client = False
-        dialog = Dialogo(parent=self.get_toplevel(), text="Cliente Sale del Juego")
+        dialog = Dialogo(parent=self.get_toplevel(),
+            text="Cliente Sale del Juego")
         dialog.run()
         dialog.destroy()
         self.emit('salir')

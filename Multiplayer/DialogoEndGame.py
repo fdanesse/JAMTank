@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#   Widgets.py por:
+#   ServerGameWidget.py por:
 #   Flavio Danesse <fdanesse@gmail.com>
 #   Uruguay
 
@@ -19,24 +19,37 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import os
-
 from gi.repository import Gtk
-from gi.repository import Gdk
-from gi.repository import GdkPixbuf
 from gi.repository import GObject
 from gi.repository import GLib
+from gi.repository import GdkPixbuf
 
-BASE_PATH = os.path.dirname(__file__)
+
+class DialogoEndGame(Gtk.Dialog):
+
+    def __init__(self, parent=None, _dict={}):
+
+        Gtk.Dialog.__init__(self,
+            parent=parent,
+            flags=Gtk.DialogFlags.MODAL,
+            buttons=["Cerrar", Gtk.ResponseType.ACCEPT])
+
+        #self.set_decorated(False)
+        #self.modify_bg(0, get_colors("window"))
+        self.set_border_width(15)
+
+        informe = InformeWidget(_dict)
+        self.vbox.pack_start(informe, True, True, 5)
+        self.set_size_request(500, 300)
 
 
-class Derecha(Gtk.EventBox):
+class InformeWidget(Gtk.EventBox):
 
-    def __init__(self):
+    def __init__(self, _dict):
 
         Gtk.EventBox.__init__(self)
 
-        self.lista = Lista()
+        self.lista = ListaDatos(_dict)
 
         scroll = Gtk.ScrolledWindow()
         scroll.set_policy(
@@ -47,31 +60,36 @@ class Derecha(Gtk.EventBox):
         self.add(scroll)
         self.show_all()
 
-        self.set_size_request(150, -1)
 
-    def update(self, _dict):
-        self.lista.update(_dict)
+class ListaDatos(Gtk.TreeView):
 
-class Lista(Gtk.TreeView):
-
-    def __init__(self):
+    def __init__(self, _dict):
 
         Gtk.TreeView.__init__(self, Gtk.ListStore(
-            GObject.TYPE_STRING,
+            GdkPixbuf.Pixbuf,
             GObject.TYPE_STRING,
             GObject.TYPE_INT))
 
-        self.players = {}
-
         self.set_property("rules-hint", True)
-        self.set_headers_visible(False)
+        self.set_headers_clickable(True)
+        self.set_headers_visible(True)
 
         self.__setear_columnas()
         self.show_all()
 
+        ips = _dict.keys()
+        items = []
+        for ip in ips:
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
+                _dict[ip]['tanque'], 24, -1)
+            item = (pixbuf, _dict[ip]['nick'], _dict[ip]['puntos'])
+            items.append(item)
+        if items:
+            self.agregar_items(items)
+
     def __setear_columnas(self):
-        self.append_column(self.__construir_columa('Ip', 0, False))
-        self.append_column(self.__construir_columa('Nick', 1, True))
+        self.append_column(self.__construir_columa_icono('Tanque', 0, True))
+        self.append_column(self.__construir_columa('Jugador', 1, True))
         self.append_column(self.__construir_columa('Puntos', 2, True))
 
     def __construir_columa(self, text, index, visible):
@@ -83,8 +101,17 @@ class Lista(Gtk.TreeView):
         columna.set_sizing(Gtk.TreeViewColumnSizing.AUTOSIZE)
         return columna
 
+    def __construir_columa_icono(self, text, index, visible):
+        render = Gtk.CellRendererPixbuf()
+        columna = Gtk.TreeViewColumn(text, render, pixbuf=index)
+        columna.set_property('visible', visible)
+        columna.set_property('resizable', False)
+        columna.set_sizing(Gtk.TreeViewColumnSizing.AUTOSIZE)
+        return columna
+
     def __ejecutar_agregar_elemento(self, elementos):
         if not elementos:
+            self.get_model().set_sort_column_id(2, Gtk.SortType.DESCENDING)
             return False
 
         ip, nick, puntos = elementos[0]
@@ -95,28 +122,3 @@ class Lista(Gtk.TreeView):
 
     def agregar_items(self, elementos):
         GLib.idle_add(self.__ejecutar_agregar_elemento, elementos)
-
-    def update(self, _dict):
-        ips = _dict.keys()
-        items = []
-        for ip in ips:
-            if not ip in self.players.keys():
-                self.players[ip] = _dict[ip]
-                item = (ip, self.players[ip]['nick'], self.players[ip]['puntos'])
-                items.append(item)
-            else:
-                self.players[ip] = _dict[ip]
-
-        if items:
-            self.agregar_items(items)
-
-        model = self.get_model()
-        item = model.get_iter_first()
-        _iter = None
-        while item:
-            _iter = item
-            ip = model.get_value(_iter, 0)
-            model.set_value(_iter, 1, self.players[ip]['nick'])
-            model.set_value(_iter, 2, self.players[ip]['puntos'])
-            item = model.iter_next(item)
-        model.set_sort_column_id(2, Gtk.SortType.DESCENDING)
