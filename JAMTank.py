@@ -120,6 +120,8 @@ class JAMTank(Gtk.Window):
             self.switch(False, 3)
         elif valor == "join":
             self.switch(False, 4)
+        elif valor == "creditos":
+            self.switch(False, 5)
         elif valor == "salir":
             self.__salir()
 
@@ -218,6 +220,9 @@ class JAMTank(Gtk.Window):
             #GLib.idle_add(self.select_widget.load, os.path.join(
             #    BASE, "Iconos", "jamtank.svg"))
             self.select_widget.connect("accion", self.__client_select_accion)
+
+        elif valor == 5:
+            print "FIXME: Creditos"
 
         GLib.idle_add(self.queue_draw)
 

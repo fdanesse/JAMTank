@@ -24,6 +24,7 @@ import time
 import threading
 
 from gi.repository import Gtk
+from gi.repository import Gdk
 from gi.repository import GdkX11
 from gi.repository import GObject
 from gi.repository import GLib
@@ -78,6 +79,8 @@ class GameWidget(Gtk.Paned):
     def __init__(self):
 
         Gtk.Paned.__init__(self, orientation=Gtk.Orientation.HORIZONTAL)
+
+        self.modify_bg(0, Gdk.color_parse("#ffffff"))
 
         self.drawing = DrawingWidget()
         self.derecha = Derecha()

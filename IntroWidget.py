@@ -52,6 +52,7 @@ class IntroWidget(Gtk.Table):
         boton = Gtk.Button("Jugar Solo")
         boton.connect("clicked", self.__emit_switch, "solo")
         self.attach(boton, 1, 2, 1, 2)
+        boton.set_sensitive(False)
 
         boton = Gtk.Button("Crear Juego en Red")
         boton.connect("clicked", self.__emit_switch, "red")
@@ -64,6 +65,7 @@ class IntroWidget(Gtk.Table):
         boton = Gtk.Button("Creditos")
         boton.connect("clicked", self.__emit_switch, "creditos")
         self.attach(boton, 1, 2, 4, 5)
+        boton.set_sensitive(False)
 
         boton = Gtk.Button("Salir")
         boton.connect("clicked", self.__emit_switch, "salir")

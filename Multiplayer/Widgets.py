@@ -36,7 +36,27 @@ class Derecha(Gtk.EventBox):
 
         Gtk.EventBox.__init__(self)
 
+        self.modify_bg(0, Gdk.color_parse("#ffffff"))
+        self.set_border_width(5)
+
         self.lista = Lista()
+        self.energia = Progreso_Descarga()
+        self.vidas = Progreso_Descarga()
+        self.preview = PreviewTank()
+
+        vbox = Gtk.VBox()
+
+        frame = Gtk.Frame()
+        frame.set_label(" Servidor ")
+        frame.set_label_align(0.5, 0.5)
+        frame.add(Gtk.Label("111.111.111.111"))
+        vbox.pack_start(frame, False, True, 0)
+
+        frame = Gtk.Frame()
+        frame.set_label(" Cliente ")
+        frame.set_label_align(0.5, 0.5)
+        frame.add(Gtk.Label("111.111.111.111"))
+        vbox.pack_start(frame, False, True, 0)
 
         scroll = Gtk.ScrolledWindow()
         scroll.set_policy(
@@ -44,13 +64,38 @@ class Derecha(Gtk.EventBox):
             Gtk.PolicyType.AUTOMATIC)
         scroll.add_with_viewport(self.lista)
 
-        self.add(scroll)
+        frame = Gtk.Frame()
+        frame.set_label(" Jugadores ")
+        frame.set_label_align(0.5, 0.5)
+        frame.add(scroll)
+        vbox.pack_start(frame, True, True, 0)
+
+        frame = Gtk.Frame()
+        frame.set_label(" Vidas ")
+        frame.set_label_align(0.5, 0.5)
+        frame.add(self.vidas)
+        vbox.pack_end(frame, False, True, 0)
+
+        frame = Gtk.Frame()
+        frame.set_label(" Energía ")
+        frame.set_label_align(0.5, 0.5)
+        frame.add(self.energia)
+        vbox.pack_end(frame, False, True, 0)
+
+        frame = Gtk.Frame()
+        frame.set_label(" Tanque ")
+        frame.set_label_align(0.5, 0.5)
+        frame.add(self.preview)
+        vbox.pack_end(frame, False, True, 0)
+
+        self.add(vbox)
         self.show_all()
 
         self.set_size_request(150, -1)
 
     def update(self, _dict):
         self.lista.update(_dict)
+
 
 class Lista(Gtk.TreeView):
 
@@ -120,3 +165,110 @@ class Lista(Gtk.TreeView):
             model.set_value(_iter, 2, self.players[ip]['puntos'])
             item = model.iter_next(item)
         model.set_sort_column_id(2, Gtk.SortType.DESCENDING)
+
+
+class Progreso_Descarga(Gtk.EventBox):
+    """
+    Barra de progreso para mostrar energia.
+    """
+
+    def __init__(self):
+
+        Gtk.EventBox.__init__(self)
+
+        self.modify_bg(0, Gdk.color_parse("#ffffff"))
+
+        self.escala = ProgressBar(
+            Gtk.Adjustment(0.0, 0.0, 101.0, 0.1, 1.0, 1.0))
+
+        self.valor = 0
+
+        self.add(self.escala)
+        self.show_all()
+
+        self.set_size_request(-1, 30)
+        self.set_progress(0)
+
+    def set_progress(self, valor=0):
+        if self.valor != valor:
+            self.valor = valor
+            self.escala.ajuste.set_value(valor)
+            self.escala.queue_draw()
+
+
+class ProgressBar(Gtk.Scale):
+
+    def __init__(self, ajuste):
+
+        Gtk.Scale.__init__(self, orientation=Gtk.Orientation.HORIZONTAL)
+
+        self.ajuste = ajuste
+        self.set_digits(0)
+        self.set_draw_value(False)
+
+        self.borde = 10
+
+        self.show_all()
+
+    def do_draw(self, contexto):
+        rect = self.get_allocation()
+        w, h = (rect.width, rect.height)
+
+        # Relleno de la barra
+        ww = w - self.borde * 2
+        hh = h - self.borde * 2
+        Gdk.cairo_set_source_color(contexto, Gdk.Color(0, 0, 0))
+        rect = Gdk.Rectangle()
+        rect.x, rect.y, rect.width, rect.height = (
+            self.borde, self.borde, ww, hh)
+        Gdk.cairo_rectangle(contexto, rect)
+        contexto.fill()
+
+        # Relleno de la barra segun progreso
+        Gdk.cairo_set_source_color(contexto, Gdk.Color(65000, 26000, 0))
+        rect = Gdk.Rectangle()
+
+        ximage = int(self.ajuste.get_value() * ww / 100)
+        rect.x, rect.y, rect.width, rect.height = (self.borde, self.borde,
+            ximage, hh)
+
+        Gdk.cairo_rectangle(contexto, rect)
+        contexto.fill()
+
+        return True
+
+
+class PreviewTank(Gtk.DrawingArea):
+
+    def __init__(self):
+
+        Gtk.DrawingArea.__init__(self)
+
+        self.modify_bg(0, Gdk.color_parse("#ffffff"))
+
+        self.imagen = False
+
+        self.show_all()
+
+        self.set_size_request(-1, 80)
+
+    def set_imagen(self, path):
+        self.imagen = GdkPixbuf.Pixbuf.new_from_file(path)
+
+    def __do_draw(self, widget, context):
+        if not self.imagen:
+            return
+
+        rect = self.get_allocation()
+        src = self.imagen
+        dst = GdkPixbuf.Pixbuf.new_from_file_at_size(
+            self.temp_path, rect.width, rect.height)
+
+        GdkPixbuf.Pixbuf.scale(src, dst, 0, 0, 100, 100, 0, 0, 1.5, 1.5,
+            GdkPixbuf.InterpType.BILINEAR)
+
+        x = rect.width / 2 - dst.get_width() / 2
+        y = rect.height / 2 - dst.get_height() / 2
+
+        Gdk.cairo_set_source_pixbuf(context, dst, x, y)
+        context.paint()
