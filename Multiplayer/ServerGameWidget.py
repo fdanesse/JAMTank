@@ -103,6 +103,11 @@ class GameWidget(Gtk.Paned):
         self.emit('salir')
 
     def setup_init(self, _dict):
+        from Globales import get_ip
+        ip = get_ip()
+        server = str(_dict['server'])
+        tanque = str(_dict['tanque'])
+        self.derecha.set_data(ip, server, tanque)
         self.drawing.setup_init(_dict)
 
     def update_events(self, eventos):

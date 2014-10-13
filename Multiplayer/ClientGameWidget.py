@@ -50,6 +50,8 @@ class GameWidget(Gtk.Paned):
 
         Gtk.Paned.__init__(self, orientation=Gtk.Orientation.HORIZONTAL)
 
+        self.modify_bg(0, Gdk.color_parse("#ffffff"))
+
         self.drawing = DrawingWidget()
         self.derecha = Derecha()
 
@@ -71,6 +73,11 @@ class GameWidget(Gtk.Paned):
         self.emit('salir')
 
     def setup_init(self, _dict):
+        from Globales import get_ip
+        ip = get_ip()
+        server = str(_dict['server'])
+        tanque = str(_dict['tanque'])
+        self.derecha.set_data(ip, server, tanque)
         self.drawing.setup_init(_dict)
 
     def update_events(self, eventos):

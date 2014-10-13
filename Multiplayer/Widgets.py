@@ -43,19 +43,21 @@ class Derecha(Gtk.EventBox):
         self.energia = Progreso_Descarga()
         self.vidas = Progreso_Descarga()
         self.preview = PreviewTank()
+        self.server = Gtk.Label("111.111.111.111")
+        self.client = Gtk.Label("111.111.111.111")
 
         vbox = Gtk.VBox()
 
         frame = Gtk.Frame()
         frame.set_label(" Servidor ")
         frame.set_label_align(0.5, 0.5)
-        frame.add(Gtk.Label("111.111.111.111"))
+        frame.add(self.server)
         vbox.pack_start(frame, False, True, 0)
 
         frame = Gtk.Frame()
         frame.set_label(" Cliente ")
         frame.set_label_align(0.5, 0.5)
-        frame.add(Gtk.Label("111.111.111.111"))
+        frame.add(self.client)
         vbox.pack_start(frame, False, True, 0)
 
         scroll = Gtk.ScrolledWindow()
@@ -95,6 +97,11 @@ class Derecha(Gtk.EventBox):
 
     def update(self, _dict):
         self.lista.update(_dict)
+
+    def set_data(self, ip, server, tanque):
+        self.server.set_text(server)
+        self.client.set_text(ip)
+        self.preview.set_imagen(tanque)
 
 
 class Lista(Gtk.TreeView):
@@ -245,15 +252,17 @@ class PreviewTank(Gtk.DrawingArea):
         Gtk.DrawingArea.__init__(self)
 
         self.modify_bg(0, Gdk.color_parse("#ffffff"))
-
+        self.temp_path = "/dev/shm/prev.png"
         self.imagen = False
-
+        self.connect('draw', self.__do_draw)
         self.show_all()
 
         self.set_size_request(-1, 80)
 
     def set_imagen(self, path):
         self.imagen = GdkPixbuf.Pixbuf.new_from_file(path)
+        self.imagen.savev(self.temp_path, "png", [], [])
+        self.queue_draw()
 
     def __do_draw(self, widget, context):
         if not self.imagen:
