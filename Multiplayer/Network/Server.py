@@ -285,7 +285,7 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
             'path': '',
             'pos': '0,0,0',
             'energia': 5,
-            'vidas': 0,
+            'vidas': 5,
             'puntos': 0,
             'bala': '-,-,-',
             'explosiones': {},

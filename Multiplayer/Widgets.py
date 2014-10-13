@@ -39,9 +39,10 @@ class Derecha(Gtk.EventBox):
         self.modify_bg(0, Gdk.color_parse("#ffffff"))
         self.set_border_width(5)
 
+        self._dict = {}
         self.lista = Lista()
-        self.energia = Progreso_Descarga()
-        self.vidas = Progreso_Descarga()
+        self.energia = Progreso()
+        self.vidas = Progreso()
         self.preview = PreviewTank()
         self.server = Gtk.Label("111.111.111.111")
         self.client = Gtk.Label("111.111.111.111")
@@ -96,7 +97,16 @@ class Derecha(Gtk.EventBox):
         self.set_size_request(150, -1)
 
     def update(self, _dict):
+        if not self._dict:
+            self._dict['vidas'] = _dict[self.client.get_text()]['vidas']
+            self._dict['energia'] = _dict[self.client.get_text()]['energia']
         self.lista.update(_dict)
+        maximo_e = self._dict['energia']
+        val_e = _dict[self.client.get_text()]['energia']
+        maximo_v = self._dict['vidas']
+        val_v = _dict[self.client.get_text()]['vidas']
+        self.energia.set_progress(100 * val_e / maximo_e)
+        self.vidas.set_progress(100 * val_v / maximo_v)
 
     def set_data(self, ip, server, tanque):
         self.server.set_text(server)
@@ -174,7 +184,7 @@ class Lista(Gtk.TreeView):
         model.set_sort_column_id(2, Gtk.SortType.DESCENDING)
 
 
-class Progreso_Descarga(Gtk.EventBox):
+class Progreso(Gtk.EventBox):
     """
     Barra de progreso para mostrar energia.
     """
