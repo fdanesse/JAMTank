@@ -25,6 +25,7 @@ from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import GObject
+#from gi.repository import Pango
 
 """
 Contiene Opciones:
@@ -50,24 +51,29 @@ class IntroWidget(Gtk.Table):
         self.temp_path = "/dev/shm/jamtank_intro_img.png"
 
         boton = Gtk.Button("Jugar Solo")
+        #boton.modify_font(Pango.FontDescription('Purisa 12'))
         boton.connect("clicked", self.__emit_switch, "solo")
         self.attach(boton, 1, 2, 1, 2)
         boton.set_sensitive(False)
 
         boton = Gtk.Button("Crear Juego en Red")
+        #boton.modify_font(Pango.FontDescription('Purisa 12'))
         boton.connect("clicked", self.__emit_switch, "red")
         self.attach(boton, 1, 2, 2, 3)
 
         boton = Gtk.Button("Unirse a Juego Existente")
+        #boton.modify_font(Pango.FontDescription('Purisa 12'))
         boton.connect("clicked", self.__emit_switch, "join")
         self.attach(boton, 1, 2, 3, 4)
 
         boton = Gtk.Button("Creditos")
+        #boton.modify_font(Pango.FontDescription('Purisa 12'))
         boton.connect("clicked", self.__emit_switch, "creditos")
         self.attach(boton, 1, 2, 4, 5)
         boton.set_sensitive(False)
 
         boton = Gtk.Button("Salir")
+        #boton.modify_font(Pango.FontDescription('Purisa 12'))
         boton.connect("clicked", self.__emit_switch, "salir")
         self.attach(boton, 1, 2, 5, 6)
 
