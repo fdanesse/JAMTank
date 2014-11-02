@@ -24,7 +24,6 @@ from gi.repository import Gdk
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import GdkPixbuf
-from gi.repository import Pango
 
 
 class DialogoEndGame(Gtk.Dialog):
@@ -37,12 +36,9 @@ class DialogoEndGame(Gtk.Dialog):
             buttons=["Cerrar", Gtk.ResponseType.ACCEPT])
 
         #self.set_decorated(False)
-        self.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         self.set_border_width(15)
 
         label = Gtk.Label("La Batalla ha Concluido")
-        label.modify_font(Pango.FontDescription('Purisa 16'))
-        label.modify_fg(Gtk.StateFlags.NORMAL, Gdk.color_parse("#0000ff"))
         label.show()
         informe = InformeWidget(_dict)
         self.vbox.pack_start(label, False, False, 5)
@@ -55,8 +51,6 @@ class InformeWidget(Gtk.EventBox):
     def __init__(self, _dict):
 
         Gtk.EventBox.__init__(self)
-
-        self.modify_bg(0, Gdk.color_parse("#ffeeaa"))
 
         self.lista = ListaDatos(_dict)
 

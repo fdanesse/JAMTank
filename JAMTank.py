@@ -59,7 +59,6 @@ class JAMTank(Gtk.Window):
         Gtk.Window.__init__(self)
 
         self.set_title("JAMTank")
-        self.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         self.set_icon_from_file(os.path.join(BASE, "Iconos", "jamtank.svg"))
 
         self.set_resizable(True)

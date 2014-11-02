@@ -70,7 +70,6 @@ class SelectServer(Gtk.EventBox):
             'vidas': 5,
             }
 
-        self.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         self.set_border_width(10)
 
         self.lista_mapas = Lista()
@@ -83,10 +82,8 @@ class SelectServer(Gtk.EventBox):
 
         frame = Gtk.Frame()
         frame.set_label(" Selecciona el Mapa: ")
-        frame.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         frame.set_border_width(4)
         event = Gtk.EventBox()
-        event.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         event.set_border_width(4)
         frame.add(event)
         self.lista_mapas.set_headers_visible(False)
@@ -98,10 +95,8 @@ class SelectServer(Gtk.EventBox):
 
         frame = Gtk.Frame()
         frame.set_label(" Selecciona tu Tanque: ")
-        frame.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         frame.set_border_width(4)
         event = Gtk.EventBox()
-        event.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         event.set_border_width(4)
         frame.add(event)
         self.lista_tanques.set_headers_visible(False)
@@ -112,7 +107,6 @@ class SelectServer(Gtk.EventBox):
         tabla.attach_defaults(frame, 0, 2, 4, 7)
 
         event = Gtk.EventBox()
-        event.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         event.set_border_width(10)
         event.add(self.mapaview)
         tabla.attach_defaults(event, 2, 5, 0, 4)
@@ -121,10 +115,8 @@ class SelectServer(Gtk.EventBox):
 
         frame = Gtk.Frame()
         frame.set_label(" Escribe tu Apodo: ")
-        frame.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         frame.set_border_width(4)
         event = Gtk.EventBox()
-        event.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         event.set_border_width(4)
         frame.add(event)
         nick = Gtk.Entry()
@@ -133,7 +125,6 @@ class SelectServer(Gtk.EventBox):
         tabla.attach_defaults(frame, 2, 5, 4, 5)
 
         event = Gtk.EventBox()
-        event.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         event.set_border_width(4)
         event.add(self.oponentes)
         tabla.attach_defaults(event, 3, 5, 5, 7)

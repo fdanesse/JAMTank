@@ -54,11 +54,11 @@ class IntroWidget(Gtk.Table):
         self.attach(boton, 1, 2, 1, 2)
         boton.set_sensitive(False)
 
-        boton = Gtk.Button("Crear Juego en Red")
+        boton = Gtk.Button("Crear en Red")
         boton.connect("clicked", self.__emit_switch, "red")
         self.attach(boton, 1, 2, 2, 3)
 
-        boton = Gtk.Button("Unirse a Juego Existente")
+        boton = Gtk.Button("Unirse en Red")
         boton.connect("clicked", self.__emit_switch, "join")
         self.attach(boton, 1, 2, 3, 4)
 

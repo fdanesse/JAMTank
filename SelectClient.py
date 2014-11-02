@@ -62,7 +62,6 @@ class SelectClient(Gtk.EventBox):
             'server': ""
             }
 
-        self.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         self.set_border_width(10)
 
         self.lista_tanques = Lista()
@@ -72,10 +71,8 @@ class SelectClient(Gtk.EventBox):
 
         frame = Gtk.Frame()
         frame.set_label(" Selecciona tu Tanque: ")
-        frame.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         frame.set_border_width(4)
         event = Gtk.EventBox()
-        event.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         event.set_border_width(4)
         frame.add(event)
         self.lista_tanques.set_headers_visible(False)
@@ -87,10 +84,8 @@ class SelectClient(Gtk.EventBox):
 
         frame = Gtk.Frame()
         frame.set_label(" Escribe la Ip del Servidor: ")
-        frame.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         frame.set_border_width(4)
         event = Gtk.EventBox()
-        event.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         event.set_border_width(4)
         frame.add(event)
         server = Gtk.Entry()
@@ -100,10 +95,8 @@ class SelectClient(Gtk.EventBox):
 
         frame = Gtk.Frame()
         frame.set_label(" Escribe tu Apodo: ")
-        frame.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         frame.set_border_width(4)
         event = Gtk.EventBox()
-        event.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         event.set_border_width(4)
         frame.add(event)
         nick = Gtk.Entry()

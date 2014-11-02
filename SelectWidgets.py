@@ -212,11 +212,9 @@ class IpFrame(Gtk.Frame):
         Gtk.Frame.__init__(self)
 
         self.set_label(" Ip Local: 192.168.1.1  ")
-        self.modify_bg(0, Gdk.color_parse("#ffffff"))
 
         event = Gtk.EventBox()
         event.set_border_width(4)
-        event.modify_bg(0, Gdk.color_parse("#ffffff"))
 
         hbox = Gtk.HBox()
         self.serverip = Gtk.Entry()
