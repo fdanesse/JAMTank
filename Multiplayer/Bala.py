@@ -19,7 +19,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import os
 import pygame
 from math import sin
 from math import cos
@@ -47,11 +46,6 @@ class Bala(Sprite):
         self.temp_y = y + self.dy
         self.rect.centerx = self.temp_x
         self.rect.centery = self.temp_y
-
-        self.sound_path = os.path.dirname(os.path.dirname(image_path))
-        sound_path = os.path.join(self.sound_path, "Audio", "disparo.ogg")
-        disparo = pygame.mixer.Sound(sound_path)
-        disparo.play()
 
     def __get_vector(self, angulo):
         dx = int(cos(radians(angulo)) * VELOCIDAD)

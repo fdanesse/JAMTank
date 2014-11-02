@@ -63,6 +63,10 @@ class Juego(GObject.Object):
         self.GAME = {}
         self.GAME['mapa'] = str(_dict['mapa'].strip())
 
+        self.sound_disparo = False
+        self.sound_juego = False
+        self.sound_explosion = False
+
         self.ip = get_ip()
         self.JUGADORES = {}
         self.JUGADORES[self.ip] = get_model()
@@ -172,6 +176,9 @@ class Juego(GObject.Object):
                 dirpath = os.path.dirname(os.path.dirname(self.GAME['mapa']))
                 dir_path = os.path.join(dirpath, "Explosion")
                 for d in range(0, len(explosiones), 2):
+                    channel = pygame.mixer.find_channel()
+                    if channel:
+                        channel.play(self.sound_explosion)
                     self.explosiones.add(Explosion(int(explosiones[d]),
                         int(explosiones[d + 1]), dir_path))
 
@@ -191,9 +198,6 @@ class Juego(GObject.Object):
                     break
 
     def __actualizar_tanque(self, ip, nick, tanque, a, x, y):
-        """
-        Actualiza posiciòn de tanque.
-        """
         tanque = os.path.join(os.path.dirname(BASE_PATH), "Tanques", tanque)
 
         if not ip in self.JUGADORES.keys():
@@ -217,18 +221,8 @@ class Juego(GObject.Object):
                 break
 
     def __actualizar_bala(self, ip, aa, xx, yy):
-        """
-        Actualiza la posiciòn de las balas.
-        """
         if not ip in self.BALAS.keys():
-            self.BALAS[ip] = True
-            image_path = os.path.join(os.path.dirname(
-                os.path.dirname(self.GAME['mapa'])), 'Iconos', 'bala.png')
-            bala = Bala(aa, xx, yy, image_path, RESOLUCION_INICIAL, ip)
-            self.balas.add(bala)
-            if ip == self.ip:
-                self.bala = bala
-
+            self.__evento_disparar(ip, aa, xx, yy)
         else:
             for bala in self.balas.sprites():
                 if ip == bala.ip:
@@ -238,10 +232,19 @@ class Juego(GObject.Object):
                         self.__eliminar_bala(bala, ip)
                     break
 
+    def __evento_disparar(self, ip, aa, xx, yy):
+        channel = pygame.mixer.find_channel()
+        if channel:
+            channel.play(self.sound_disparo)
+        self.BALAS[ip] = True
+        image_path = os.path.join(os.path.dirname(
+            os.path.dirname(self.GAME['mapa'])), 'Iconos', 'bala.png')
+        bala = Bala(aa, xx, yy, image_path, RESOLUCION_INICIAL, ip)
+        self.balas.add(bala)
+        if ip == self.ip:
+            self.bala = bala
+
     def __eliminar_bala(self, bala, ip):
-        """
-        Elimina una bala.
-        """
         bala.kill()
         del(bala)
         bala = False
@@ -253,9 +256,6 @@ class Juego(GObject.Object):
             self.bala = False
 
     def __eliminar_jugador(self, j, ip):
-        """
-        Elimina un Jugador.
-        """
         j.kill()
         del(j)
         j = False
@@ -382,7 +382,16 @@ class Juego(GObject.Object):
 
         pygame.mixer.init(44100, -16, 2, 2048)
         pygame.mixer.music.set_volume(1.0)
-        #sonido_juego.play(-1)
+        path = os.path.dirname(BASE_PATH)
+        sound = os.path.join(path, "Audio", "Juego.ogg")
+        self.sound_juego = pygame.mixer.Sound(sound)
+        self.sound_juego.play(-1)
+
+        disparo = os.path.join(path, "Audio", "disparo.ogg")
+        self.sound_disparo = pygame.mixer.Sound(disparo)
+
+        explosion = os.path.join(path, "Audio", "explosion.ogg")
+        self.sound_explosion = pygame.mixer.Sound(explosion)
 
         self.jugador = Jugador(self.JUGADORES[self.ip]['tanque'],
             RESOLUCION_INICIAL, self.ip)
