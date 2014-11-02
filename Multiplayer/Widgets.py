@@ -36,7 +36,7 @@ class Derecha(Gtk.EventBox):
 
         Gtk.EventBox.__init__(self)
 
-        self.modify_bg(0, Gdk.color_parse("#ffffff"))
+        self.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         self.set_border_width(5)
 
         self._dict = {}
@@ -193,7 +193,7 @@ class Progreso(Gtk.EventBox):
 
         Gtk.EventBox.__init__(self)
 
-        self.modify_bg(0, Gdk.color_parse("#ffffff"))
+        self.modify_bg(0, Gdk.color_parse("#ffeeaa"))
 
         self.escala = ProgressBar(
             Gtk.Adjustment(0.0, 0.0, 101.0, 0.1, 1.0, 1.0))
@@ -261,7 +261,7 @@ class PreviewTank(Gtk.DrawingArea):
 
         Gtk.DrawingArea.__init__(self)
 
-        self.modify_bg(0, Gdk.color_parse("#ffffff"))
+        self.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         self.temp_path = "/dev/shm/prev.png"
         self.imagen = False
         self.connect('draw', self.__do_draw)

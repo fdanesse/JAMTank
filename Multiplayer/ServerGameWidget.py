@@ -80,7 +80,7 @@ class GameWidget(Gtk.Paned):
 
         Gtk.Paned.__init__(self, orientation=Gtk.Orientation.HORIZONTAL)
 
-        self.modify_bg(0, Gdk.color_parse("#ffffff"))
+        self.modify_bg(0, Gdk.color_parse("#ffeeaa"))
 
         self.drawing = DrawingWidget()
         self.derecha = Derecha()
@@ -199,6 +199,7 @@ class DrawingWidget(Gtk.DrawingArea):
         Comienza a correr el Juego.
         """
         try:
+            # FIXME: Agregar Dialogo con explicacion sobre teclas
             xid = self.get_property('window').get_xid()
             os.putenv('SDL_WINDOWID', str(xid))
             self.juego = Juego(dict(_dict), self.client)

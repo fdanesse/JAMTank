@@ -20,6 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 from gi.repository import Gtk
+from gi.repository import Gdk
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import GdkPixbuf
@@ -35,7 +36,7 @@ class DialogoEndGame(Gtk.Dialog):
             buttons=["Cerrar", Gtk.ResponseType.ACCEPT])
 
         #self.set_decorated(False)
-        #self.modify_bg(0, get_colors("window"))
+        self.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         self.set_border_width(15)
 
         informe = InformeWidget(_dict)
@@ -48,6 +49,8 @@ class InformeWidget(Gtk.EventBox):
     def __init__(self, _dict):
 
         Gtk.EventBox.__init__(self)
+
+        self.modify_bg(0, Gdk.color_parse("#ffeeaa"))
 
         self.lista = ListaDatos(_dict)
 
