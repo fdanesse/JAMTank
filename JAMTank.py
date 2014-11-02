@@ -26,11 +26,20 @@ from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GLib
 
-BASE = os.path.dirname(__file__)
-
 from IntroWidget import IntroWidget
 from SelectServer import SelectServer
 from SelectClient import SelectClient
+
+BASE = os.path.dirname(__file__)
+
+screen = Gdk.Screen.get_default()
+css_provider = Gtk.CssProvider()
+style_path = os.path.join(BASE, "Estilo.css")
+css_provider.load_from_path(style_path)
+context = Gtk.StyleContext()
+
+context.add_provider_for_screen(screen, css_provider,
+    Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
 """
 Requiere:

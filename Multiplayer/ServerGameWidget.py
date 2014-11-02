@@ -290,7 +290,7 @@ class Dialogo(Gtk.Dialog):
             flags=Gtk.DialogFlags.MODAL)
 
         #self.set_decorated(False)
-        #self.modify_bg(0, get_colors("window"))
+        self.modify_bg(0, Gdk.color_parse("#ffeeaa"))
         self.set_border_width(15)
 
         label = Gtk.Label(text)

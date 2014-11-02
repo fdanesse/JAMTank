@@ -1,0 +1,22 @@
+GtkFrame {
+    color: #000000;
+    font: Purisa 10;
+}
+GtkLabel {
+    color: #000000;
+    font: Purisa 10;
+}
+
+GtkButton {
+    color: #000000;
+    font: Purisa 10;
+    background: #55ddff;
+}
+GtkButton:insensitive {
+    background: #afdde9;
+}
+GtkButton:prelight {
+    color: #0000ff;
+    font: Purisa 12;
+    background: #d5f6ff;
+}
