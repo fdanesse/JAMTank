@@ -183,6 +183,7 @@ class Lista(Gtk.TreeView):
             return False
 
         texto, path = elementos[0]
+        texto = texto.split('.')[0]
         icono = os.path.join(path)
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(icono, 50, -1)
         self.modelo.append([pixbuf, texto, path])
