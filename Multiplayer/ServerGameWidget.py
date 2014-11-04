@@ -191,7 +191,6 @@ class DrawingWidget(Gtk.DrawingArea):
         self.emit('salir')
         dialog.run()
         dialog.destroy()
-        #self.emit('salir')
 
     def __run_game(self, _dict):
         """

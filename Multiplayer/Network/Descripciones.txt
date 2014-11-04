@@ -17,4 +17,3 @@ Cuando Cliente Remoto se desconecta:
 Cuando Host se desconecta:
     ENVIA: "END," (En el servidor, self.server.GAME['estado'] = False, lo cual enviará "END," a todos los clientes en la siguiente conexión, lo cual hará salir a todos del juego.)
     RECIBE: "END"
-

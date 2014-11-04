@@ -100,6 +100,7 @@ class SelectClient(Gtk.EventBox):
         event.set_border_width(4)
         frame.add(event)
         nick = Gtk.Entry()
+        nick.set_max_length(10)
         nick.connect("changed", self.__change_nick)
         event.add(nick)
         tabla.attach_defaults(frame, 2, 4, 1, 2)
