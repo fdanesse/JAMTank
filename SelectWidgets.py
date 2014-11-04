@@ -22,7 +22,6 @@
 import os
 
 from gi.repository import Gtk
-from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import GObject
 from gi.repository import GLib
@@ -100,10 +99,10 @@ class NumBox(Gtk.HBox):
     def __change(self, widget):
         label = widget.get_label()
         if label == "-":
-            if self.valor - 1 >= min(self.rango):
+            if self.valor - 1 > min(self.rango):
                 self.valor -= 1
         elif label == "+":
-            if self.valor + 1 <= max(self.rango) + 1:
+            if self.valor + 1 < max(self.rango) + 1:
                 self.valor += 1
 
         self.emit("valor", self.valor)

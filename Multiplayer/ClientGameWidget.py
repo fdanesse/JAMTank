@@ -23,7 +23,6 @@ import os
 import time
 
 from gi.repository import Gtk
-from gi.repository import Gdk
 from gi.repository import GdkX11
 from gi.repository import GObject
 from gi.repository import GLib

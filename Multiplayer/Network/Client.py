@@ -92,7 +92,7 @@ class Client(GObject.Object):
         entrada = ""
         while not entrada:
             try:
-                entrada = self.socket.recv(512)
+                entrada = self.socket.recv(1024)
                 entrada = entrada.replace("*", "").strip()
             except socket.error, err:
                 if MAKELOG:

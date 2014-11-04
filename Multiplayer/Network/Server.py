@@ -67,7 +67,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                     str(self.client_address[0]))
 
                 if respuesta:
-                    while len(respuesta) < 512:
+                    while len(respuesta) < 1024:
                         respuesta = "%s*" % respuesta
                     self.wfile.write(respuesta)
                 else:
@@ -323,6 +323,6 @@ if __name__ == "__main__":
     if ip:
         server = Server(host=ip, port=5000, handler=RequestHandler)
         server.GAME['mapa'] = "fondo1.png"
-        server.GAME['jugadores'] = 2
+        server.GAME['jugadores'] = 3
         server.GAME['vidas'] = 5
         server.serve_forever()
