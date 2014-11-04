@@ -59,7 +59,7 @@ class SelectServer(Gtk.EventBox):
 
         Gtk.EventBox.__init__(self)
 
-        self.imagen = False
+        #self.imagen = False
 
         self.game_dict = {
             'server': get_ip(),
@@ -78,7 +78,7 @@ class SelectServer(Gtk.EventBox):
         self.tanqueview = Gtk.Image()
         self.oponentes = OponentesSelectBox()
 
-        tabla = Gtk.Table(columns=5, rows=8, homogeneous=True)
+        tabla = Gtk.Table(columns=5, rows=6, homogeneous=True)
 
         frame = Gtk.Frame()
         frame.set_label(" Selecciona el Mapa: ")
@@ -91,7 +91,7 @@ class SelectServer(Gtk.EventBox):
         scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         scroll.add(self.lista_mapas)
         event.add(scroll)
-        tabla.attach_defaults(frame, 0, 2, 0, 4)
+        tabla.attach_defaults(frame, 0, 2, 0, 3)
 
         frame = Gtk.Frame()
         frame.set_label(" Selecciona tu Tanque: ")
@@ -104,14 +104,14 @@ class SelectServer(Gtk.EventBox):
         scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         scroll.add(self.lista_tanques)
         event.add(scroll)
-        tabla.attach_defaults(frame, 0, 2, 4, 7)
+        tabla.attach_defaults(frame, 0, 2, 3, 5)
 
         event = Gtk.EventBox()
         event.set_border_width(10)
         event.add(self.mapaview)
-        tabla.attach_defaults(event, 2, 5, 0, 4)
+        tabla.attach_defaults(event, 2, 5, 0, 3)
 
-        tabla.attach_defaults(self.tanqueview, 2, 3, 5, 6)
+        tabla.attach_defaults(self.tanqueview, 2, 3, 4, 5)
 
         frame = Gtk.Frame()
         frame.set_label(" Escribe tu Apodo: ")
@@ -122,21 +122,21 @@ class SelectServer(Gtk.EventBox):
         nick = Gtk.Entry()
         nick.connect("changed", self.__change_nick)
         event.add(nick)
-        tabla.attach_defaults(frame, 2, 5, 4, 5)
+        tabla.attach_defaults(frame, 2, 5, 3, 4)
 
         event = Gtk.EventBox()
         event.set_border_width(4)
         event.add(self.oponentes)
-        tabla.attach_defaults(event, 3, 5, 5, 7)
+        tabla.attach_defaults(event, 3, 5, 4, 5)
 
         button = Gtk.Button("Cancelar")
-        tabla.attach_defaults(button, 0, 1, 7, 8)
+        tabla.attach_defaults(button, 0, 1, 5, 6)
         button.connect("clicked", self.__accion, "salir")
 
         self.jugar = Gtk.Button("Jugar")
         self.jugar.set_sensitive(False)
         self.jugar.connect("clicked", self.__accion, "run")
-        tabla.attach_defaults(self.jugar, 4, 5, 7, 8)
+        tabla.attach_defaults(self.jugar, 4, 5, 5, 6)
 
         self.add(tabla)
 
@@ -151,7 +151,7 @@ class SelectServer(Gtk.EventBox):
         elementos = []
         mapas_path = os.path.join(BASE, "Mapas")
 
-        for arch in os.listdir(mapas_path):
+        for arch in sorted(os.listdir(mapas_path)):
             path = os.path.join(mapas_path, arch)
             archivo = os.path.basename(path)
             elementos.append([archivo, path])
@@ -162,7 +162,7 @@ class SelectServer(Gtk.EventBox):
         elementos = []
         mapas_path = os.path.join(BASE, "Tanques")
 
-        for arch in os.listdir(mapas_path):
+        for arch in sorted(os.listdir(mapas_path)):
             path = os.path.join(mapas_path, arch)
             archivo = os.path.basename(path)
             elementos.append([archivo, path])

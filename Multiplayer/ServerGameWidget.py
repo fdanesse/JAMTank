@@ -188,9 +188,10 @@ class DrawingWidget(Gtk.DrawingArea):
         El juego recibe salir desde el server.
         """
         dialog = DialogoEndGame(parent=self.get_toplevel(), _dict=_dict)
+        self.emit('salir')
         dialog.run()
         dialog.destroy()
-        self.emit('salir')
+        #self.emit('salir')
 
     def __run_game(self, _dict):
         """
@@ -287,7 +288,7 @@ class Dialogo(Gtk.Dialog):
             parent=parent,
             flags=Gtk.DialogFlags.MODAL)
 
-        #self.set_decorated(False)
+        self.set_decorated(False)
         self.set_border_width(15)
 
         label = Gtk.Label(text)

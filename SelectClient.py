@@ -53,8 +53,8 @@ class SelectClient(Gtk.EventBox):
 
         Gtk.EventBox.__init__(self)
 
-        self.temp_path = "    mp/jamtank_intro_img.png"
-        self.imagen = False
+        #self.temp_path = "    mp/jamtank_intro_img.png"
+        #self.imagen = False
 
         self.game_dict = {
             'nick': "",
@@ -144,7 +144,7 @@ class SelectClient(Gtk.EventBox):
         elementos = []
         mapas_path = os.path.join(BASE, "Tanques")
 
-        for arch in os.listdir(mapas_path):
+        for arch in sorted(os.listdir(mapas_path)):
             path = os.path.join(mapas_path, arch)
             archivo = os.path.basename(path)
             elementos.append([archivo, path])

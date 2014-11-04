@@ -155,9 +155,10 @@ class DrawingWidget(Gtk.DrawingArea):
         El juego recibe salir desde el server.
         """
         dialog = DialogoEndGame(parent=self.get_toplevel(), _dict=_dict)
+        self.emit('salir')
         dialog.run()
         dialog.destroy()
-        self.emit('salir')
+        #self.emit('salir')
 
     def __run_game(self, _dict):
         """
@@ -215,7 +216,7 @@ class DrawingWidget(Gtk.DrawingArea):
             del(self.client)
             self.client = False
         dialog = Dialogo(parent=self.get_toplevel(),
-            text="Cliente Sale del Juego")
+            text="Saliendo del Juego . . .")
         dialog.run()
         dialog.destroy()
         self.emit('salir')
@@ -229,8 +230,8 @@ class Dialogo(Gtk.Dialog):
             parent=parent,
             flags=Gtk.DialogFlags.MODAL)
 
-        #self.set_decorated(False)
-        self.set_border_width(15)
+        self.set_decorated(False)
+        self.set_border_width(20)
 
         label = Gtk.Label(text)
         label.show()
@@ -240,7 +241,7 @@ class Dialogo(Gtk.Dialog):
         self.connect("realize", self.__do_realize)
 
     def __do_realize(self, widget):
-        GLib.timeout_add(2000, self.__destroy)
+        GLib.timeout_add(3000, self.__destroy)
 
     def __destroy(self):
         self.destroy()

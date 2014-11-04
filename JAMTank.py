@@ -61,10 +61,11 @@ class JAMTank(Gtk.Window):
         self.set_title("JAMTank")
         self.set_icon_from_file(os.path.join(BASE, "Iconos", "jamtank.svg"))
 
-        self.set_resizable(True)
-        self.set_size_request(640, 480)
+        #self.set_resizable(True)
+        #self.set_size_request(640, 480)
         self.set_border_width(2)
-        self.set_position(Gtk.WindowPosition.CENTER)
+        #self.set_position(Gtk.WindowPosition.CENTER)
+        self.fullscreen()
 
         # Fase 1: Introduccion
         self.intro_widget = False
