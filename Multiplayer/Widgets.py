@@ -60,16 +60,10 @@ class Derecha(Gtk.EventBox):
         frame.add(self.client)
         vbox.pack_start(frame, False, True, 0)
 
-        scroll = Gtk.ScrolledWindow()
-        scroll.set_policy(
-            Gtk.PolicyType.NEVER,
-            Gtk.PolicyType.AUTOMATIC)
-        scroll.add_with_viewport(self.lista)
-
         frame = Gtk.Frame()
         frame.set_label(" Jugadores ")
         frame.set_label_align(0.5, 0.5)
-        frame.add(scroll)
+        frame.add(self.lista)
         vbox.pack_start(frame, True, True, 0)
 
         frame = Gtk.Frame()
