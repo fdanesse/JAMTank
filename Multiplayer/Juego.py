@@ -22,6 +22,7 @@
 import os
 import pygame
 import random
+import platform
 
 from gi.repository import GObject
 from gi.repository import Gtk
@@ -37,6 +38,7 @@ from Globales import APPEND_LOG
 
 RESOLUCION_INICIAL = (800, 600)
 BASE_PATH = os.path.dirname(__file__)
+OLPC = 'olpc' in platform.platform()
 
 
 def get_model():
@@ -290,7 +292,8 @@ class Juego(GObject.Object):
         GLib.timeout_add(1500, self.__emit_update)
         while self.estado == "En Juego":
             try:
-                self.reloj.tick(35)
+                if not OLPC:
+                    self.reloj.tick(35)
                 while Gtk.events_pending():
                     Gtk.main_iteration()
                 self.jugadores.clear(self.ventana, self.escenario)
@@ -312,7 +315,7 @@ class Juego(GObject.Object):
                 pygame.display.update()
                 pygame.event.pump()
                 pygame.event.clear()
-                pygame.time.wait(1)
+                #pygame.time.wait(1)
 
             except:
                 self.estado = False
