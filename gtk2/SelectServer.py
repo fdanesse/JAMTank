@@ -26,7 +26,7 @@ import gobject
 from SelectWidgets import Lista
 from SelectWidgets import OponentesSelectBox
 
-from Globales import get_ip
+from Multiplayer.Globales import get_ip
 
 BASE = os.path.dirname(__file__)
 

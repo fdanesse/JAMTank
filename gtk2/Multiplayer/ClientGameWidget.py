@@ -31,6 +31,7 @@ from DialogoEndGame import DialogoEndGame
 
 from Globales import MAKELOG
 from Globales import APPEND_LOG
+from Globales import get_ip
 
 if MAKELOG:
     from Globales import reset_log
@@ -68,7 +69,6 @@ class GameWidget(gtk.Paned):
         self.emit('salir')
 
     def setup_init(self, _dict):
-        from Globales import get_ip
         ip = get_ip()
         server = str(_dict['server'])
         tanque = str(_dict['tanque'])

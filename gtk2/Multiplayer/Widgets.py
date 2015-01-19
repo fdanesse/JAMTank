@@ -86,13 +86,13 @@ class Derecha(gtk.EventBox):
 
     def update(self, _dict):
         if not self._dict:
-            self._dict['vidas'] = _dict[self.client.get_text()]['vidas']
-            self._dict['energia'] = _dict[self.client.get_text()]['energia']
+            self._dict['vidas'] = _dict[self.client.get_text()].get('vidas', 5)
+            self._dict['energia'] = _dict[self.client.get_text()].get('energia', 5)
         self.lista.update(_dict)
         maximo_e = self._dict['energia']
-        val_e = _dict[self.client.get_text()]['energia']
+        val_e = _dict[self.client.get_text()].get('energia', 5)
         maximo_v = self._dict['vidas']
-        val_v = _dict[self.client.get_text()]['vidas']
+        val_v = _dict[self.client.get_text()].get('vidas', 5)
         self.energia.set_progress(100 * val_e / maximo_e)
         self.vidas.set_progress(100 * val_v / maximo_v)
 

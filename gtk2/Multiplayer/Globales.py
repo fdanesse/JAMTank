@@ -45,15 +45,13 @@ def __return_ip(interfaz):
             ip = datos.split('inet ')[1].split('netmask ')[0].strip()
         else:
             ip = datos.split('Direc. inet:')[1].split('Difus.:')[0].strip()
-    return ip
+    return ip.strip()
 
 
 def get_ip():
     ip = __return_ip("wlan0")
     if not ip:
         ip = __return_ip("eth0")
-    if not ip:
-        ip = 'localhost'
     return ip
 
 
