@@ -47,7 +47,7 @@ def __return_ip(interfaz):
             if 'Direc. inet:' in linea and 'Difus.:' in linea and 'Másc:' in linea:
                 datos = linea
                 break
-    ip = ''
+    ip = False
     if datos:
         if 'olpc' in sistema:
             ip = datos.split('inet ')[1].split('netmask ')[0].strip()
@@ -60,6 +60,4 @@ def get_ip():
     ip = __return_ip("wlan0")
     if not ip:
         ip = __return_ip("eth0")
-    if not ip:
-        ip = 'localhost'
     return ip

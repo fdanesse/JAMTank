@@ -98,9 +98,6 @@ class JAMTank(Gtk.Window):
         self.eventos = []
 
     def __do_realize(self, widget):
-        """
-        Cuando la ventana está realizada, carga los widgets de Introducción.
-        """
         self.switch(False, 1)
 
     def __solo_run(self, widget, datos):
@@ -163,10 +160,8 @@ class JAMTank(Gtk.Window):
     def __key_press_event(self, widget, event):
         if not self.widget_game:
             return
-
         nombre = Gdk.keyval_name(event.keyval)
         teclas = ["Up", "Down", "Right", "Left", "space", "Escape"]
-
         if nombre in teclas and not nombre in self.eventos:
             if nombre == "Up" and "Down" in self.eventos:
                 self.eventos.remove("Down")
@@ -176,7 +171,6 @@ class JAMTank(Gtk.Window):
                 self.eventos.remove("Left")
             elif nombre == "Left" and "Right" in self.eventos:
                 self.eventos.remove("Right")
-
             self.eventos.append(nombre)
         self.__update_events()
         return False
@@ -184,12 +178,10 @@ class JAMTank(Gtk.Window):
     def __key_release_event(self, widget, event):
         if not self.widget_game:
             return
-
         nombre = Gdk.keyval_name(event.keyval)
         teclas = ["Up", "Down", "Right", "Left", "space", "Escape"]
         if nombre in teclas and nombre in self.eventos:
             self.eventos.remove(nombre)
-
         self.__update_events()
         return False
 
@@ -217,8 +209,6 @@ class JAMTank(Gtk.Window):
             print "Esta PC será Servidor"
             self.select_widget = SelectServer()
             self.add(self.select_widget)
-            #GLib.idle_add(self.select_widget.load, os.path.join(
-            #    BASE, "Iconos", "jamtank.svg"))
             self.select_widget.connect("accion", self.__server_select_accion)
 
         elif valor == 4:
@@ -226,8 +216,6 @@ class JAMTank(Gtk.Window):
             print "Esta PC será Cliente"
             self.select_widget = SelectClient()
             self.add(self.select_widget)
-            #GLib.idle_add(self.select_widget.load, os.path.join(
-            #    BASE, "Iconos", "jamtank.svg"))
             self.select_widget.connect("accion", self.__client_select_accion)
 
         elif valor == 5:

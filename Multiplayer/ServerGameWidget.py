@@ -48,18 +48,14 @@ def terminate_thread(thread):
     Termina un hilo python desde otro hilo.
     thread debe ser una instancia threading.Thread
     """
-
     if not thread.isAlive():
         return
-
     import ctypes
     exc = ctypes.py_object(SystemExit)
     res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
         ctypes.c_long(thread.ident), exc)
-
     if res == 0:
         raise ValueError("No Existe el id de este hilo")
-
     elif res > 1:
         """
         si devuelve un número mayor que uno, estás en problemas, entonces
