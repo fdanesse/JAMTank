@@ -73,6 +73,7 @@ class GameWidget(gtk.Paned):
 
         gtk.Paned.__init__(self, orientation=gtk.ORIENTATION_HORIZONTAL)
 
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.drawing = DrawingWidget()
         self.derecha = Derecha()
 
@@ -274,6 +275,7 @@ class Dialogo(gtk.Dialog):
             parent=parent,
             flags=gtk.DIALOG_MODAL)
 
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_decorated(False)
         self.set_border_width(15)
         label = gtk.Label(text)

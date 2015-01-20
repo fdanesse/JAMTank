@@ -34,6 +34,7 @@ class Derecha(gtk.EventBox):
 
         self.set_border_width(5)
 
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self._dict = {}
         self.lista = Lista()
         self.energia = Progreso()
@@ -45,36 +46,42 @@ class Derecha(gtk.EventBox):
         vbox = gtk.VBox()
 
         frame = gtk.Frame()
+        frame.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         frame.set_label(" Servidor ")
         frame.set_label_align(0.5, 0.5)
         frame.add(self.server)
         vbox.pack_start(frame, False, True, 0)
 
         frame = gtk.Frame()
+        frame.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         frame.set_label(" Cliente ")
         frame.set_label_align(0.5, 0.5)
         frame.add(self.client)
         vbox.pack_start(frame, False, True, 0)
 
         frame = gtk.Frame()
+        frame.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         frame.set_label(" Jugadores ")
         frame.set_label_align(0.5, 0.5)
         frame.add(self.lista)
         vbox.pack_start(frame, True, True, 0)
 
         frame = gtk.Frame()
+        frame.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         frame.set_label(" Vidas ")
         frame.set_label_align(0.5, 0.5)
         frame.add(self.vidas)
         vbox.pack_end(frame, False, True, 0)
 
         frame = gtk.Frame()
+        frame.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         frame.set_label(" Energía ")
         frame.set_label_align(0.5, 0.5)
         frame.add(self.energia)
         vbox.pack_end(frame, False, True, 0)
 
         frame = gtk.Frame()
+        frame.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         frame.set_label(" Tanque ")
         frame.set_label_align(0.5, 0.5)
         frame.add(self.preview)
@@ -111,6 +118,7 @@ class Lista(gtk.TreeView):
             gobject.TYPE_STRING,
             gobject.TYPE_INT))
 
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.players = {}
         self.set_property("rules-hint", True)
         self.set_headers_visible(False)
@@ -181,6 +189,7 @@ class Progreso(gtk.EventBox):
         self.escala = ProgressBar(
             gtk.Adjustment(0.0, 0.0, 101.0, 0.1, 1.0, 1.0))
 
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.valor = 0
         self.add(self.escala)
         self.show_all()
@@ -200,6 +209,7 @@ class ProgressBar(gtk.HScale):
 
         gtk.HScale.__init__(self)
 
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.ajuste = ajuste
         self.set_digits(0)
         self.set_draw_value(False)

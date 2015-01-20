@@ -32,6 +32,7 @@ class DialogoEndGame(gtk.Dialog):
             flags=gtk.DIALOG_MODAL,
             buttons=("Cerrar", gtk.RESPONSE_ACCEPT))
 
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_decorated(False)
         self.set_border_width(15)
         label = gtk.Label("La Batalla ha Concluido")
@@ -48,6 +49,7 @@ class InformeWidget(gtk.EventBox):
 
         gtk.EventBox.__init__(self)
 
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.lista = ListaDatos(_dict)
         scroll = gtk.ScrolledWindow()
         scroll.set_policy(

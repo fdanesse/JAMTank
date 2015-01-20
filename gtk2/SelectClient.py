@@ -50,6 +50,8 @@ class SelectClient(gtk.EventBox):
 
         gtk.EventBox.__init__(self)
 
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+
         self.game_dict = {
             'nick': "",
             'tanque': "",
@@ -62,12 +64,15 @@ class SelectClient(gtk.EventBox):
         self.tanqueview = gtk.Image()
 
         tabla = gtk.Table(columns=4, rows=6, homogeneous=True)
+        tabla.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
 
         frame = gtk.Frame()
         frame.set_label(" Selecciona tu Tanque: ")
         frame.set_border_width(4)
         event = gtk.EventBox()
         event.set_border_width(4)
+        frame.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         frame.add(event)
         self.lista_tanques.set_headers_visible(False)
         scroll = gtk.ScrolledWindow()
@@ -81,6 +86,8 @@ class SelectClient(gtk.EventBox):
         frame.set_border_width(4)
         event = gtk.EventBox()
         event.set_border_width(4)
+        frame.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         frame.add(event)
         server = gtk.Entry()
         server.connect("changed", self.__change_server)
@@ -92,6 +99,8 @@ class SelectClient(gtk.EventBox):
         frame.set_border_width(4)
         event = gtk.EventBox()
         event.set_border_width(4)
+        frame.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         frame.add(event)
         nick = gtk.Entry()
         nick.set_max_length(10)

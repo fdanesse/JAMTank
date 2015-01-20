@@ -56,6 +56,8 @@ class SelectServer(gtk.EventBox):
 
         gtk.EventBox.__init__(self)
 
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+
         self.game_dict = {
             'server': get_ip(),
             'nick': '',
@@ -74,11 +76,14 @@ class SelectServer(gtk.EventBox):
         self.oponentes = OponentesSelectBox()
 
         tabla = gtk.Table(columns=5, rows=6, homogeneous=True)
+        tabla.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
 
         frame = gtk.Frame()
         frame.set_label(" Selecciona el Mapa: ")
         frame.set_border_width(4)
         event = gtk.EventBox()
+        frame.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         event.set_border_width(4)
         frame.add(event)
         self.lista_mapas.set_headers_visible(False)
@@ -93,6 +98,8 @@ class SelectServer(gtk.EventBox):
         frame.set_border_width(4)
         event = gtk.EventBox()
         event.set_border_width(4)
+        frame.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         frame.add(event)
         self.lista_tanques.set_headers_visible(False)
         scroll = gtk.ScrolledWindow()
@@ -103,6 +110,7 @@ class SelectServer(gtk.EventBox):
 
         event = gtk.EventBox()
         event.set_border_width(10)
+        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         event.add(self.mapaview)
         tabla.attach_defaults(event, 2, 5, 0, 3)
 
@@ -113,6 +121,8 @@ class SelectServer(gtk.EventBox):
         frame.set_border_width(4)
         event = gtk.EventBox()
         event.set_border_width(4)
+        frame.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         frame.add(event)
         nick = gtk.Entry()
         nick.set_max_length(10)
@@ -121,6 +131,7 @@ class SelectServer(gtk.EventBox):
         tabla.attach_defaults(frame, 2, 5, 3, 4)
 
         event = gtk.EventBox()
+        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         event.set_border_width(4)
         event.add(self.oponentes)
         tabla.attach_defaults(event, 3, 5, 4, 5)

@@ -41,14 +41,13 @@ class JAMTank(gtk.Window):
     Ventana gtk principal del Juego.
     """
 
-    __gtype_name__ = 'JAMTank'
-
     def __init__(self):
 
         gtk.Window.__init__(self)
 
         self.set_title("JAMTank")
         self.set_icon_from_file(os.path.join(BASE, "Iconos", "jamtank.svg"))
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
 
         #self.set_resizable(True)
         #self.set_size_request(640, 480)

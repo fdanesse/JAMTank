@@ -43,6 +43,7 @@ class IntroWidget(gtk.Table):
 
         gtk.Table.__init__(self, rows=7, columns=3, homogeneous=True)
 
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.imagen = False
         self.temp_path = "/dev/shm/jamtank_intro_img.png"
 

@@ -43,6 +43,8 @@ class JAMTank(Activity):
     def __init__(self, handle):
 
         Activity.__init__(self, handle)
+
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.socket = gtk.Socket()
         self.set_canvas(self.socket)
         self.interfaz = Interfaz()
@@ -67,6 +69,7 @@ class Interfaz(gtk.Plug):
 
         self.set_title("JAMTank")
         self.set_icon_from_file(os.path.join(BASE, "Iconos", "jamtank.svg"))
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
 
         #self.set_resizable(True)
         #self.set_size_request(640, 480)

@@ -20,12 +20,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
-
-#from gi.repository import gtk
-#from gi.repository import GdkPixbuf
-#from gi.repository import gobject
-#from gi.repository import gobject
-
 import gtk
 import gobject
 
@@ -107,7 +101,6 @@ class NumBox(gtk.HBox):
         elif label == "+":
             if self.valor + 1 < max(self.rango) + 1:
                 self.valor += 1
-
         self.emit("valor", self.valor)
         self.label.set_text(str(self.valor))
 
@@ -210,8 +203,9 @@ class IpFrame(gtk.Frame):
         gtk.Frame.__init__(self)
 
         self.set_label(" Ip Local: 192.168.1.1  ")
-
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         event = gtk.EventBox()
+        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         event.set_border_width(4)
 
         hbox = gtk.HBox()
