@@ -161,27 +161,27 @@ class Jugador(Sprite):
             return
 
         # girar en movimiento
-        if "Up" in self.eventos and "Right" in self.eventos:
+        if "w" in self.eventos and "d" in self.eventos:
             self.__arriba()
             self.__derecha()
-        elif "Up" in self.eventos and "Left" in self.eventos:
+        elif "w" in self.eventos and "a" in self.eventos:
             self.__arriba()
             self.__izquierda()
-        elif "Down" in self.eventos and "Right" in self.eventos:
+        elif "s" in self.eventos and "d" in self.eventos:
             self.__abajo()
             self.__izquierda()
-        elif "Down" in self.eventos and "Left" in self.eventos:
+        elif "s" in self.eventos and "a" in self.eventos:
             self.__abajo()
             self.__derecha()
 
         # moverse sin girar
-        elif "Up" in self.eventos:
+        elif "w" in self.eventos:
             self.__arriba()
-        elif "Down" in self.eventos:
+        elif "s" in self.eventos:
             self.__abajo()
 
         # girar sin moverse
-        elif "Right" in self.eventos:
+        elif "d" in self.eventos:
             self.__derecha()
-        elif "Left" in self.eventos:
+        elif "a" in self.eventos:
             self.__izquierda()

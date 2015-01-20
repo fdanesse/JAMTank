@@ -181,20 +181,17 @@ class Interfaz(Gtk.Plug):
     def key_press_event(self, widget, event):
         if not self.widget_game:
             return
-
         nombre = Gdk.keyval_name(event.keyval)
-        teclas = ["Up", "Down", "Right", "Left", "space", "Escape"]
-
+        teclas = ["w", "s", "d", "a", "space", "Escape"]
         if nombre in teclas and not nombre in self.eventos:
-            if nombre == "Up" and "Down" in self.eventos:
-                self.eventos.remove("Down")
-            elif nombre == "Down" and "Up" in self.eventos:
-                self.eventos.remove("Up")
-            elif nombre == "Right" and "Left" in self.eventos:
-                self.eventos.remove("Left")
-            elif nombre == "Left" and "Right" in self.eventos:
-                self.eventos.remove("Right")
-
+            if nombre == "w" and "s" in self.eventos:
+                self.eventos.remove("s")
+            elif nombre == "s" and "w" in self.eventos:
+                self.eventos.remove("w")
+            elif nombre == "d" and "a" in self.eventos:
+                self.eventos.remove("a")
+            elif nombre == "a" and "d" in self.eventos:
+                self.eventos.remove("d")
             self.eventos.append(nombre)
         self.__update_events()
         return False
@@ -202,12 +199,10 @@ class Interfaz(Gtk.Plug):
     def key_release_event(self, widget, event):
         if not self.widget_game:
             return
-
         nombre = Gdk.keyval_name(event.keyval)
-        teclas = ["Up", "Down", "Right", "Left", "space", "Escape"]
+        teclas = ["w", "s", "d", "a", "space", "Escape"]
         if nombre in teclas and nombre in self.eventos:
             self.eventos.remove(nombre)
-
         self.__update_events()
         return False
 

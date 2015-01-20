@@ -202,6 +202,14 @@ class DrawingWidget(gtk.DrawingArea):
     def __update_players(self, juego, _dict):
         self.emit("update", _dict)
 
+    def __do_draw(self, widget=None, event=None):
+        """
+        Reescalado en gtk, reescala en pygame.
+        """
+        rect = self.get_allocation()
+        if self.juego:
+            self.juego.escalar((rect.width, rect.height))
+
     def setup_init(self, _dict):
         """
         Comienza a correr el Server.
@@ -223,14 +231,6 @@ class DrawingWidget(gtk.DrawingArea):
             dialog.run()
             self.salir()
         return False
-
-    def __do_draw(self, widget, event):
-        """
-        Reescalado en gtk, reescala en pygame.
-        """
-        rect = self.get_allocation()
-        if self.juego:
-            self.juego.escalar((rect.width, rect.height))
 
     def update_events(self, eventos):
         """

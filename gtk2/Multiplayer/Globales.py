@@ -22,8 +22,10 @@
 import os
 import json
 import codecs
+import socket
 
 
+"""
 def __return_ip(interfaz):
     import commands
     import platform
@@ -45,13 +47,23 @@ def __return_ip(interfaz):
             ip = datos.split('inet ')[1].split('netmask ')[0].strip()
         else:
             ip = datos.split('Direc. inet:')[1].split('Difus.:')[0].strip()
-    return ip.strip()
+    return ip
+"""
 
 
 def get_ip():
+    ip = ""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("google.com", 80))
+        ip = s.getsockname()[0]
+    except:
+        pass
+    """
     ip = __return_ip("wlan0")
     if not ip:
         ip = __return_ip("eth0")
+    """
     return ip
 
 

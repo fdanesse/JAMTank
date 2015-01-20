@@ -96,6 +96,8 @@ class DrawingWidget(gtk.DrawingArea):
 
         self.client = False
         self.juego = False
+
+        self.connect("expose-event", self.__do_draw)
         self.show_all()
         self.set_size_request(640, 480)
 
@@ -170,17 +172,17 @@ class DrawingWidget(gtk.DrawingArea):
     def __update_players(self, juego, _dict):
         self.emit("update", _dict)
 
-    def setup_init(self, _dict):
-        self.__run_client(dict(_dict))
-        return False
-
-    def do_draw(self, context):
+    def __do_draw(self, widget=None, event=None):
         """
         Reescalado en gtk, reescala en pygame.
         """
         rect = self.get_allocation()
         if self.juego:
             self.juego.escalar((rect.width, rect.height))
+
+    def setup_init(self, _dict):
+        self.__run_client(dict(_dict))
+        return False
 
     def update_events(self, eventos):
         """
