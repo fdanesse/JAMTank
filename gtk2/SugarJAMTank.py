@@ -42,7 +42,7 @@ class JAMTank(Activity):
 
     def __init__(self, handle):
 
-        Activity.__init__(self, handle)
+        Activity.__init__(self, handle, False)
 
         self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.socket = gtk.Socket()

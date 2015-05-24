@@ -83,6 +83,7 @@ class IntroWidget(gtk.Table):
         y = rect.height / 2 - dst.get_height() / 2
         context.set_source_pixbuf(dst, x, y)
         context.paint()
+        return True
 
     def __emit_switch(self, widget, valor):
         self.emit("switch", valor)
