@@ -10,7 +10,8 @@ using Gdk;
 public class JAMTank : Gtk.Window{
 
     //private Juego juego;
-    private VideoVisor visor = new VideoVisor();
+    private IntroWidget introwidget = new IntroWidget();
+    //private VideoVisor visor = new VideoVisor();
 
     public JAMTank(){
 
@@ -18,11 +19,14 @@ public class JAMTank : Gtk.Window{
         this.window_position = Gtk.WindowPosition.CENTER;
         this.set("border_width", 2);
 
-        this.add(this.visor);
-        this.visor.run.connect(this.__run);
+        this.add(this.introwidget);
+        this.introwidget.accion.connect ((text) => {
+            this.__intro_accion(text);
+            });
+        //this.visor.run.connect(this.__run);
 
         this.show_all();
-        this.realize();
+        this.fullscreen();
 
         this.key_press_event.connect ((event) => {
             this.__do_key_press_event(event);
@@ -43,6 +47,11 @@ public class JAMTank : Gtk.Window{
         //GLib.Timeout.add(35, this.juego.run);
         //GLib.stdout.printf(GLib.Environment.get_variable("SDL_WINDOWID"));
         //GLib.stdout.flush();
+        }
+
+    private void __intro_accion(string text){
+        if (text == "Salir")
+            this.__confirmar_salir();
         }
 
     private void __do_key_press_event(Gdk.EventKey event){
