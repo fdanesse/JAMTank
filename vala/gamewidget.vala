@@ -20,7 +20,6 @@ public class GameWidget : Gtk.Grid{
         /*
         Gestiona los eventos de tecla presionada.
         */
-
         if (event.keyval == 65307)
             this.__confirmar_salir();
         else
@@ -32,7 +31,6 @@ public class GameWidget : Gtk.Grid{
         /*
         Gestiona los eventos de tecla que deja de estar presionada.
         */
-
         GLib.stdout.printf("r: %s\n", event.str);
         GLib.stdout.flush();
         }
@@ -41,7 +39,6 @@ public class GameWidget : Gtk.Grid{
         /*
         Abre Dialogo para confirmar salida.
         */
-
         ConfirmarSalir dialog = new ConfirmarSalir(
             this.get_toplevel() as Gtk.Window, "Alerta",
             "¿ Abandonar el Juego ?");
