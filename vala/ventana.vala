@@ -10,7 +10,8 @@ using Gdk;
 public class JAMTank : Gtk.Window{
 
     //private Juego juego;
-    private IntroWidget introwidget = new IntroWidget();
+    private IntroWidget introwidget;
+    private GameWidget gamewidget;
     //private VideoVisor visor = new VideoVisor();
 
     public JAMTank(){
@@ -19,14 +20,11 @@ public class JAMTank : Gtk.Window{
         this.window_position = Gtk.WindowPosition.CENTER;
         this.set("border_width", 2);
 
-        this.add(this.introwidget);
-        this.introwidget.accion.connect ((text) => {
-            this.__intro_accion(text);
-            });
         //this.visor.run.connect(this.__run);
 
         this.show_all();
         this.fullscreen();
+        this.__switch("Intro");
 
         this.key_press_event.connect ((event) => {
             this.__do_key_press_event(event);
@@ -38,7 +36,36 @@ public class JAMTank : Gtk.Window{
             return true;
             });
 
-        this.destroy.connect(this.__salir);
+        //this.destroy.connect(this.__salir);
+        }
+
+    private void __switch(string text){
+        /*
+        Cambia la interfaz interna:
+            Introducción
+            Juego Gtk + SDL
+            Creditos
+        */
+
+        weak Gtk.Widget widget = this.get_child();
+        widget.destroy();
+        widget.unref();
+
+        if (text == "Intro"){
+            this.introwidget = new IntroWidget();
+            this.add(this.introwidget);
+            this.introwidget.accion.connect ((text) => {
+                this.__intro_accion(text);
+                });
+            }
+
+        else if (text == "Jugar"){
+            this.gamewidget = new GameWidget();
+            this.add(this.gamewidget);
+            this.gamewidget.accion.connect ((text) => {
+                this.__game_accion(text);
+                });
+            }
         }
 
     private void __run(){
@@ -50,24 +77,53 @@ public class JAMTank : Gtk.Window{
         }
 
     private void __intro_accion(string text){
+        /*
+        Gestiona las acciones de la Introducción.
+        */
+
         if (text == "Salir")
             this.__confirmar_salir();
+        else
+            this.__switch(text);
+        }
+
+    private void __game_accion(string text){
+        /*
+        Gestiona las acciones que llegan desde gamewidget.
+        */
+
+        if (text == "Salir")
+            this.__switch("Intro");
         }
 
     private void __do_key_press_event(Gdk.EventKey event){
-        if (event.keyval == 65307)
-            this.__confirmar_salir();
+        /*
+        Gestiona los eventos de tecla presionada.
+        */
+
+        weak Gtk.Widget widget = this.get_child();
+        if (widget == this.gamewidget)
+            this.gamewidget.press(event);
         else
-            GLib.stdout.printf("p: %s\n", event.keyval.to_string());
-            GLib.stdout.flush();
+            if (event.keyval == 65307)
+                this.__confirmar_salir();
         }
 
     private void __do_key_release_event(Gdk.EventKey event){
-        GLib.stdout.printf("r: %s\n", event.str);
-        GLib.stdout.flush();
+        /*
+        Gestiona los eventos de tecla que deja de estar presionada.
+        */
+
+        weak Gtk.Widget widget = this.get_child();
+        if (widget == this.gamewidget)
+            this.gamewidget.release(event);
         }
 
     private void __confirmar_salir(){
+        /*
+        Abre Dialogo para confirmar salida de la aplicación.
+        */
+
         ConfirmarSalir dialog = new ConfirmarSalir(this, "Alerta",
             "¿ Salir de JAMTank ?");
         int resp = dialog.run();

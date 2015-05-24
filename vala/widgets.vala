@@ -4,7 +4,7 @@ public class VideoVisor : Gtk.DrawingArea{
     public signal void run();
 
     public VideoVisor(){
-        this.set_size_request(640, 480);
+        //this.set_size_request(640, 480);
         this.realize.connect(this.__realize);
         this.show_all();
         }
@@ -16,6 +16,8 @@ public class VideoVisor : Gtk.DrawingArea{
         //GLib.stdout.printf("XID %s\n", GLib.Environment.get_variable("SDL_WINDOWID"));
         //GLib.stdout.flush();
         //this.run();
+        GLib.stdout.printf("Video Visor OK\n");
+        GLib.stdout.flush();
         }
 }
 
