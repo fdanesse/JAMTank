@@ -46,8 +46,11 @@ public class JAMTank : Gtk.Window{
         }
 
     private void __do_key_press_event(Gdk.EventKey event){
-        GLib.stdout.printf("p: %s\n", event.str);
-        GLib.stdout.flush();
+        if (event.keyval == 65307)
+            this.__confirmar_salir();
+        else
+            GLib.stdout.printf("p: %s\n", event.keyval.to_string());
+            GLib.stdout.flush();
         }
 
     private void __do_key_release_event(Gdk.EventKey event){
@@ -55,29 +58,17 @@ public class JAMTank : Gtk.Window{
         GLib.stdout.flush();
         }
 
+    private void __confirmar_salir(){
+        ConfirmarSalir dialog = new ConfirmarSalir(this, "Alerta",
+            "¿ Salir de JAMTank ?");
+        int resp = dialog.run();
+        dialog.destroy();
+        if (resp == -5)
+            this.__salir();
+        }
+
     private void __salir(){
         Gtk.main_quit();
-        }
-}
-
-
-public class VideoVisor : Gtk.DrawingArea{
-
-    public signal void run();
-
-    public VideoVisor(){
-        this.set_size_request(640, 480);
-        this.realize.connect(this.__realize);
-        this.show_all();
-        }
-
-    private void __realize(){
-        //uint xid = (uint)Gdk.X11Window.get_xid(this.get_window());
-        //string sxid = xid.to_string();
-        //GLib.Environment.set_variable("SDL_WINDOWID", sxid, true);
-        //GLib.stdout.printf("XID %s\n", GLib.Environment.get_variable("SDL_WINDOWID"));
-        //GLib.stdout.flush();
-        //this.run();
         }
 }
 
