@@ -2,18 +2,12 @@
 using Gtk;
 using Gdk;
 
-//using SDL;
-//using SDLImage;
-//using SDLGraphics;
-
 
 public class JAMTank : Gtk.Window{
 
-    //private Juego juego;
     private IntroWidget introwidget;
     private GameWidget gamewidget;
     private CreditosWidget creditoswidget;
-    //private VideoVisor visor = new VideoVisor();
 
     public JAMTank(){
 
@@ -21,11 +15,8 @@ public class JAMTank : Gtk.Window{
         this.window_position = Gtk.WindowPosition.CENTER;
         this.set("border_width", 2);
 
-        //this.visor.run.connect(this.__run);
-
         this.show_all();
-        this.fullscreen();
-        this.__switch("Intro");
+        //this.fullscreen();
 
         this.key_press_event.connect ((event) => {
             this.__do_key_press_event(event);
@@ -37,7 +28,8 @@ public class JAMTank : Gtk.Window{
             return true;
             });
 
-        //this.destroy.connect(this.__salir);
+        this.destroy.connect(this.__salir);
+        this.__switch("Intro");
         }
 
     private void __switch(string text){
@@ -49,7 +41,7 @@ public class JAMTank : Gtk.Window{
         */
         weak Gtk.Widget widget = this.get_child();
         widget.destroy();
-        widget.unref();
+        //widget.unref();
         if (text == "Intro"){
             this.introwidget = new IntroWidget();
             this.add(this.introwidget);
@@ -71,14 +63,6 @@ public class JAMTank : Gtk.Window{
                 this.__creditos_accion(text);
                 });
             }
-        }
-
-    private void __run(){
-        //SDL.init(InitFlag.EVERYTHING);
-        //this.juego = new Juego();
-        //GLib.Timeout.add(35, this.juego.run);
-        //GLib.stdout.printf(GLib.Environment.get_variable("SDL_WINDOWID"));
-        //GLib.stdout.flush();
         }
 
     private void __intro_accion(string text){

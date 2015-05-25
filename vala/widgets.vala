@@ -1,27 +1,4 @@
 
-public class VideoVisor : Gtk.DrawingArea{
-
-    public signal void run();
-
-    public VideoVisor(){
-        //this.set_size_request(640, 480);
-        this.realize.connect(this.__realize);
-        this.show_all();
-        }
-
-    private void __realize(){
-        //uint xid = (uint)Gdk.X11Window.get_xid(this.get_window());
-        //string sxid = xid.to_string();
-        //GLib.Environment.set_variable("SDL_WINDOWID", sxid, true);
-        //GLib.stdout.printf("XID %s\n", GLib.Environment.get_variable("SDL_WINDOWID"));
-        //GLib.stdout.flush();
-        //this.run();
-        GLib.stdout.printf("Video Visor OK\n");
-        GLib.stdout.flush();
-        }
-}
-
-
 public class ConfirmarSalir : Gtk.Dialog{
 
     public ConfirmarSalir(Gtk.Window parent, string title, string text){
