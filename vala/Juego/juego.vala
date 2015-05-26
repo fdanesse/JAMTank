@@ -33,6 +33,12 @@ public class Juego : GLib.Object {
     //private Group group;
     private Protagonista jugador;
 
+    // Eventos.
+    private bool izquierda = false;
+    private bool derecha = false;
+    private bool arriba = false;
+    private bool abajo = false;
+
     public Juego () {
         // Ventana real de SDL escalable dinámicamente.
         this.real_screen = SDL.Screen.set_video_mode (REAL_WIDTH,
@@ -57,7 +63,52 @@ public class Juego : GLib.Object {
         //this.group.agregar(this.jugador);
         }
 
+    public void press(Gdk.EventKey event){
+        /*
+        Gestiona los eventos de tecla presionada.
+        */
+        // Izquierda o derecha.
+        if (event.keyval == 97){
+            this.derecha = false;
+            this.izquierda = true;
+            }
+        else if (event.keyval == 100){
+            this.izquierda = false;
+            this.derecha = true;
+            }
+        // Arriba o abajo
+        if (event.keyval == 119){
+            this.abajo = false;
+            this.arriba = true;
+            }
+        else if (event.keyval == 115){
+            this.arriba = false;
+            this.abajo = true;
+            }
+        }
+
+    public void release(Gdk.EventKey event){
+        /*
+        Gestiona los eventos de tecla que deja de estar presionada.
+        */
+        if (event.keyval == 97){
+            this.izquierda = false;
+            }
+        else if (event.keyval == 100){
+            this.derecha = false;
+            }
+        else if (event.keyval == 119){
+            this.arriba = false;
+            }
+        else if (event.keyval == 115){
+            this.abajo = false;
+            }
+        }
+
     public void resize(int w, int h){
+        /*
+        Reescalado de la ventana principal de SDL.
+        */
         this.REAL_WIDTH = w;
         this.REAL_HEIGHT = h;
         this.real_screen = SDL.Screen.set_video_mode (REAL_WIDTH,
@@ -93,29 +144,7 @@ public class Juego : GLib.Object {
         }
 
     private void process_events () {
-        SDL.Event event;
-        while (SDL.Event.poll (out event) == 1) {
-            switch (event.type) {
-                case SDL.EventType.QUIT:
-                    this.paused = false;
-                    this.running = false;
-                    break;
-                case SDL.EventType.KEYDOWN:
-                    //if(event.key.keysym.sym == SDL.KeySymbol.ESCAPE)
-                    //    this.running = false;
-                    if(event.key.keysym.sym == SDL.KeySymbol.a)
-                        this.jugador.izquierda();
-                    if(event.key.keysym.sym == SDL.KeySymbol.d)
-                        this.jugador.derecha();
-                    if(event.key.keysym.sym == SDL.KeySymbol.w)
-                        this.jugador.arriba();
-                    if(event.key.keysym.sym == SDL.KeySymbol.s)
-                        this.jugador.abajo();
-                    //if(event.key.keysym.sym == SDL.KeySymbol.SPACE)
-                    //    this.estado = false;
-                    break;
-                }
-            }
+        this.jugador.update(this.izquierda, this.derecha, this.arriba, this.abajo);
         SDL.Event.pump();
         }
 }

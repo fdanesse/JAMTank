@@ -22,22 +22,58 @@ public class Protagonista : GLib.Object {
         this.pos_rect.h = this.image_rect.h;
         }
 
-    public void derecha() {
+    public void update(bool izquierda, bool derecha, bool arriba, bool abajo){
+        // girar en movimiento
+        if (arriba & derecha){
+            this.__arriba();
+            this.__derecha();
+            }
+        else if (arriba & izquierda){
+            this.__arriba();
+            this.__izquierda();
+            }
+        else if (abajo & derecha){
+            this.__abajo();
+            this.__izquierda();
+            }
+        else if (abajo & izquierda){
+            this.__abajo();
+            this.__derecha();
+            }
+
+        // moverse sin girar
+        else if (arriba){
+            this.__arriba();
+            }
+        else if (abajo){
+            this.__abajo();
+            }
+
+        // girar sin moverse
+        else if (derecha){
+            this.__derecha();
+            }
+        else if (izquierda){
+            this.__izquierda();
+            }
+        }
+
+    private void __derecha() {
         if (this.ventana_rect.w - this.pos_rect.w >= this.pos_rect.x + velocidad)
             this.pos_rect.x = this.pos_rect.x + velocidad;
         }
 
-    public void izquierda() {
+    private void __izquierda() {
         if (this.pos_rect.x - velocidad >= 0)
             this.pos_rect.x = this.pos_rect.x - velocidad;
         }
 
-    public void arriba() {
+    private void __arriba() {
         if (this.pos_rect.y - velocidad >= 0)
             this.pos_rect.y = this.pos_rect.y - velocidad;
         }
 
-    public void abajo() {
+    private void __abajo() {
         if (this.ventana_rect.h - this.pos_rect.h >= this.pos_rect.y + velocidad)
             this.pos_rect.y = this.pos_rect.y + velocidad;
         }

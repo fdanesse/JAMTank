@@ -66,16 +66,15 @@ public class GameWidget : Gtk.Grid{
         if (event.keyval == 65307)
             this.__confirmar_salir();
         else
-            GLib.stdout.printf("p: %s\n", event.str);
-            GLib.stdout.flush();
+            this.juego.press(event);
         }
 
     public void release(Gdk.EventKey event){
         /*
         Gestiona los eventos de tecla que deja de estar presionada.
         */
-        GLib.stdout.printf("r: %s\n", event.str);
-        GLib.stdout.flush();
+        if (event.keyval != 65307)
+            this.juego.release(event);
         }
 
     private void __confirmar_salir(){
