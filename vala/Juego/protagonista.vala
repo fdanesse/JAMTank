@@ -3,17 +3,17 @@ using SDL;
 using SDLImage;
 
 
-public class Sprite : GLib.Object {
+public class Protagonista : GLib.Object {
 
     private SDL.Surface imagen;
     private SDL.Rect image_rect;
     private SDL.Rect pos_rect;
     private SDL.Rect ventana_rect;
-    private const int16 velocidad = 5;
+    private const int16 velocidad = 10;
 
-    public Sprite(string file, SDL.Surface screen) {
+    public Protagonista(string file, SDL.Surface screen) {
         this.imagen = SDLImage.load(file);
-        this.imagen = escalar(this.imagen, 50, 43);
+        this.imagen = escalar(this.imagen, 50, 50);
         this.imagen.get_cliprect(out this.image_rect);
         screen.get_cliprect(out this.ventana_rect);
         this.pos_rect.x = this.ventana_rect.w / 2 - this.image_rect.w / 2;
@@ -23,23 +23,23 @@ public class Sprite : GLib.Object {
         }
 
     public void derecha() {
-        if (this.ventana_rect.w - this.pos_rect.w >= this.pos_rect.x + 5)
-            this.pos_rect.x = this.pos_rect.x + 5;
+        if (this.ventana_rect.w - this.pos_rect.w >= this.pos_rect.x + velocidad)
+            this.pos_rect.x = this.pos_rect.x + velocidad;
         }
 
     public void izquierda() {
-        if (this.pos_rect.x - 5 >= 0)
-            this.pos_rect.x = this.pos_rect.x - 5;
+        if (this.pos_rect.x - velocidad >= 0)
+            this.pos_rect.x = this.pos_rect.x - velocidad;
         }
 
     public void arriba() {
-        if (this.pos_rect.y - 5 >= 0)
-            this.pos_rect.y = this.pos_rect.y - 5;
+        if (this.pos_rect.y - velocidad >= 0)
+            this.pos_rect.y = this.pos_rect.y - velocidad;
         }
 
     public void abajo() {
-        if (this.ventana_rect.h - this.pos_rect.h >= this.pos_rect.y + 5)
-            this.pos_rect.y = this.pos_rect.y + 5;
+        if (this.ventana_rect.h - this.pos_rect.h >= this.pos_rect.y + velocidad)
+            this.pos_rect.y = this.pos_rect.y + velocidad;
         }
 
     public void draw(SDL.Surface surface) {

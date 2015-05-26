@@ -30,8 +30,8 @@ public class Juego : GLib.Object {
     public bool running = true;
     public bool paused = false;
 
-    private Group group;
-    private Sprite jugador;
+    //private Group group;
+    private Protagonista jugador;
 
     public Juego () {
         // Ventana real de SDL escalable dinámicamente.
@@ -51,10 +51,10 @@ public class Juego : GLib.Object {
 
         // Protagonista.
         path = "/home/flavio/Documentos/JAMTank/vala/Juego/Tanques/tanque-4.png";
-        this.jugador = new Sprite(path, this.virtual_screen);
+        this.jugador = new Protagonista(path, this.virtual_screen);
 
-        this.group = new Group();
-        this.group.agregar(this.jugador);
+        //this.group = new Group();
+        //this.group.agregar(this.jugador);
         }
 
     public void resize(int w, int h){
@@ -82,7 +82,8 @@ public class Juego : GLib.Object {
     private void draw () {
         // Dibujando en superficie virtual de 640x480
         this.fondo.blit(this.virtual_rect, this.virtual_screen, this.virtual_rect);
-        this.group.draw(this.virtual_screen);
+        this.jugador.draw(this.virtual_screen);
+        //this.group.draw(this.virtual_screen);
         //spriteManager.Render(screen);
         // Escalando y dibujando en la ventana real de SDL.
         SDL.Surface result = escalar(this.virtual_screen, this.REAL_WIDTH,
