@@ -9,12 +9,22 @@ using Gee;
 
 public class Juego : GLib.Object {
 
-    private const int SCREEN_WIDTH = 640;
-    private const int SCREEN_HEIGHT = 480;
-    private const int SCREEN_BPP = 32;
+    private const uint32 video_flags = SDL.SurfaceFlag.DOUBLEBUF |
+        SDL.SurfaceFlag.HWACCEL | SDL.SurfaceFlag.HWSURFACE;
 
-    private weak SDL.Screen screen;
-    private SDL.Rect ventana_rect;
+    //Superficie virtual de dibujo a 640x480.
+    private const int VIRTUAL_WIDTH = 640;
+    private const int VIRTUAL_HEIGHT = 480;
+    private SDL.Surface virtual_screen;
+    private SDL.Rect virtual_rect;
+
+    //Ventana real de SDL que escala el dibujo dinámicamente.
+    private int REAL_WIDTH = 640;
+    private int REAL_HEIGHT = 480;
+    private weak SDL.Screen real_screen;
+    private SDL.Rect real_rect;
+
+    private const int SCREEN_BPP = 32;
 
     private SDL.Surface fondo;
     public bool running = true;
@@ -24,23 +34,35 @@ public class Juego : GLib.Object {
     private Sprite jugador;
 
     public Juego () {
-        // Ventana
-        uint32 video_flags = SDL.SurfaceFlag.DOUBLEBUF |
-            SDL.SurfaceFlag.HWACCEL | SDL.SurfaceFlag.HWSURFACE;
-        this.screen = SDL.Screen.set_video_mode (SCREEN_WIDTH, SCREEN_HEIGHT,
-            SCREEN_BPP, video_flags);
-        this.screen.get_cliprect(out this.ventana_rect);
+        // Ventana real de SDL escalable dinámicamente.
+        this.real_screen = SDL.Screen.set_video_mode (REAL_WIDTH,
+            REAL_HEIGHT, SCREEN_BPP, video_flags);
+        this.real_screen.get_cliprect(out this.real_rect);
         SDL.WindowManager.set_caption("Juego vala", "");
 
-        // Fondo
-        this.fondo = SDLImage.load("/home/flavio/Documentos/JAMTank/vala/Juego/Mapas/fondo1.png");
-        this.fondo = escalar(this.fondo, this.ventana_rect.w, this.ventana_rect.h);
+        // Fondo del escenario.
+        string path = "/home/flavio/Documentos/JAMTank/vala/Juego/Mapas/fondo1.png";
+        this.fondo = SDLImage.load(path);
+        this.fondo = escalar(this.fondo, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
 
-        // Sprites
-        this.jugador = new Sprite("/home/flavio/Documentos/JAMTank/vala/Juego/Tanques/tanque-4.png", this.screen);
+        // Superficie Virtual de dibujo.
+        this.virtual_screen = escalar(this.fondo, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+        this.virtual_screen.get_cliprect(out this.virtual_rect);
+
+        // Protagonista.
+        path = "/home/flavio/Documentos/JAMTank/vala/Juego/Tanques/tanque-4.png";
+        this.jugador = new Sprite(path, this.virtual_screen);
 
         this.group = new Group();
         this.group.agregar(this.jugador);
+        }
+
+    public void resize(int w, int h){
+        this.REAL_WIDTH = w;
+        this.REAL_HEIGHT = h;
+        this.real_screen = SDL.Screen.set_video_mode (REAL_WIDTH,
+            REAL_HEIGHT, SCREEN_BPP, video_flags);
+        this.real_screen.get_cliprect(out this.real_rect);
         }
 
     public bool run () {
@@ -50,7 +72,7 @@ public class Juego : GLib.Object {
         while (Gtk.events_pending()){
             Gtk.main_iteration();
             }
-        this.screen.fill(null, this.screen.format.map_rgb(0, 0, 0));
+        //this.real_screen.fill(null, this.real_screen.format.map_rgb(0, 0, 0));
         this.process_events();
         //this.update();
         this.draw();
@@ -58,10 +80,15 @@ public class Juego : GLib.Object {
         }
 
     private void draw () {
-        this.fondo.blit(this.ventana_rect, this.screen, this.ventana_rect);
-        this.group.draw(this.screen);
+        // Dibujando en superficie virtual de 640x480
+        this.fondo.blit(this.virtual_rect, this.virtual_screen, this.virtual_rect);
+        this.group.draw(this.virtual_screen);
         //spriteManager.Render(screen);
-        this.screen.flip();
+        // Escalando y dibujando en la ventana real de SDL.
+        SDL.Surface result = escalar(this.virtual_screen, this.REAL_WIDTH,
+            this.REAL_HEIGHT);
+        result.blit(this.real_rect, this.real_screen, this.real_rect);
+        this.real_screen.flip();
         }
 
     private void process_events () {

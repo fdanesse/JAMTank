@@ -11,7 +11,7 @@ public class Sprite : GLib.Object {
     private SDL.Rect ventana_rect;
     private const int16 velocidad = 5;
 
-    public Sprite(string file, SDL.Screen screen) {
+    public Sprite(string file, SDL.Surface screen) {
         this.imagen = SDLImage.load(file);
         this.imagen = escalar(this.imagen, 50, 43);
         this.imagen.get_cliprect(out this.image_rect);

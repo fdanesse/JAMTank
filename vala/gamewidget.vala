@@ -19,6 +19,19 @@ public class GameWidget : Gtk.Grid{
         this.visor.realize.connect(this.__realize);
 
         this.show_all();
+
+        this.size_allocate.connect ((allocation) => {
+            this.__do_size_allocate(allocation);
+            });
+        }
+
+    private void __do_size_allocate(Gtk.Allocation allocation){
+        /*
+        Al cambiar de tamaño, reescala el juego.
+        */
+        int w = (int) this.get_allocated_width();
+        int h = (int) this.get_allocated_height();
+        this.juego.resize(w, h);
         }
 
     private void __realize(){
