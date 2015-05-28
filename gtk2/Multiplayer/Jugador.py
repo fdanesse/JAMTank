@@ -77,11 +77,11 @@ class Jugador(Sprite):
     def __izquierda(self):
         self.temp_angulo -= int(0.7 * INDICE_ROTACION)
 
-    def __arriba(self):
+    def __adelante(self):
         self.dx, self.dy = self.__get_vector(self.temp_angulo)
         self.__actualizar_posicion()
 
-    def __abajo(self):
+    def __atras(self):
         x, y = self.__get_vector(self.temp_angulo)
         self.dx = x * -1
         self.dy = y * -1
@@ -162,23 +162,23 @@ class Jugador(Sprite):
 
         # girar en movimiento
         if "w" in self.eventos and "d" in self.eventos:
-            self.__arriba()
+            self.__adelante()
             self.__derecha()
         elif "w" in self.eventos and "a" in self.eventos:
-            self.__arriba()
+            self.__adelante()
             self.__izquierda()
         elif "s" in self.eventos and "d" in self.eventos:
-            self.__abajo()
+            self.__atras()
             self.__izquierda()
         elif "s" in self.eventos and "a" in self.eventos:
-            self.__abajo()
+            self.__atras()
             self.__derecha()
 
         # moverse sin girar
         elif "w" in self.eventos:
-            self.__arriba()
+            self.__adelante()
         elif "s" in self.eventos:
-            self.__abajo()
+            self.__atras()
 
         # girar sin moverse
         elif "d" in self.eventos:
