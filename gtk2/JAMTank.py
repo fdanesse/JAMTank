@@ -50,10 +50,10 @@ class JAMTank(gtk.Window):
         self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
 
         #self.set_resizable(True)
-        #self.set_size_request(640, 480)
+        self.set_size_request(640, 480)
         self.set_border_width(2)
         #self.set_position(gtk.WindowPosition.CENTER)
-        self.fullscreen()
+        #self.fullscreen()
 
         # Fase 1: Introduccion
         self.intro_widget = False

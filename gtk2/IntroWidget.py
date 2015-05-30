@@ -97,4 +97,4 @@ class IntroWidget(gtk.Table):
                 self.imagen = gtk.gdk.pixbuf_new_from_file(path)
                 self.imagen.save(self.temp_path, "png")#, [], [])
                 self.set_size_request(-1, -1)
-        self.connect("expose-event", self.__do_draw)
+        #self.connect("expose-event", self.__do_draw)

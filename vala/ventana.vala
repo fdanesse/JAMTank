@@ -1,6 +1,6 @@
-
 using Gtk;
 using Gdk;
+using Posix;
 
 
 public class JAMTank : Gtk.Window{
@@ -30,6 +30,9 @@ public class JAMTank : Gtk.Window{
 
         this.destroy.connect(this.__salir);
         this.__switch("Intro");
+
+        GLib.stdout.printf("JAMTank process: %i\n", Posix.getpid());
+        GLib.stdout.flush();
         }
 
     private void __switch(string text){

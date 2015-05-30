@@ -1,5 +1,4 @@
 
-
 public class CreditosWidget : Gtk.Grid{
 
     public signal void accion(string text);

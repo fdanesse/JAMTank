@@ -1,5 +1,4 @@
 
-
 public class IntroWidget : Gtk.Grid{
 
     public signal void accion(string acc);

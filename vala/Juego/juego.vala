@@ -1,6 +1,3 @@
-// valac --pkg gee-1.0 --pkg sdl --pkg sdl-image --pkg sdl-gfx -X -lSDL_gfx -X -lSDL_image -o juego
-// juego.vala sprite.vala globales.vala
-
 using SDL;
 using SDLImage;
 using SDLGraphics;
