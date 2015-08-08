@@ -88,12 +88,12 @@ class JAMTank(gtk.Window):
     def __do_realize(self, widget):
         self.switch(False, 1)
 
-    def __solo_run(self, widget, datos):
-        self.__reset()
-        from GameWidget import GameWidget
-        self.widget_game = GameWidget()
-        self.add(self.widget_game)
-        gobject.idle_add(self.widget_game.setup_init, datos)
+    #def __solo_run(self, widget, datos):
+    #    self.__reset()
+    #    from GameWidget import GameWidget
+    #    self.widget_game = GameWidget()
+    #    self.add(self.widget_game)
+    #    gobject.idle_add(self.widget_game.setup_init, datos)
 
     def __update_events(self):
         if self.widget_game:
@@ -180,8 +180,8 @@ class JAMTank(gtk.Window):
             self.intro_widget = IntroWidget()
             self.intro_widget.connect("switch", self.__intro_switch)
             self.add(self.intro_widget)
-            gobject.idle_add(self.intro_widget.load, os.path.join(
-                BASE, "Iconos", "jamtank.svg"))
+            #gobject.idle_add(self.intro_widget.load, os.path.join(
+            #    BASE, "Iconos", "jamtank.svg"))
 
         elif valor == 2:
             print "FIXME: Comenzar Guión del Juego"

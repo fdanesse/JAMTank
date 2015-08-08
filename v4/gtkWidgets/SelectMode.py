@@ -1,43 +1,42 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#   IntroWidget.py por:
-#   Flavio Danesse <fdanesse@gmail.com>
-#   Uruguay
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-import os
-import gobject
 import gtk
+import gobject
 
-"""
-Contiene Opciones:
-    Jugar Solo                  emit("switch", "solo")
-    Crear Juego en Red          emit("switch", "red")
-    Unirse a Juego Existente    emit("switch", "join")
-    Creditos                    emit("switch", "creditos")
-    Salir                       emit("switch", "salir")
-"""
+
+class SelectMode(gtk.Window):
+
+    __gsignals__ = {
+    "switch": (gobject.SIGNAL_RUN_LAST,
+        gobject.TYPE_NONE, (gobject.TYPE_STRING, ))}
+
+    def __init__(self, top):
+
+        gtk.Window.__init__(self, gtk.WINDOW_POPUP)
+
+        self.set_resizable(False)
+        self.set_position(3)
+        self.set_deletable(False)
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        self.set_transient_for(top)
+
+        child = IntroWidget()
+        self.add(child)
+        self.show_all()
+
+        child.connect("switch", self.__emit_switch)
+
+    def __emit_switch(self, widget, valor):
+        self.emit("switch", valor)
+        self.destroy()
 
 
 class IntroWidget(gtk.Table):
 
     __gsignals__ = {
-        "switch": (gobject.SIGNAL_RUN_LAST,
-            gobject.TYPE_NONE, (gobject.TYPE_STRING, ))}
+    "switch": (gobject.SIGNAL_RUN_LAST,
+        gobject.TYPE_NONE, (gobject.TYPE_STRING, ))}
 
     def __init__(self):
 
