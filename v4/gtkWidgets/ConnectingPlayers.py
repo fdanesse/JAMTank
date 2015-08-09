@@ -37,10 +37,10 @@ class ConnectingPlayers(gtk.Dialog):
 
         self.show_all()
 
-        rect = internal_widget.mapaview.get_allocation()
+        rect = internal_widget.framemapa.mapaview.get_allocation()
         path = os.path.join(ROOTPATH, "Mapas", _dict['mapa'])
         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, -1, rect.height)
-        internal_widget.mapaview.set_from_pixbuf(pixbuf)
+        internal_widget.framemapa.mapaview.set_from_pixbuf(pixbuf)
 
     def __accion(self, widget):
         self.emit("accion", widget.get_label().lower())
@@ -56,40 +56,66 @@ class InternalWidget(gtk.EventBox):
         self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_border_width(15)
 
-        self.jugadores = Lista()
-        self.mapaview = gtk.Image()
-
-        tabla = gtk.Table(columns=6, rows=5, homogeneous=True)
+        tabla = gtk.Table(columns=4, rows=7, homogeneous=True)
+        tabla.set_col_spacing(1, 10)
+        tabla.set_col_spacing(2, 10)
+        tabla.set_row_spacing(6, 10)
         tabla.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
 
-        frame = gtk.Frame()
-        frame.set_label(" Jugadores: ")
-        frame.set_border_width(4)
+        self.framejugadores = FrameJugadores()
+        tabla.attach_defaults(self.framejugadores, 0, 2, 0, 7)
+
+        self.framemapa = FrameMapa()
+        tabla.attach_defaults(self.framemapa, 2, 4, 0, 6)
+
+        self.cancelar = gtk.Button("Cancelar")
+        self.jugar = gtk.Button("Jugar")
+        self.jugar.set_sensitive(False)
+        tabla.attach_defaults(self.cancelar, 2, 3, 6, 7)
+        tabla.attach_defaults(self.jugar, 3, 4, 6, 7)
+
+        self.add(tabla)
+        self.show_all()
+
+
+class FrameJugadores(gtk.Frame):
+
+    def __init__(self):
+
+        gtk.Frame.__init__(self)
+
+        self.set_label(" Jugadores: ")
+        self.set_border_width(4)
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+
         event = gtk.EventBox()
-        frame.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         event.set_border_width(4)
-        frame.add(event)
+        self.jugadores = Lista()
         self.jugadores.set_headers_visible(False)
         scroll = gtk.ScrolledWindow()
         scroll.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         scroll.add(self.jugadores)
         event.add(scroll)
-        tabla.attach_defaults(frame, 0, 3, 0, 6)
+        self.add(event)
+        self.show_all()
 
+
+class FrameMapa(gtk.Frame):
+
+    def __init__(self):
+
+        gtk.Frame.__init__(self)
+
+        self.set_label(" Mapa: ")
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        self.set_border_width(4)
+
+        self.mapaview = gtk.Image()
         event = gtk.EventBox()
-        event.set_border_width(10)
+        event.set_border_width(4)
         event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         event.add(self.mapaview)
-        tabla.attach_defaults(event, 3, 6, 0, 5)
 
-        hbox = gtk.HBox()
-        self.cancelar = gtk.Button("Cancelar")
-        self.jugar = gtk.Button("Jugar")
-        self.jugar.set_sensitive(False)
-        hbox.pack_end(self.jugar, True, True, 0)
-        hbox.pack_end(self.cancelar, True, True, 0)
-        tabla.attach_defaults(hbox, 3, 6, 5, 6)
-
-        self.add(tabla)
+        self.add(event)
         self.show_all()
