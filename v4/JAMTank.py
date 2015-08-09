@@ -13,6 +13,7 @@ import gobject
 from gtkWidgets.SelectMode import SelectMode
 from gtkWidgets.StatusGame import StatusGame
 from gtkWidgets.CreateServerMode import CreateServerMode
+from gtkWidgets.ConnectingPlayers import ConnectingPlayers
 from ServerModelGame import ServerModelGame
 
 BASE = os.path.dirname(__file__)
@@ -109,11 +110,23 @@ class JAMTank(gtk.Window):
             model = ServerModelGame(_dict.get('server', 'localhost'),
                 new_dict, _dict.get('nick', 'JAMTank'), _dict.get('tanque', ''))
             model.connect("error", self.__server_error)
-            win = StatusGame(self, self.screen_wh)
             #model.connect('salir', self.__switch, 3)
-            model.server_run()
+            if model.server_run():
+                print "Server Corriendo: True"
+                win = ConnectingPlayers(self, _dict.get('nick', 'JAMTank'),
+                    _dict.get('tanque', ''), new_dict)
+                win.connect("accion", self.__accion_connecting_players)
+            else:
+                pass
         elif accion == "salir":
             self.__switch(False, 1)
+
+    def __accion_connecting_players(self, connecting_players, valor):
+        if valor == "jugar":
+            print "Lanzar el Juego"
+            win = StatusGame(self, self.screen_wh)
+        elif valor == "cancelar":
+            self.__salir()
 
     def __server_error(self, servermodel):
         print ("FIXME:", self.__server_error)

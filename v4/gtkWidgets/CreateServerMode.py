@@ -180,14 +180,14 @@ class CreateServer(gtk.EventBox):
         rect = self.tanqueview.get_allocation()
         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, -1, rect.height)
         self.tanqueview.set_from_pixbuf(pixbuf)
-        self.game_dict['tanque'] = path
+        self.game_dict['tanque'] = os.path.basename(path)
         self.__check_dict()
 
     def __seleccion_mapa(self, widget, path):
         rect = self.mapaview.get_allocation()
         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, -1, rect.height)
         self.mapaview.set_from_pixbuf(pixbuf)
-        self.game_dict['mapa'] = path
+        self.game_dict['mapa'] = os.path.basename(path)
         self.__check_dict()
 
     def __seleccion_oponentes(self, widget, valor, tipo):

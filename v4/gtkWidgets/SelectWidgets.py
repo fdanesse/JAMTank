@@ -126,7 +126,6 @@ class Lista(gtk.TreeView):
         self.__setear_columnas()
         self.set_model(self.modelo)
 
-        #self.get_selection().set_select_function(self.__selecciones, full=True)
         self.get_selection().connect('changed', self.__selecciones)
         self.show_all()
 
@@ -193,7 +192,7 @@ class Lista(gtk.TreeView):
     def seleccionar_primero(self, widget=None):
         self.get_selection().select_path(0)
 
-
+'''
 class IpFrame(gtk.Frame):
 
     def __init__(self):
@@ -216,3 +215,4 @@ class IpFrame(gtk.Frame):
         event.add(hbox)
         self.add(event)
         self.show_all()
+'''

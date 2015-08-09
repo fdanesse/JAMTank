@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import socket
 import SocketServer
-import time
 import cPickle as pickle
 
 
@@ -34,7 +32,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                 'default_bufsize', 'fileno', 'flush', 'mode', 'name', 'next',
                 'read', 'readline', 'readlines', 'softspace', 'write', 'writelines']
                 """
-                entrada = self.rfile.readline().split('\n')[0]#.strip()
+                entrada = self.rfile.readline().split('\n')[0]
                 if not entrada:
                     self.request.close()
                     return
@@ -108,7 +106,7 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
 
         self.registrados = 0
         self._dict_game = dict(_dict)  # n°de jugadores, mapa, vidas
-        self._dict_game['mapa'] = os.path.basename(_dict['mapa'])
+        self._dict_game['mapa'] = _dict['mapa']
         self._players_dict = {}
 
         print "Server ON:", "ip:", host, "Port:", port

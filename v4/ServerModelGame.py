@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import gobject
 import socket
 import time
@@ -132,7 +131,7 @@ class ServerModelGame(gobject.GObject):
         print ("Registrando Cliente en el Servidor...")
         new = {
             "register": {
-                "tank": "%s" % os.path.basename(self._tank_host),
+                "tank": "%s" % self._tank_host,
                 "nick": "%s" % self._nick_host,
                 },
             }
