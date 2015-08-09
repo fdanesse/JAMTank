@@ -19,7 +19,6 @@ class ConnectingPlayers(gtk.Dialog):
 
         gtk.Dialog.__init__(self)
 
-        print nick, tanque, _dict
         self.set_resizable(False)
         self.set_position(3)
         self.set_deletable(False)
@@ -149,15 +148,12 @@ class NewLista(Lista):
         Lista.__init__(self)
 
     def __ejecutar_agregar_elemento(self, elementos):
-        print elementos
         if not elementos:
             return False
-
         pixbuf, texto, path = elementos[0]
         if pixbuf:
-            pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(icono, 50, -1)
+            pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(pixbuf, 50, -1)
         self.modelo.append([pixbuf, texto, path])
-
         elementos.remove(elementos[0])
         gobject.idle_add(self.__ejecutar_agregar_elemento, elementos)
         return False
