@@ -56,6 +56,12 @@ class ConnectingPlayers(gtk.Dialog):
         self.emit("accion", widget.get_label().lower())
         self.destroy()
 
+    def join_player(self, player):
+        pass
+
+    def remove_player(self, player):
+        pass
+
 
 class InternalWidget(gtk.Frame):
 

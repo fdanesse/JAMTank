@@ -48,11 +48,9 @@ class JAMTank(gtk.Window):
         self.screen_wh = (screen.get_width(), screen.get_height())
         xid = self.get_property('window').xid
         #os.putenv('SDL_WINDOWID', str(xid))
-        print "Monitor:", self.screen_wh
-        print "gtk widget id:", xid
-        print ("Geometria:", "Game:", self.screen_wh[0]/4*3,
-            self.screen_wh[1], "StatusGame:",
-            self.screen_wh[0]/4, self.screen_wh[1])
+        print "Resolución del Monitor:", self.screen_wh
+        print "id de la ventana:", xid
+        print "Geometria:", "Game:", self.screen_wh[0]/4*3, self.screen_wh[1], "StatusGame:", self.screen_wh[0]/4, self.screen_wh[1]
 
     def __reset(self):
         #for child in self.get_children():
@@ -110,14 +108,13 @@ class JAMTank(gtk.Window):
             model = ServerModelGame(_dict.get('server', 'localhost'),
                 new_dict, _dict.get('nick', 'JAMTank'), _dict.get('tanque', ''))
             model.connect("error", self.__server_error)
-            #model.connect('salir', self.__switch, 3)
             if model.server_run():
                 print "Server Corriendo: True"
                 win = ConnectingPlayers(self, _dict.get('nick', 'JAMTank'),
                     _dict.get('tanque', ''), new_dict)
                 win.connect("accion", self.__accion_connecting_players)
             else:
-                pass
+                print "FIXME:", self.__accion_create_server
         elif accion == "salir":
             self.__switch(False, 1)
 

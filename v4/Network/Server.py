@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import gobject
 import socket
 import SocketServer
 import cPickle as pickle
