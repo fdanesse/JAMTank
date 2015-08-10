@@ -12,6 +12,20 @@ from Network.Server import RequestHandler
 from Network.Client import Client
 
 
+def __make_anuncio(new):
+    # carga debe ser 150
+    new["z"] = ""
+    message = pickle.dumps(new, 2)
+    l = len(message)
+    if l < 150:
+        x = 149 - l
+        new["z"] = " " * x
+        message = pickle.dumps(new, 2)
+    elif l > 150:
+        print "Sobre Carga en la Red:", l
+    return message
+
+
 def terminate_thread(thread):
     """
     Termina un hilo python desde otro hilo.
@@ -50,44 +64,92 @@ class ServerModelGame(gobject.GObject):
         self.server_thread = False
         self.server = False
         self.publicar = False
+        self.registro = False
         self.dict_players = {}
 
-    def __new_handle(self, reset):
+    def new_handler_registro(self, reset):
+        if self.registro:
+            gobject.source_remove(self.registro)
+            self.registro = False
+        if reset:
+            print "Esperando Jugadores..."
+            self.registro = gobject.timeout_add(35, self.__handler_registro)
+
+    def __handler_registro(self):
+        #FIXME: Enviar <> recibir
+        #   Cuando se recibe, los jugadores debe actualizarse en ConnectingPlayers
+        #   Al recibir todos == True, se debe habilitar jugar en ConnectingPlayers
+        #Cuando el jugador arctiva jugar en ConnectingPlayers:
+        #   Se manda running al Servidor, entonces:
+        #       en enviar <> recibir: cuando se recibe running == True
+        #           Se debe detener la publicación del server
+        #           Se debe detener enviar <> recibir
+        #           Y se debe lanzar el juego
+        new = {
+            "register": {
+                "tank": "%s" % self._tank_host,
+                "nick": "%s" % self._nick_host,
+                },
+            }
+        message = pickle.dumps(new, 2)
+        self.client.enviar(message)
+        retorno = self.client.recibir()
+        try:
+            _dict = pickle.loads(retorno)
+            if _dict.get("aceptado", False):
+                # Jugador aceptado
+                del(_dict["z"])
+                print "\tRegistrado:"
+                for item in _dict.items():
+                    print "\t\t", item
+                """
+                {
+                "aceptado": True,
+                "game": {
+                    "todos": False, "jugadores": 2, "vidas": 5,
+                    "mapa": "fondo0.png"
+                    },
+                "z": "",
+                "players": {
+                    "192.168.1.11": {
+                        "nick": "flavio",
+                        "tank": "tanque-1.png"
+                        }
+                    }
+                }
+                """
+                self.dict_players = dict(_dict.get("players", {}))
+        except:
+            print "Server Model pickle Error"
+        self.new_handler_registro(False)
+        self.__new_handler_anuncio(False)
+        self.client.desconectarse()
+        return bool(self.registro)
+
+    def __new_handler_anuncio(self, reset):
         if self.publicar:
             gobject.source_remove(self.publicar)
             self.publicar = False
         if reset:
             print "Publicando Juego en la red..."
-            self.publicar = gobject.timeout_add(1000, self.__handle)
+            self.publicar = gobject.timeout_add(1000, self.__handler_anuncio)
 
-    def __make_anuncio(self, new):
-        new['z'] = ''
-        message = pickle.dumps(new, 2)
-        l = len(message)
-        if l < 150:
-            x = 149 - l
-            new['z'] = " " * x
-            message = pickle.dumps(new, 2)
-        elif l > 150:
-            print "Sobre Carga en la Red:", l
-        return message
-
-    def __handle(self):
+    def __handler_anuncio(self):
         if not self.server:
             return False
-        if self.server.registrados < self._dict.get('jugadores', 0):
+        if self.server.registrados < self._dict.get("jugadores", 0):
             new = dict(self._dict)
-            new['ip'] = self._host
-            new['nickh'] = self._nick_host
+            new["ip"] = self._host
+            new["nickh"] = self._nick_host
             print "Anunciando:", time.time(), new
-            message = "%s\n" % self.__make_anuncio(new)  # carga debe ser 150
+            message = "%s\n" % __make_anuncio(new)  # carga debe ser 150
             my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-            my_socket.sendto(message, ('<broadcast>', 10000))
+            my_socket.sendto(message, ("<broadcast>", 10000))
             my_socket.close()
             return True
         else:
-            print "Todos los Jugadores Conectados"
+            print "FIXME: Todos los Jugadores Conectados"
             return False
 
     def __client_run(self):
@@ -100,7 +162,7 @@ class ServerModelGame(gobject.GObject):
             return False
 
     def __register_client_in_server(self):
-        print ("Registrando Cliente en el Servidor...")
+        print "Registrando Cliente del host en el Servidor..."
         new = {
             "register": {
                 "tank": "%s" % self._tank_host,
@@ -108,32 +170,32 @@ class ServerModelGame(gobject.GObject):
                 },
             }
         message = pickle.dumps(new, 2)
-        self.client.enviar("%s\n" % message)
+        self.client.enviar(message)
         retorno = self.client.recibir()
         _dict = pickle.loads(retorno)
-        if _dict.get('aceptado', False):
+        if _dict.get("aceptado", False):
             # Jugador aceptado
-            del(_dict['z'])
+            del(_dict["z"])
             print "\tRegistrado:"
             for item in _dict.items():
                 print "\t\t", item
             """
             {
-            'aceptado': True,
-            'game': {
-                'running': False, 'jugadores': 2, 'vidas': 5,
-                'mapa': 'fondo0.png'
+            "aceptado": True,
+            "game": {
+                "todos": False, "jugadores": 2, "vidas": 5,
+                "mapa": "fondo0.png"
                 },
-            'z': '',
-            'players': {
-                '192.168.1.11': {
-                    'nick': 'flavio',
-                    'tank': 'tanque-1.png'
+            "z": "",
+            "players": {
+                "192.168.1.11": {
+                    "nick": "flavio",
+                    "tank": "tanque-1.png"
                     }
                 }
             }
             """
-            self.dict_players = dict(_dict.get('players', {}))
+            self.dict_players = dict(_dict.get("players", {}))
             return True
         else:
             # Jugador rechazado. FIXME: No debiera ocurrir nunca, dado que este es el host
@@ -156,14 +218,14 @@ class ServerModelGame(gobject.GObject):
         print self._nick_host, "Ha Creado un Juego en la red"
 
         if self.__client_run():
-            # FIXME: debemos continuar comunicandonos o cerrar la conexión
-            self.client.desconectarse()
-            self.__new_handle(True)
+            #self.__new_handler_anuncio(True)
+            #time.sleep(0.02)
+            #self.__new_handler_registro(True)
             return True
         else:
             print "FIXME: El Cliente del host falla en el registro"
             self.client.desconectarse()
-            self.__new_handle(False)
+            self.__new_handler_anuncio(False)
             self.server.server_close()
             self.server.shutdown()
             self.server.socket.close()

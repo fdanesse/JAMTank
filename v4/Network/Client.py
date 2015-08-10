@@ -5,6 +5,8 @@ import socket
 import time
 import gobject
 
+T = "\r\n\r\n"
+
 
 class Client(gobject.GObject):
 
@@ -30,11 +32,11 @@ class Client(gobject.GObject):
         self.socket.close()
         time.sleep(0.5)
 
-    def enviar(self, datos):
+    def enviar(self, message):
         enviado = False
         while not enviado:
             try:
-                self.socket.sendall(datos)
+                self.socket.sendall("%s%s" % (message, T))
                 enviado = True
             except socket.error, err:
                 print "Error del cliente al enviar datos:", err
@@ -44,7 +46,9 @@ class Client(gobject.GObject):
         entrada = ""
         while not entrada:
             try:
-                entrada = self.socket.recv(1024)
+                entrada = self.socket.recv(1024)  #.split("\n")[0]
+                # client.makefile("rwb", buffering=0)
+                # cf.read(99)
             except socket.error, err:
                 print "Error del cliente al recibir datos:", err
                 time.sleep(0.02)

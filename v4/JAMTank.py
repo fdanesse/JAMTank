@@ -18,6 +18,8 @@ from ServerModelGame import ServerModelGame
 
 BASE = os.path.dirname(__file__)
 
+#gobject.threads_init()
+
 
 class JAMTank(gtk.Window):
 
@@ -113,6 +115,7 @@ class JAMTank(gtk.Window):
                 win = ConnectingPlayers(self, _dict.get('nick', 'JAMTank'),
                     _dict.get('tanque', ''), new_dict)
                 win.connect("accion", self.__accion_connecting_players)
+                model.new_handler_registro(True)
             else:
                 print "FIXME:", self.__accion_create_server
         elif accion == "salir":
@@ -121,8 +124,10 @@ class JAMTank(gtk.Window):
     def __accion_connecting_players(self, connecting_players, valor):
         if valor == "jugar":
             print "Lanzar el Juego"
+            # Se debe mandar "running al server"
             win = StatusGame(self, self.screen_wh)
         elif valor == "cancelar":
+            # FIXME: Bajar el server y el client
             self.__salir()
 
     def __server_error(self, servermodel):
