@@ -34,7 +34,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                 "default_bufsize", "fileno", "flush", "mode", "name", "next",
                 "read", "readline", "readlines", "softspace", "write", "writelines"]
                 """
-                entrada = self.rfile.readline().split("\n")[0]
+                entrada = self.rfile.readline()#.split("\n")[0]
                 if not entrada:
                     self.request.close()
                     return
