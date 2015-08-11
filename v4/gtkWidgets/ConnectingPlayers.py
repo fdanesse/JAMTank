@@ -29,38 +29,37 @@ class ConnectingPlayers(gtk.Dialog):
         for child in self.vbox.get_children():
             self.vbox.remove(child)
             child.destroy()
-        internal_widget = InternalWidget()
-        internal_widget.cancelar.connect("clicked", self.__accion)
-        internal_widget.jugar.connect("clicked", self.__accion)
-        self.vbox.pack_start(internal_widget, True, True, 0)
+        self.internal_widget = InternalWidget()
+        self.internal_widget.cancelar.connect("clicked", self.__accion)
+        self.internal_widget.jugar.connect("clicked", self.__accion)
+        self.vbox.pack_start(self.internal_widget, True, True, 0)
 
         self.show_all()
 
         text = "Host: %s  Límite de Vidas: %s" % (
             nick, _dict['vidas'])
-        internal_widget.label.set_text(text)
-        rect = internal_widget.framemapa.mapaview.get_allocation()
+        self.internal_widget.label.set_text(text)
+        rect = self.internal_widget.framemapa.mapaview.get_allocation()
         path = os.path.join(ROOTPATH, "Mapas", _dict['mapa'])
         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, -1, rect.height)
-        internal_widget.framemapa.mapaview.set_from_pixbuf(pixbuf)
+        self.internal_widget.framemapa.mapaview.set_from_pixbuf(pixbuf)
 
-        items = []
-        for x in range(_dict['jugadores']):
-            pix = None
-            nom = "Esperando..."
-            items.append([pix, nom, ""])
-        internal_widget.framejugadores.jugadores.limpiar()
-        internal_widget.framejugadores.jugadores.agregar_items(items)
+        # FIXME: Analizar esto, requiere cambios en:
+        # self.internal_widget.framejugadores.jugadores.update_playeres(_dict)
+        #items = []
+        #for x in range(_dict['jugadores']):
+        #    pix = None
+        #    nom = "Esperando..."
+        #    items.append([pix, nom, ""])
+        #self.internal_widget.framejugadores.jugadores.limpiar()
+        #self.internal_widget.framejugadores.jugadores.agregar_items(items)
 
     def __accion(self, widget):
         self.emit("accion", widget.get_label().lower())
         self.destroy()
 
-    def join_player(self, player):
-        pass
-
-    def remove_player(self, player):
-        pass
+    def update_playeres(self, servermodel, _dict):
+        self.internal_widget.framejugadores.jugadores.update_playeres(_dict)
 
 
 class InternalWidget(gtk.Frame):
@@ -148,6 +147,7 @@ class FrameMapa(gtk.Frame):
 
 
 class NewLista(Lista):
+    # FIXME: Analizar independizar esta clase de su herencia
 
     def __init__(self):
 
@@ -156,13 +156,59 @@ class NewLista(Lista):
     def __ejecutar_agregar_elemento(self, elementos):
         if not elementos:
             return False
-        pixbuf, texto, path = elementos[0]
+        pixbuf, nick, ip = elementos[0]
         if pixbuf:
-            pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(pixbuf, 50, -1)
-        self.modelo.append([pixbuf, texto, path])
+            if os.path.exists(pixbuf):
+                pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(pixbuf, 50, -1)
+        self.modelo.append([pixbuf, nick, ip])
         elementos.remove(elementos[0])
         gobject.idle_add(self.__ejecutar_agregar_elemento, elementos)
         return False
 
+    def __buscar(self, texto):
+        model = self.get_model()
+        _iter = model.get_iter_first()
+        while _iter:
+            contenido = model.get_value(_iter, 2)
+            if texto == contenido:
+                return _iter
+            _iter = model.iter_next(_iter)
+        return None
+
     def agregar_items(self, elementos):
         gobject.idle_add(self.__ejecutar_agregar_elemento, elementos)
+
+    def update_playeres(self, _dict):
+        #{'192.168.1.11': {'nick': 'flavio', 'tank': 't1.png'}}
+        news = _dict.keys()
+        model = self.get_model()
+        # Los que no vienen en _dict, hay que quitarlos
+        remover = []
+        _iter = model.get_iter_first()
+        while _iter:
+            ip = model.get_value(_iter, 2)
+            if ip not in news:
+                remover.append(_iter)
+            _iter = model.iter_next(_iter)
+        for item in remover:
+            model.remove(item)
+        # Todos los que vienen en _dict, deben estar en la lista
+        items = []
+        for key in news:
+            _iter = self.__buscar(key)
+            if _iter:
+                pixbuf = os.path.join(ROOTPATH, "Tanques",
+                    _dict[key].get('tank', ''))
+                if pixbuf:
+                    if os.path.exists(pixbuf):
+                        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(
+                            pixbuf, 50, -1)
+                        model.set_value(_iter, 0, pixbuf)
+                model.set_value(_iter, 1, _dict[key].get('nick', ''))
+                model.set_value(_iter, 2, key)
+            else:
+                pixbuf = os.path.join(ROOTPATH, "Tanques",
+                    _dict[key].get('tank', ''))
+                items.append([pixbuf, _dict[key].get('nick', ''), key])
+        if items:
+            self.agregar_items(items)

@@ -51,7 +51,9 @@ def terminate_thread(thread):
 class ServerModelGame(gobject.GObject):
 
     __gsignals__ = {
-    "error": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, [])}
+    "error": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, []),
+    "players": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
+        (gobject.TYPE_PYOBJECT, ))}
 
     def __init__(self, _host, _dict, _nick_host, _tank_host):
 
@@ -93,29 +95,14 @@ class ServerModelGame(gobject.GObject):
             }
         self.client.enviar(new)
         _dict = self.client.recibir()
-        '''
         if _dict.get("aceptado", False):
-            # Jugador aceptado
-            print "\tRegistrado:"
-            for item in _dict.items():
-                print "\t\t", item
-            """
-            {
-            "aceptado": True,
-            "game": {
-                "todos": False, "jugadores": 2, "vidas": 5,
-                "mapa": "f0.png"
-                },
-            "players": {
-                "192.168.1.11": {
-                    "nick": "flavio",
-                    "tank": "t1.png"
-                    }
-                }
-            }
-            """
-            self.dict_players = dict(_dict.get("players", {}))
-        '''
+            self.emit("players", dict(_dict.get("players", {})))
+            if _dict.get("todos", False):
+                #Cuando recibe "todos" == True, Cierra el servidor deteniendo handler_anuncio y habilita jugar en la interfaz
+                #    Cuando seleccione jugar en la interfaz, debe enviar running al server para que todos lancen el juego
+                print "FIXME: Todos Conectados"
+        else:
+            print "FIXME: Host no aceptado como jugador. Esto no debiera ocurrir nunca"
         return bool(self.registro)
 
     def __new_handler_anuncio(self, reset):
@@ -206,12 +193,6 @@ class ServerModelGame(gobject.GObject):
             self.server_thread = False
             self.emit("error")
             return False
-
-    def __join_player(self, servermodel, ip, nick):
-        print self.__join_player, ip, nick
-
-    def __remove_player(self, servermodel, ip):
-        print self.__remove_player, ip
 
     def close_all_and_exit(self):
         #self.__new_handler_anuncio(False)

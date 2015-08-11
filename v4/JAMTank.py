@@ -116,19 +116,18 @@ class JAMTank(gtk.Window):
                 win = ConnectingPlayers(self, _dict.get('nick', 'JAMTank'),
                     _dict.get('tanque', ''), new_dict)
                 win.connect("accion", self.__accion_connecting_players)
+                self.servermodel.connect("players", win.update_playeres)
                 self.servermodel.new_handler_registro(True)
             else:
                 print "FIXME:", self.__accion_create_server
         elif accion == "salir":
             self.__switch(False, 1)
 
-    def __accion_connecting_players(self, connecting_players, valor):
+    def __accion_connecting_players(self, con_players, valor):
         if valor == "jugar":
-            print "Lanzar el Juego"
-            # Se debe mandar "running al server"
+            print "FIXME: Se debe mandar running al server para Lanzar el Juego"
             win = StatusGame(self, self.screen_wh)
         elif valor == "cancelar":
-            # FIXME: Bajar el server y el client
             self.servermodel.close_all_and_exit()
             del(self.servermodel)
             self.servermodel = False
