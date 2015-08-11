@@ -35,6 +35,7 @@ class JAMTank(gtk.Window):
         self.screen_wh = (640, 480)
         self.widget_game = False
         self.eventos = []
+        self.servermodel = False
 
         self.connect("delete-event", self.__salir)
         self.connect('key-press-event', self.__key_press_event)
@@ -107,15 +108,15 @@ class JAMTank(gtk.Window):
                 'mapa': str(_dict.get('mapa', '')),
                 'vidas': int(_dict.get('vidas', 5))
                 }
-            model = ServerModelGame(_dict.get('server', 'localhost'),
+            self.servermodel = ServerModelGame(_dict.get('server', 'localhost'),
                 new_dict, _dict.get('nick', 'JAMTank'), _dict.get('tanque', ''))
-            model.connect("error", self.__server_error)
-            if model.server_run():
+            self.servermodel.connect("error", self.__server_error)
+            if self.servermodel.server_run():
                 print "Server Corriendo: True"
                 win = ConnectingPlayers(self, _dict.get('nick', 'JAMTank'),
                     _dict.get('tanque', ''), new_dict)
                 win.connect("accion", self.__accion_connecting_players)
-                model.new_handler_registro(True)
+                self.servermodel.new_handler_registro(True)
             else:
                 print "FIXME:", self.__accion_create_server
         elif accion == "salir":
@@ -128,12 +129,16 @@ class JAMTank(gtk.Window):
             win = StatusGame(self, self.screen_wh)
         elif valor == "cancelar":
             # FIXME: Bajar el server y el client
+            self.servermodel.close_all_and_exit()
+            del(self.servermodel)
+            self.servermodel = False
             self.__salir()
 
     def __server_error(self, servermodel):
         print ("FIXME:", self.__server_error)
         # FIXME: Quitar panel lateral
-        del(servermodel)
+        del(self.servermodel)
+        self.servermodel = False
         self.__switch(False, 3)
 
     def __key_press_event(self, widget, event):

@@ -5,6 +5,7 @@ import gobject
 import socket
 import time
 import threading
+import gtk
 
 from Network.Server import Server
 from Network.Server import RequestHandler
@@ -103,22 +104,17 @@ class ServerModelGame(gobject.GObject):
             "aceptado": True,
             "game": {
                 "todos": False, "jugadores": 2, "vidas": 5,
-                "mapa": "fondo0.png"
+                "mapa": "f0.png"
                 },
-            "z": "",
             "players": {
                 "192.168.1.11": {
                     "nick": "flavio",
-                    "tank": "tanque-1.png"
+                    "tank": "t1.png"
                     }
                 }
             }
             """
             self.dict_players = dict(_dict.get("players", {}))
-
-        ### self.new_handler_registro(False)
-        ### self.__new_handler_anuncio(False)
-        ### self.client.desconectarse()
         '''
         return bool(self.registro)
 
@@ -172,22 +168,6 @@ class ServerModelGame(gobject.GObject):
             print "\tRegistrado:"
             for item in _dict.items():
                 print "\t\t", item
-            """
-            {
-            "aceptado": True,
-            "game": {
-                "todos": False, "jugadores": 2, "vidas": 5,
-                "mapa": "fondo0.png"
-                },
-            "z": "",
-            "players": {
-                "192.168.1.11": {
-                    "nick": "flavio",
-                    "tank": "tanque-1.png"
-                    }
-                }
-            }
-            """
             self.dict_players = dict(_dict.get("players", {}))
             return True
         else:
@@ -232,3 +212,16 @@ class ServerModelGame(gobject.GObject):
 
     def __remove_player(self, servermodel, ip):
         print self.__remove_player, ip
+
+    def close_all_and_exit(self):
+        #self.__new_handler_anuncio(False)
+        self.new_handler_registro(False)
+        self.client.desconectarse()
+        self.server.server_close()
+        self.server.shutdown()
+        self.server.socket.close()
+        del(self.server)
+        self.server = False
+        terminate_thread(self.server_thread)
+        del(self.server_thread)
+        self.server_thread = False
