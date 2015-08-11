@@ -90,9 +90,10 @@ class ServerModelGame(gobject.GObject):
                 "nick": "%s" % self._nick_host,
                 },
             }
-        message = pickle.dumps(new, 2)
-        self.client.enviar(message)
-        retorno = self.client.recibir()
+        self.client.enviar(new)
+        _dict = self.client.recibir()
+        del(_dict["z"])
+        print "Recibido:", _dict
         '''
         try:
             _dict = pickle.loads(retorno)

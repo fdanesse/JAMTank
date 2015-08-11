@@ -53,9 +53,7 @@ class Client(gobject.GObject):
         while not entrada:
             try:
                 entrada = self.rfile.readline()
-                print entrada
                 entrada = ast.literal_eval(entrada)
-                print entrada
                 self.rfile.flush()
             except socket.error, err:
                 print "Error del cliente al recibir datos:", err
