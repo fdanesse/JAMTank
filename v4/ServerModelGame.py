@@ -94,6 +94,7 @@ class ServerModelGame(gobject.GObject):
         message = pickle.dumps(new, 2)
         self.client.enviar(message)
         retorno = self.client.recibir()
+        '''
         try:
             _dict = pickle.loads(retorno)
             if _dict.get("aceptado", False):
@@ -124,6 +125,7 @@ class ServerModelGame(gobject.GObject):
         self.new_handler_registro(False)
         self.__new_handler_anuncio(False)
         self.client.desconectarse()
+        '''
         return bool(self.registro)
 
     def __new_handler_anuncio(self, reset):
@@ -218,9 +220,6 @@ class ServerModelGame(gobject.GObject):
         print self._nick_host, "Ha Creado un Juego en la red"
 
         if self.__client_run():
-            #self.__new_handler_anuncio(True)
-            #time.sleep(0.02)
-            #self.__new_handler_registro(True)
             return True
         else:
             print "FIXME: El Cliente del host falla en el registro"
