@@ -92,39 +92,33 @@ class ServerModelGame(gobject.GObject):
             }
         self.client.enviar(new)
         _dict = self.client.recibir()
-        del(_dict["z"])
-        print "Recibido:", _dict
         '''
-        try:
-            _dict = pickle.loads(retorno)
-            if _dict.get("aceptado", False):
-                # Jugador aceptado
-                del(_dict["z"])
-                print "\tRegistrado:"
-                for item in _dict.items():
-                    print "\t\t", item
-                """
-                {
-                "aceptado": True,
-                "game": {
-                    "todos": False, "jugadores": 2, "vidas": 5,
-                    "mapa": "fondo0.png"
-                    },
-                "z": "",
-                "players": {
-                    "192.168.1.11": {
-                        "nick": "flavio",
-                        "tank": "tanque-1.png"
-                        }
+        if _dict.get("aceptado", False):
+            # Jugador aceptado
+            print "\tRegistrado:"
+            for item in _dict.items():
+                print "\t\t", item
+            """
+            {
+            "aceptado": True,
+            "game": {
+                "todos": False, "jugadores": 2, "vidas": 5,
+                "mapa": "fondo0.png"
+                },
+            "z": "",
+            "players": {
+                "192.168.1.11": {
+                    "nick": "flavio",
+                    "tank": "tanque-1.png"
                     }
                 }
-                """
-                self.dict_players = dict(_dict.get("players", {}))
-        except:
-            print "Server Model pickle Error"
-        self.new_handler_registro(False)
-        self.__new_handler_anuncio(False)
-        self.client.desconectarse()
+            }
+            """
+            self.dict_players = dict(_dict.get("players", {}))
+
+        ### self.new_handler_registro(False)
+        ### self.__new_handler_anuncio(False)
+        ### self.client.desconectarse()
         '''
         return bool(self.registro)
 
@@ -175,7 +169,6 @@ class ServerModelGame(gobject.GObject):
         _dict = self.client.recibir()
         if _dict.get("aceptado", False):
             # Jugador aceptado
-            del(_dict["z"])
             print "\tRegistrado:"
             for item in _dict.items():
                 print "\t\t", item

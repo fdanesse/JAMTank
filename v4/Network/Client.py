@@ -23,7 +23,7 @@ class Client(gobject.GObject):
         try:
             self.socket.connect(self.dir)
             self.socket.setblocking(0)
-            self.rfile = self.socket.makefile("rwb", bufsize=1024)
+            self.rfile = self.socket.makefile("rwb") #, bufsize=1024
             self.rfile.flush()
             time.sleep(0.5)
             return True
@@ -38,6 +38,9 @@ class Client(gobject.GObject):
         time.sleep(0.5)
 
     def enviar(self, message):
+        """
+        Escribe un diccionario convertido a str y con la terminacion "\n"
+        """
         enviado = False
         while not enviado:
             try:
@@ -49,6 +52,10 @@ class Client(gobject.GObject):
             time.sleep(0.02)
 
     def recibir(self):
+        """
+        Espera una linea string que termina con "\n" y que ast puede convertir
+        en un diccionario python.
+        """
         entrada = {}
         while not entrada:
             try:

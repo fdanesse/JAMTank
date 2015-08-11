@@ -56,6 +56,10 @@ class RequestHandler(SocketServer.StreamRequestHandler):
     #def setup(self):
 
     def __procesar(self, entrada, ip):
+        """
+        Espera una linea string que termina con "\n" y que ast puede convertir
+        en un diccionario python.
+        """
         ret = {}
         try:
             _dict = ast.literal_eval(entrada)
@@ -66,16 +70,10 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         return self.__make_resp(ret)
 
     def __make_resp(self, new):
-        new["z"] = ""
-        message = "%s%s" % (str(new), T)
-        l = len(message)
-        if l < 1024:
-            x = 1024 - l
-            new["z"] = " " * x
-            message = "%s%s" % (str(new), T)
-        elif l > 1023:
-            print "Sobre Carga en la Red:", l
-        return message
+        """
+        Escribe un diccionario convertido a str y con la terminacion "\n"
+        """
+        return "%s%s" % (str(new), T)
 
 
 class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
