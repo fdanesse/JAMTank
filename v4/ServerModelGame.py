@@ -5,7 +5,6 @@ import gobject
 import socket
 import time
 import threading
-import cPickle as pickle
 
 from Network.Server import Server
 from Network.Server import RequestHandler
@@ -171,10 +170,8 @@ class ServerModelGame(gobject.GObject):
                 "nick": "%s" % self._nick_host,
                 },
             }
-        message = pickle.dumps(new, 2)
-        self.client.enviar(message)
-        retorno = self.client.recibir()
-        _dict = pickle.loads(retorno)
+        self.client.enviar(new)
+        _dict = self.client.recibir()
         if _dict.get("aceptado", False):
             # Jugador aceptado
             del(_dict["z"])
@@ -200,7 +197,7 @@ class ServerModelGame(gobject.GObject):
             self.dict_players = dict(_dict.get("players", {}))
             return True
         else:
-            # Jugador rechazado. FIXME: No debiera ocurrir nunca, dado que este es el host
+            print "Jugador rechazado. FIXME: No debiera ocurrir nunca, dado que este es el host"
             return False
 
     def server_run(self):

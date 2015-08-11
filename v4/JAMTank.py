@@ -115,7 +115,7 @@ class JAMTank(gtk.Window):
                 win = ConnectingPlayers(self, _dict.get('nick', 'JAMTank'),
                     _dict.get('tanque', ''), new_dict)
                 win.connect("accion", self.__accion_connecting_players)
-                model.new_handler_registro(True)
+                #model.new_handler_registro(True)
             else:
                 print "FIXME:", self.__accion_create_server
         elif accion == "salir":

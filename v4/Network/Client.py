@@ -4,8 +4,9 @@
 import socket
 import time
 import gobject
+import ast
 
-T = "\r\n\r\n"
+T = "\n"
 
 
 class Client(gobject.GObject):
@@ -16,11 +17,14 @@ class Client(gobject.GObject):
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.dir = (ip, 5000)
+        self.rfile = False
 
     def conectarse(self):
         try:
             self.socket.connect(self.dir)
             self.socket.setblocking(0)
+            self.rfile = self.socket.makefile("rwb", bufsize=1024)
+            self.rfile.flush()
             time.sleep(0.5)
             return True
         except socket.error, err:
@@ -30,25 +34,29 @@ class Client(gobject.GObject):
 
     def desconectarse(self):
         self.socket.close()
+        self.rfile.close()
         time.sleep(0.5)
 
     def enviar(self, message):
         enviado = False
         while not enviado:
             try:
-                self.socket.sendall("%s%s" % (message, T))
+                self.rfile.write("%s%s" % (message, T))
+                self.rfile.flush()
                 enviado = True
             except socket.error, err:
                 print "Error del cliente al enviar datos:", err
             time.sleep(0.02)
 
     def recibir(self):
-        entrada = ""
+        entrada = {}
         while not entrada:
             try:
-                entrada = self.socket.recv(1024)  #.split("\n")[0]
-                # client.makefile("rwb", buffering=0)
-                # cf.read(99)
+                entrada = self.rfile.readline()
+                print entrada
+                entrada = ast.literal_eval(entrada)
+                print entrada
+                self.rfile.flush()
             except socket.error, err:
                 print "Error del cliente al recibir datos:", err
                 time.sleep(0.02)

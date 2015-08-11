@@ -3,9 +3,9 @@
 
 import socket
 import SocketServer
-import cPickle as pickle
+import ast
 
-T = "\r\n\r\n"
+T = "\n"
 
 
 class RequestHandler(SocketServer.StreamRequestHandler):
@@ -34,7 +34,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                 "default_bufsize", "fileno", "flush", "mode", "name", "next",
                 "read", "readline", "readlines", "softspace", "write", "writelines"]
                 """
-                entrada = self.rfile.readline()#.split("\n")[0]
+                entrada = self.rfile.readline()
                 if not entrada:
                     self.request.close()
                     return
@@ -43,7 +43,7 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                     entrada, str(self.client_address[0]))
 
                 if respuesta:
-                    self.wfile.write("%s\n" % respuesta)
+                    self.wfile.write(respuesta)
                 else:
                     self.request.close()
 
@@ -56,32 +56,25 @@ class RequestHandler(SocketServer.StreamRequestHandler):
     #def setup(self):
 
     def __procesar(self, entrada, ip):
+        ret = {}
         try:
-            _dict = pickle.loads(entrada)
+            _dict = ast.literal_eval(entrada)
             if _dict.get("register", False):
-                return self.server.registrar(ip, _dict)
-            else:
-                return self.__make_resp({})
+                ret = self.server.registrar(ip, _dict)
         except:
             print "Server pickle Error:"
-            return self.__make_resp({})
+        return self.__make_resp(ret)
 
     def __make_resp(self, new):
         new["z"] = ""
-        message = pickle.dumps(new, 2)
-        message = "%s%s" % (message, T)
+        message = "%s%s" % (str(new), T)
         l = len(message)
         if l < 1024:
             x = 1024 - l
-            new["z"] = " " * (x - 3)
-            message = pickle.dumps(new, 2)
-            message = "%s%s" % (message, T)
+            new["z"] = " " * x
+            message = "%s%s" % (str(new), T)
         elif l > 1023:
             print "Sobre Carga en la Red:", l
-        #t = open("/tmp/xx.dat", 'w')
-        #pickle.dump(new, t)
-        #t.flush()
-        #t.close()
         return message
 
 
@@ -115,24 +108,6 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         for item in self._dict_game.items():
             print "\t\t", item
 
-    def __make_resp(self, new):
-        new["z"] = ""
-        message = pickle.dumps(new, 2)
-        message = "%s%s" % (message, T)
-        l = len(message)
-        if l < 1024:
-            x = 1024 - l
-            new["z"] = " " * (x - 3)
-            message = pickle.dumps(new, 2)
-            message = "%s%s" % (message, T)
-        elif l > 1023:
-            print "Sobre Carga en la Red:", l
-        #t = open("/tmp/x.dat", 'w')
-        #pickle.dump(new, t)
-        #t.flush()
-        #t.close()
-        return message
-
     def registrar(self, ip, _dict):
         permitidos = self._dict_game["jugadores"]
         new = {}
@@ -161,7 +136,7 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
             print "FIXME: hay más jugadores de los permitidos"
             # este jugador no puede jugar
             new["aceptado"] = False
-        return self.__make_resp(new)
+        return new
 
     def shutdown(self):
         print "Server OFF"
