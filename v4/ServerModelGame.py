@@ -5,7 +5,6 @@ import gobject
 import socket
 import time
 import threading
-import gtk
 
 from Network.Server import Server
 from Network.Server import RequestHandler
@@ -67,7 +66,6 @@ class ServerModelGame(gobject.GObject):
         self.server = False
         self.publicar = False
         self.registro = False
-        self.dict_players = {}
 
     def new_handler_registro(self, reset):
         if self.registro:
@@ -155,7 +153,6 @@ class ServerModelGame(gobject.GObject):
             print "\tRegistrado:"
             for item in _dict.items():
                 print "\t\t", item
-            self.dict_players = dict(_dict.get("players", {}))
             return True
         else:
             print "Jugador rechazado. FIXME: No debiera ocurrir nunca, dado que este es el host"
