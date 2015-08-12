@@ -65,6 +65,8 @@ class ServerModelGame(gobject.GObject):
                 "nick": "%s" % self._nick_host,
                 },
             }
+        if self.running:
+            new['running'] = True
         self.client.enviar(new)
         _dict = self.client.recibir()
         if _dict.get("aceptado", False):
@@ -133,8 +135,6 @@ class ServerModelGame(gobject.GObject):
                 "nick": "%s" % self._nick_host,
                 },
             }
-        if self.running:
-            new['running'] = True
         self.client.enviar(new)
         _dict = self.client.recibir()
         if _dict.get("aceptado", False):

@@ -125,7 +125,7 @@ class JAMTank(gtk.Window):
 
     def __play_run(self, servermodel):
         print "FIXME: Lanzar el juego"
-        #win = StatusGame(self, self.screen_wh)
+        win = StatusGame(self, self.screen_wh)
 
     def __accion_connecting_players(self, con_players, valor):
         if valor == "jugar":

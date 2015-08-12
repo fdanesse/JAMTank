@@ -96,6 +96,7 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         self.allow_reuse_address = True
         self.socket.setblocking(0)
 
+        self.ip = host
         self.registrados = 0
         self._dict_game = dict(_dict)  # n°de jugadores, mapa, vidas
         self._dict_game["mapa"] = _dict["mapa"]
@@ -126,8 +127,11 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
                 new["aceptado"] = True
                 new["game"] = dict(self._dict_game)
                 new["players"] = dict(self._players_dict)
-                # Si running == True, running a todos para lanzar el juego
-                new["running"] = _dict.get("running", False)
+                # Si running == True, desde el host,
+                # running a todos para lanzar el juego
+                if ip == self.ip:
+                    if _dict.get("running", False):
+                        self._dict_game["running"] = True
             else:
                 # este jugador no puede jugar
                 new["aceptado"] = False
