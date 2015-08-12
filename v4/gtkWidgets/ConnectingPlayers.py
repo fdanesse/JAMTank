@@ -45,14 +45,14 @@ class ConnectingPlayers(gtk.Dialog):
         self.internal_widget.framemapa.mapaview.set_from_pixbuf(pixbuf)
 
         # FIXME: Analizar esto, requiere cambios en:
-        # self.internal_widget.framejugadores.jugadores.update_playeres(_dict)
-        #items = []
-        #for x in range(_dict['jugadores']):
-        #    pix = None
-        #    nom = "Esperando..."
-        #    items.append([pix, nom, ""])
-        #self.internal_widget.framejugadores.jugadores.limpiar()
-        #self.internal_widget.framejugadores.jugadores.agregar_items(items)
+        #self.internal_widget.framejugadores.jugadores.update_playeres(_dict)
+        items = []
+        for x in range(_dict['jugadores']):
+            pix = None
+            nom = "Esperando..."
+            items.append([pix, nom, ""])
+        self.internal_widget.framejugadores.jugadores.limpiar()
+        self.internal_widget.framejugadores.jugadores.agregar_items(items)
 
     def __accion(self, widget):
         self.emit("accion", widget.get_label().lower())
@@ -122,7 +122,7 @@ class FrameJugadores(gtk.Frame):
         self.jugadores = NewLista()
         self.jugadores.set_headers_visible(False)
         scroll = gtk.ScrolledWindow()
-        scroll.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         scroll.add(self.jugadores)
         event.add(scroll)
         self.add(event)
@@ -173,7 +173,7 @@ class NewLista(Lista):
         _iter = model.get_iter_first()
         while _iter:
             contenido = model.get_value(_iter, 2)
-            if texto == contenido:
+            if texto == contenido or contenido == "":
                 return _iter
             _iter = model.iter_next(_iter)
         return None
@@ -190,10 +190,10 @@ class NewLista(Lista):
         _iter = model.get_iter_first()
         while _iter:
             ip = model.get_value(_iter, 2)
-            if ip not in news:
+            if ip != "" and ip not in news:
                 remover.append(_iter)
             _iter = model.iter_next(_iter)
-        for item in remover:
+        for item in reversed(remover):
             model.remove(item)
         # Todos los que vienen en _dict, deben estar en la lista
         items = []
@@ -213,5 +213,6 @@ class NewLista(Lista):
                 pixbuf = os.path.join(ROOTPATH, "Tanques",
                     _dict[key].get('tank', ''))
                 items.append([pixbuf, _dict[key].get('nick', ''), key])
+                # FIXME: Emitir sonido de conexión
         if items:
             self.agregar_items(items)

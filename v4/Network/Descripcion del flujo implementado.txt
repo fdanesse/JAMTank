@@ -21,14 +21,10 @@ Host crea el juego:
                     }
                 }
             }
-
-        Almacena "players" (Verifica si tiene alguno almacenado que ya no viene del server para quitarlo de la lista)
-        Envia "players" a la interfaz y actualiza la lista de jugadores conectados
+        Envía los datos a la interfaz
         Cuando recibe "todos" == True, Cierra el servidor deteniendo handler_anuncio y habilita jugar en la interfaz
             Cuando seleccione jugar en la interfaz, debe enviar running al server para que todos lancen el juego
-
-
-
+        Cuando recibe "running" == True lanza el juego
 
 
 
@@ -36,7 +32,8 @@ Cliente no host:
     Escucha la red buscando juegos creados
     Al encontrar un juego, informa a la interfaz y el juego se agrega a una lista
     Cuando el usuario selecciona uno de esos juegos y se conecta:
+        Detiene la escucha en la red
         Levanta su cliente
         Registra su cliente en el servidor configurando nick y tanque
-
         inicia handler_registro
+        Cuando recibe "running" == True lanza el juego
