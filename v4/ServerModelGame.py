@@ -136,19 +136,22 @@ class ServerModelGame(gobject.GObject):
             return False
 
     def __kill_server(self):
-        self.server.server_close()
-        self.server.shutdown()
-        self.server.socket.close()
-        del(self.server)
-        self.server = False
-        terminate_thread(self.server_thread)
-        del(self.server_thread)
-        self.server_thread = False
+        if self.server:
+            self.server.server_close()
+            self.server.shutdown()
+            self.server.socket.close()
+            del(self.server)
+            self.server = False
+        if self.server_thread:
+            terminate_thread(self.server_thread)
+            del(self.server_thread)
+            self.server_thread = False
 
     def __kill_client(self):
-        self.client.desconectarse()
-        del(self.client)
-        self.client = False
+        if self.client:
+            self.client.desconectarse()
+            del(self.client)
+            self.client = False
 
     def new_handler_anuncio(self, reset):
         if self.publicar:

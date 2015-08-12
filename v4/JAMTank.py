@@ -35,6 +35,9 @@ class JAMTank(gtk.Window):
         self.screen_wh = (640, 480)
         self.widget_game = False
         self.eventos = []
+        self.handlers = {
+            'servermodel': []
+            }
         self.servermodel = False
 
         self.connect("delete-event", self.__salir)
@@ -110,13 +113,16 @@ class JAMTank(gtk.Window):
                 }
             self.servermodel = ServerModelGame(_dict.get('server', 'localhost'),
                 new_dict, _dict.get('nick', 'JAMTank'), _dict.get('tanque', ''))
-            self.servermodel.connect("error", self.__server_error)
+            _id = self.servermodel.connect("error", self.__server_error)
+            self.handlers['servermodel'].append(_id)
             if self.servermodel.server_run():
                 win = ConnectingPlayers(self, _dict.get('nick', 'JAMTank'),
                     _dict.get('tanque', ''), new_dict)
                 win.connect("accion", self.__accion_connecting_players)
-                self.servermodel.connect("players", win.update_playeres)
-                self.servermodel.connect("play-enabled", win.play_enabled)
+                _id = self.servermodel.connect("players", win.update_playeres)
+                self.handlers['servermodel'].append(_id)
+                _id = self.servermodel.connect("play-enabled", win.play_enabled)
+                self.handlers['servermodel'].append(_id)
                 self.servermodel.new_handler_registro(True)
                 self.servermodel.new_handler_anuncio(True)
             else:
@@ -129,14 +135,22 @@ class JAMTank(gtk.Window):
             print "FIXME: Se debe mandar running al server para Lanzar el Juego"
             win = StatusGame(self, self.screen_wh)
         elif valor == "cancelar":
+            self.__server_error()
+
+    def __kill_server_model(self):
+        if self.servermodel:
+            for h in self.handlers.get('servermodel', []):
+                if self.servermodel.handler_is_connected(h):
+                    self.servermodel.handler_disconnect(h)
+            for h in self.handlers.get('servermodel', []):
+                del(h)
+            self.handlers['servermodel'] = []
             self.servermodel.close_all_and_exit()
             del(self.servermodel)
             self.servermodel = False
-            self.__salir()
 
-    def __server_error(self, servermodel):
-        del(self.servermodel)
-        self.servermodel = False
+    def __server_error(self, servermodel=False):
+        self.__kill_server_model()
         self.__switch(False, 3)
 
     def __key_press_event(self, widget, event):
@@ -175,8 +189,7 @@ class JAMTank(gtk.Window):
     #        self.widget_game.update_events(self.eventos)
 
     def __salir(self, widget=None, event=None):
-        #if self.widget_game:
-        #    self.widget_game.salir()
+        self.__kill_server_model()
         sys.exit(0)
 
 
