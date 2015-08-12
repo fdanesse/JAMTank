@@ -112,12 +112,13 @@ class JAMTank(gtk.Window):
                 new_dict, _dict.get('nick', 'JAMTank'), _dict.get('tanque', ''))
             self.servermodel.connect("error", self.__server_error)
             if self.servermodel.server_run():
-                print "Server Corriendo: True"
                 win = ConnectingPlayers(self, _dict.get('nick', 'JAMTank'),
                     _dict.get('tanque', ''), new_dict)
                 win.connect("accion", self.__accion_connecting_players)
                 self.servermodel.connect("players", win.update_playeres)
+                self.servermodel.connect("play-enabled", win.play_enabled)
                 self.servermodel.new_handler_registro(True)
+                self.servermodel.new_handler_anuncio(True)
             else:
                 print "FIXME:", self.__accion_create_server
         elif accion == "salir":
@@ -134,8 +135,6 @@ class JAMTank(gtk.Window):
             self.__salir()
 
     def __server_error(self, servermodel):
-        print ("FIXME:", self.__server_error)
-        # FIXME: Quitar panel lateral
         del(self.servermodel)
         self.servermodel = False
         self.__switch(False, 3)

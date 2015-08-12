@@ -5,24 +5,12 @@ import gobject
 import socket
 import time
 import threading
+import ctypes
+import cPickle as pickle
 
 from Network.Server import Server
 from Network.Server import RequestHandler
 from Network.Client import Client
-
-
-def __make_anuncio(new):
-    # carga debe ser 150
-    new["z"] = ""
-    message = pickle.dumps(new, 2)
-    l = len(message)
-    if l < 150:
-        x = 149 - l
-        new["z"] = " " * x
-        message = pickle.dumps(new, 2)
-    elif l > 150:
-        print "Sobre Carga en la Red:", l
-    return message
 
 
 def terminate_thread(thread):
@@ -32,7 +20,6 @@ def terminate_thread(thread):
     """
     if not thread.isAlive():
         return
-    import ctypes
     exc = ctypes.py_object(SystemExit)
     res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
         ctypes.c_long(thread.ident), exc)
@@ -52,7 +39,9 @@ class ServerModelGame(gobject.GObject):
     __gsignals__ = {
     "error": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, []),
     "players": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
-        (gobject.TYPE_PYOBJECT, ))}
+        (gobject.TYPE_PYOBJECT, )),
+    "play-enabled": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
+        (gobject.TYPE_BOOLEAN, ))}
 
     def __init__(self, _host, _dict, _nick_host, _tank_host):
 
@@ -67,24 +56,7 @@ class ServerModelGame(gobject.GObject):
         self.publicar = False
         self.registro = False
 
-    def new_handler_registro(self, reset):
-        if self.registro:
-            gobject.source_remove(self.registro)
-            self.registro = False
-        if reset:
-            print "Esperando Jugadores..."
-            self.registro = gobject.timeout_add(35, self.__handler_registro)
-
     def __handler_registro(self):
-        #FIXME: Enviar <> recibir
-        #   Cuando se recibe, los jugadores debe actualizarse en ConnectingPlayers
-        #   Al recibir todos == True, se debe habilitar jugar en ConnectingPlayers
-        #Cuando el jugador arctiva jugar en ConnectingPlayers:
-        #   Se manda running al Servidor, entonces:
-        #       en enviar <> recibir: cuando se recibe running == True
-        #           Se debe detener la publicación del server
-        #           Se debe detener enviar <> recibir
-        #           Y se debe lanzar el juego
         new = {
             "register": {
                 "tank": "%s" % self._tank_host,
@@ -96,38 +68,44 @@ class ServerModelGame(gobject.GObject):
         if _dict.get("aceptado", False):
             self.emit("players", dict(_dict.get("players", {})))
             if _dict.get("todos", False):
-                #Cuando recibe "todos" == True, Cierra el servidor deteniendo handler_anuncio y habilita jugar en la interfaz
-                #    Cuando seleccione jugar en la interfaz, debe enviar running al server para que todos lancen el juego
-                print "FIXME: Todos Conectados"
+                self.new_handler_anuncio(False)
+                self.emit("play-enabled", True)
+            #else:
+            #   self.emit("play-enabled", False)
+            #if _dict.get("running", False):
+            #    Fixme: detener los handlers y lanzar el juego
         else:
-            print "FIXME: Host no aceptado como jugador. Esto no debiera ocurrir nunca"
+            print "FIXME: Host no aceptado como jugador."
+            self.close_all_and_exit()
+            self.emit("error")
         return bool(self.registro)
 
-    def __new_handler_anuncio(self, reset):
-        if self.publicar:
-            gobject.source_remove(self.publicar)
-            self.publicar = False
-        if reset:
-            print "Publicando Juego en la red..."
-            self.publicar = gobject.timeout_add(1000, self.__handler_anuncio)
+    def __make_anuncio(self, new):
+        # carga debe ser 150
+        new["z"] = ""
+        message = pickle.dumps(new, 2)
+        l = len(message)
+        if l < 150:
+            x = 149 - l
+            new["z"] = " " * x
+            message = pickle.dumps(new, 2)
+        elif l > 150:
+            print "Sobre Carga en la Red:", l
+        return message
 
     def __handler_anuncio(self):
         if not self.server:
             return False
-        if self.server.registrados < self._dict.get("jugadores", 0):
-            new = dict(self._dict)
-            new["ip"] = self._host
-            new["nickh"] = self._nick_host
-            print "Anunciando:", time.time(), new
-            message = "%s\n" % __make_anuncio(new)  # carga debe ser 150
-            my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-            my_socket.sendto(message, ("<broadcast>", 10000))
-            my_socket.close()
-            return True
-        else:
-            print "FIXME: Todos los Jugadores Conectados"
-            return False
+        new = dict(self._dict)
+        new["ip"] = self._host
+        new["nickh"] = self._nick_host
+        print "Anunciando:", time.time(), new
+        message = "%s\n" % self.__make_anuncio(new)  # carga debe ser 150
+        my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        my_socket.sendto(message, ("<broadcast>", 10000))
+        my_socket.close()
+        return bool(self.publicar)
 
     def __client_run(self):
         self.client = Client(self._host)
@@ -149,14 +127,44 @@ class ServerModelGame(gobject.GObject):
         self.client.enviar(new)
         _dict = self.client.recibir()
         if _dict.get("aceptado", False):
-            # Jugador aceptado
-            print "\tRegistrado:"
+            print "\t Cliente del Host Registrado:"
             for item in _dict.items():
                 print "\t\t", item
             return True
         else:
-            print "Jugador rechazado. FIXME: No debiera ocurrir nunca, dado que este es el host"
+            print "Cliente del Host rechazado por el Servidor"
             return False
+
+    def __kill_server(self):
+        self.server.server_close()
+        self.server.shutdown()
+        self.server.socket.close()
+        del(self.server)
+        self.server = False
+        terminate_thread(self.server_thread)
+        del(self.server_thread)
+        self.server_thread = False
+
+    def __kill_client(self):
+        self.client.desconectarse()
+        del(self.client)
+        self.client = False
+
+    def new_handler_anuncio(self, reset):
+        if self.publicar:
+            gobject.source_remove(self.publicar)
+            self.publicar = False
+        if reset:
+            print "Publicando Juego en la red..."
+            self.publicar = gobject.timeout_add(1000, self.__handler_anuncio)
+
+    def new_handler_registro(self, reset):
+        if self.registro:
+            gobject.source_remove(self.registro)
+            self.registro = False
+        if reset:
+            print "Esperando Jugadores..."
+            self.registro = gobject.timeout_add(35, self.__handler_registro)
 
     def server_run(self):
         try:
@@ -172,34 +180,20 @@ class ServerModelGame(gobject.GObject):
             self.emit("error")
             return False
 
+        print "Server Corriendo: True"
         print self._nick_host, "Ha Creado un Juego en la red"
 
         if self.__client_run():
             return True
         else:
             print "FIXME: El Cliente del host falla en el registro"
-            self.client.desconectarse()
-            self.__new_handler_anuncio(False)
-            self.server.server_close()
-            self.server.shutdown()
-            self.server.socket.close()
-            del(self.server)
-            self.server = False
-            terminate_thread(self.server_thread)
-            del(self.server_thread)
-            self.server_thread = False
+            self.__kill_client()
+            self.__kill_server()
             self.emit("error")
             return False
 
     def close_all_and_exit(self):
-        #self.__new_handler_anuncio(False)
+        self.new_handler_anuncio(False)
         self.new_handler_registro(False)
-        self.client.desconectarse()
-        self.server.server_close()
-        self.server.shutdown()
-        self.server.socket.close()
-        del(self.server)
-        self.server = False
-        terminate_thread(self.server_thread)
-        del(self.server_thread)
-        self.server_thread = False
+        self.__kill_client()
+        self.__kill_server()

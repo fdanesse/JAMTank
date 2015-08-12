@@ -61,6 +61,9 @@ class ConnectingPlayers(gtk.Dialog):
     def update_playeres(self, servermodel, _dict):
         self.internal_widget.framejugadores.jugadores.update_playeres(_dict)
 
+    def play_enabled(self, servermodel, valor):
+        self.internal_widget.jugar.set_sensitive(valor)
+
 
 class InternalWidget(gtk.Frame):
 
