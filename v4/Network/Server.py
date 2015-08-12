@@ -126,7 +126,8 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
                 new["aceptado"] = True
                 new["game"] = dict(self._dict_game)
                 new["players"] = dict(self._players_dict)
-                #FIXME: si running, running a todos
+                # Si running == True, running a todos para lanzar el juego
+                new["running"] = _dict.get("running", False)
             else:
                 # este jugador no puede jugar
                 new["aceptado"] = False

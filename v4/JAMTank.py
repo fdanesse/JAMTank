@@ -59,15 +59,6 @@ class JAMTank(gtk.Window):
         print "Geometria:", "Game:", self.screen_wh[0]/4*3, self.screen_wh[1], "StatusGame:", self.screen_wh[0]/4, self.screen_wh[1]
 
     def __reset(self):
-        #for child in self.get_children():
-        #    self.remove(child)
-        #    child.destroy()
-        #if self.widget_game:
-        #    self.disconnect_by_func(self.__key_press_event)
-        #    self.disconnect_by_func(self.__key_release_event)
-        #    self.widget_game.disconnect_by_func(self.switch)
-        #    del(self.widget_game)
-        #    self.widget_game = False
         self.eventos = []
 
     def __select_mode(self, widget, valor):
@@ -123,6 +114,8 @@ class JAMTank(gtk.Window):
                 self.handlers['servermodel'].append(_id)
                 _id = self.servermodel.connect("play-enabled", win.play_enabled)
                 self.handlers['servermodel'].append(_id)
+                _id = self.servermodel.connect("play-run", self.__play_run)
+                self.handlers['servermodel'].append(_id)
                 self.servermodel.new_handler_registro(True)
                 self.servermodel.new_handler_anuncio(True)
             else:
@@ -130,10 +123,13 @@ class JAMTank(gtk.Window):
         elif accion == "salir":
             self.__switch(False, 1)
 
+    def __play_run(self, servermodel):
+        print "FIXME: Lanzar el juego"
+        #win = StatusGame(self, self.screen_wh)
+
     def __accion_connecting_players(self, con_players, valor):
         if valor == "jugar":
-            print "FIXME: Se debe mandar running al server para Lanzar el Juego"
-            win = StatusGame(self, self.screen_wh)
+            self.servermodel.running = True
         elif valor == "cancelar":
             self.__server_error()
 

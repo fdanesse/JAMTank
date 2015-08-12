@@ -41,7 +41,8 @@ class ServerModelGame(gobject.GObject):
     "players": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
         (gobject.TYPE_PYOBJECT, )),
     "play-enabled": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
-        (gobject.TYPE_BOOLEAN, ))}
+        (gobject.TYPE_BOOLEAN, )),
+    "play-run": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, [])}
 
     def __init__(self, _host, _dict, _nick_host, _tank_host):
 
@@ -55,6 +56,7 @@ class ServerModelGame(gobject.GObject):
         self.server = False
         self.publicar = False
         self.registro = False
+        self.running = False
 
     def __handler_registro(self):
         new = {
@@ -70,10 +72,17 @@ class ServerModelGame(gobject.GObject):
             if _dict.get("todos", False):
                 self.new_handler_anuncio(False)
                 self.emit("play-enabled", True)
-            #else:
-            #   self.emit("play-enabled", False)
-            #if _dict.get("running", False):
-            #    Fixme: detener los handlers y lanzar el juego
+            else:
+                # FIXME: Verificar esto 2
+                self.running = False
+                self.emit("play-enabled", False)
+                if not self.publicar:
+                    self.new_handler_anuncio(True)
+            if _dict.get("running", False):
+                # FIXME: Verificar si esto debe ir acá
+                self.new_handler_anuncio(False)
+                self.new_handler_registro(False)
+                self.emit("play-run")
         else:
             print "FIXME: Host no aceptado como jugador."
             self.close_all_and_exit()
@@ -124,6 +133,8 @@ class ServerModelGame(gobject.GObject):
                 "nick": "%s" % self._nick_host,
                 },
             }
+        if self.running:
+            new['running'] = True
         self.client.enviar(new)
         _dict = self.client.recibir()
         if _dict.get("aceptado", False):
@@ -196,6 +207,7 @@ class ServerModelGame(gobject.GObject):
             return False
 
     def close_all_and_exit(self):
+        self.running = False
         self.new_handler_anuncio(False)
         self.new_handler_registro(False)
         self.__kill_client()

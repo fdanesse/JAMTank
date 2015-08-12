@@ -1,11 +1,30 @@
 
 Host crea el juego:
     Levanta el servidor configurando mapa, vidas, jugadores
+        {
+        'jugadores': 2,
+        'vidas': 5,
+        'mapa': 'f1.png'
+        }
+
     Levanta su cliente
     Registra su cliente en el servidor configurando nick y tanque
+        {
+        'register': {
+            'nick': 'flavio',
+            'tank': 't1.png'
+            }
+        }
 
     inicia handler_registro
     inicia handler_anuncio (publica el servidor en la red)
+        {
+        'ip': '192.168.1.11',
+        'nickh': 'flavio',
+        'jugadores': 7,
+        'vidas': 5,
+        'mapa': 'f1.png'
+        }
 
     * handler_registro Recibe:
         {
@@ -22,9 +41,9 @@ Host crea el juego:
                 }
             }
         Envía los datos a la interfaz
-        Cuando recibe "todos" == True, Cierra el servidor deteniendo handler_anuncio y habilita jugar en la interfaz
-            Cuando seleccione jugar en la interfaz, debe enviar running al server para que todos lancen el juego
-        Cuando recibe "running" == True lanza el juego
+        Cuando recibe "todos" == True, Detiene handler_anuncio y envia "play-enabled" == True a la interfaz
+        Cuando recibe "todos" == False, Reinicia handler_anuncio y envia "play-enabled" == False a la interfaz
+        Cuando recibe "running" == True Detiene los handlers y envia "play-run" a la interfaz para que se lance el juego
 
 
 
@@ -36,4 +55,4 @@ Cliente no host:
         Levanta su cliente
         Registra su cliente en el servidor configurando nick y tanque
         inicia handler_registro
-        Cuando recibe "running" == True lanza el juego
+        Cuando recibe "running" == True Detiene los handlers y envia "play-run" a la interfaz para que se lance el juego
