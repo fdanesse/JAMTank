@@ -4,7 +4,6 @@
 import os
 import gtk
 import gobject
-from SelectWidgets import Lista
 
 ROOTPATH = os.path.dirname(os.path.dirname(__file__))
 
@@ -44,14 +43,11 @@ class ConnectingPlayers(gtk.Dialog):
         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, -1, rect.height)
         self.internal_widget.framemapa.mapaview.set_from_pixbuf(pixbuf)
 
-        # FIXME: Analizar esto, requiere cambios en:
-        #self.internal_widget.framejugadores.jugadores.update_playeres(_dict)
         items = []
         for x in range(_dict['jugadores']):
             pix = None
             nom = "Esperando..."
             items.append([pix, nom, ""])
-        self.internal_widget.framejugadores.jugadores.limpiar()
         self.internal_widget.framejugadores.jugadores.agregar_items(items)
 
     def __accion(self, widget):
@@ -149,12 +145,41 @@ class FrameMapa(gtk.Frame):
         self.show_all()
 
 
-class NewLista(Lista):
-    # FIXME: Analizar independizar esta clase de su herencia
+class NewLista(gtk.TreeView):
 
     def __init__(self):
 
-        Lista.__init__(self)
+        gtk.TreeView.__init__(self, gtk.ListStore(gtk.gdk.Pixbuf,
+            gobject.TYPE_STRING, gobject.TYPE_STRING))
+
+        self.set_property("rules-hint", True)
+        self.set_headers_clickable(True)
+        self.set_headers_visible(True)
+
+        self.__setear_columnas()
+        self.show_all()
+
+    def __setear_columnas(self):
+        self.append_column(self.__construir_columa_icono('', 0, True))
+        self.append_column(self.__construir_columa('Nombre', 1, True))
+        self.append_column(self.__construir_columa('', 2, False))
+
+    def __construir_columa(self, text, index, visible):
+        render = gtk.CellRendererText()
+        columna = gtk.TreeViewColumn(text, render, text=index)
+        columna.set_sort_column_id(index)
+        columna.set_property('visible', visible)
+        columna.set_property('resizable', False)
+        columna.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
+        return columna
+
+    def __construir_columa_icono(self, text, index, visible):
+        render = gtk.CellRendererPixbuf()
+        columna = gtk.TreeViewColumn(text, render, pixbuf=index)
+        columna.set_property('visible', visible)
+        columna.set_property('resizable', False)
+        columna.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
+        return columna
 
     def __ejecutar_agregar_elemento(self, elementos):
         if not elementos:
@@ -163,7 +188,7 @@ class NewLista(Lista):
         if pixbuf:
             if os.path.exists(pixbuf):
                 pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(pixbuf, 50, -1)
-        self.modelo.append([pixbuf, nick, ip])
+        self.get_model().append([pixbuf, nick, ip])
         elementos.remove(elementos[0])
         gobject.idle_add(self.__ejecutar_agregar_elemento, elementos)
         return False
