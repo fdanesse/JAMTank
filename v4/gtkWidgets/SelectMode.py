@@ -5,6 +5,7 @@ import gtk
 import gobject
 
 
+#FIXME: Analizar si no es mejor un dialog
 class SelectMode(gtk.Window):
 
     __gsignals__ = {

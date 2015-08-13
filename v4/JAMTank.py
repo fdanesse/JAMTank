@@ -15,6 +15,7 @@ from gtkWidgets.StatusGame import StatusGame
 from gtkWidgets.CreateServerMode import CreateServerMode
 from gtkWidgets.ConnectingPlayers import ConnectingPlayers
 from ServerModelGame import ServerModelGame
+from gtkWidgets.CreateClientMode import CreateClientMode
 
 BASE = os.path.dirname(__file__)
 
@@ -86,14 +87,23 @@ class JAMTank(gtk.Window):
             # Crear Juego en Red
             print "Esta PC será Servidor"
             win = CreateServerMode(self)
-            win.connect("close", self.__switch, 1)
+            win.connect("close", self.__switch, 1)  # Escape en dialog
             win.connect("accion", self.__accion_create_server)
         elif valor == 4:
             # Unirse a Juego en Red
             print "Esta PC será Cliente"
+            win = CreateClientMode(self)
+            win.connect("close", self.__switch, 1)  # Escape en dialog
+            win.connect("accion", self.__accion_create_client)
         elif valor == 5:
             # Creditos
             pass
+
+    def __accion_create_client(self, create_client, accion, _dict):
+        if accion == "run":
+            print "FIXME: Jugar en cliente no host"
+        elif accion == "salir":
+            self.__switch(False, 1)
 
     def __accion_create_server(self, create_server, accion, _dict):
         if accion == "run":

@@ -6,13 +6,11 @@ import gtk
 import gobject
 
 from SelectWidgets import Lista
-from SelectWidgets import OponentesSelectBox
-from Globales import get_ip
 
 IMGPATH = os.path.dirname(os.path.dirname(__file__))
 
 
-class CreateServerMode(gtk.Dialog):
+class CreateClientMode(gtk.Dialog):
 
     __gsignals__ = {
     "accion": (gobject.SIGNAL_RUN_FIRST,
@@ -33,9 +31,9 @@ class CreateServerMode(gtk.Dialog):
         for child in self.vbox.get_children():
             self.vbox.remove(child)
             child.destroy()
-        create_server = CreateServer()
-        create_server.connect("accion", self.__accion)
-        self.vbox.pack_start(create_server, True, True, 0)
+        create_client = CreateClient()
+        create_client.connect("accion", self.__accion)
+        self.vbox.pack_start(create_client, True, True, 0)
         self.show_all()
 
     def __accion(self, widget, accion, _dict):
@@ -43,7 +41,7 @@ class CreateServerMode(gtk.Dialog):
         self.destroy()
 
 
-class CreateServer(gtk.EventBox):
+class CreateClient(gtk.EventBox):
 
     __gsignals__ = {
     "accion": (gobject.SIGNAL_RUN_FIRST,
@@ -57,45 +55,24 @@ class CreateServer(gtk.EventBox):
         self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
 
         self.game_dict = {
-            'server': get_ip(),
+            'server': True,
             'nick': '',
-            'mapa': "",
             'tanque': "",
-            'enemigos': 2,
-            'vidas': 5,
             }
 
         self.set_border_width(10)
 
-        self.mapaview = gtk.Image()
-        self.tanqueview = gtk.Image()
-        self.oponentes = OponentesSelectBox()
-
         tabla = gtk.Table(columns=5, rows=6, homogeneous=True)
         tabla.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
-
-        self.framemapa = FrameMapa()
-        tabla.attach_defaults(self.framemapa, 0, 2, 0, 3)
 
         self.frametanque = FrameTanque()
         tabla.attach_defaults(self.frametanque, 0, 2, 3, 5)
 
-        event = gtk.EventBox()
-        event.set_border_width(10)
-        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
-        event.add(self.mapaview)
-        tabla.attach_defaults(event, 2, 5, 0, 3)
-
+        self.tanqueview = gtk.Image()
         tabla.attach_defaults(self.tanqueview, 2, 3, 4, 5)
 
         self.framenick = FrameNick()
         tabla.attach_defaults(self.framenick, 2, 5, 3, 4)
-
-        event = gtk.EventBox()
-        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
-        event.set_border_width(4)
-        event.add(self.oponentes)
-        tabla.attach_defaults(event, 3, 5, 4, 5)
 
         button = gtk.Button("Cancelar")
         tabla.attach_defaults(button, 0, 1, 5, 6)
@@ -109,24 +86,12 @@ class CreateServer(gtk.EventBox):
         self.add(tabla)
 
         self.connect("realize", self.__do_realize)
-        self.framemapa.lista.connect(
-            "nueva-seleccion", self.__seleccion_mapa)
-        self.frametanque.lista.connect(
-            "nueva-seleccion", self.__seleccion_tanque)
-        self.oponentes.connect("valor", self.__seleccion_oponentes)
+        self.frametanque.lista.connect("nueva-seleccion", self.__seleccion_tanque)
         self.framenick.nick.connect("changed", self.__change_nick)
 
         self.show_all()
 
     def __do_realize(self, widget):
-        elementos = []
-        mapas_path = os.path.join(IMGPATH, "Mapas")
-        for arch in sorted(os.listdir(mapas_path)):
-            path = os.path.join(mapas_path, arch)
-            archivo = os.path.basename(path)
-            elementos.append([archivo, path])
-        self.framemapa.lista.limpiar()
-        self.framemapa.lista.agregar_items(elementos)
         elementos = []
         mapas_path = os.path.join(IMGPATH, "Tanques")
         for arch in sorted(os.listdir(mapas_path)):
@@ -149,20 +114,6 @@ class CreateServer(gtk.EventBox):
         self.game_dict['tanque'] = os.path.basename(path)
         self.__check_dict()
 
-    def __seleccion_mapa(self, widget, path):
-        rect = self.mapaview.get_allocation()
-        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, -1, rect.height)
-        self.mapaview.set_from_pixbuf(pixbuf)
-        self.game_dict['mapa'] = os.path.basename(path)
-        self.__check_dict()
-
-    def __seleccion_oponentes(self, widget, valor, tipo):
-        if tipo == "oponentes":
-            self.game_dict['enemigos'] = valor
-        elif tipo == "vidas":
-            self.game_dict['vidas'] = valor
-        self.__check_dict()
-
     def __accion(self, widget, accion):
         self.emit("accion", accion, dict(self.game_dict))
 
@@ -175,31 +126,6 @@ class CreateServer(gtk.EventBox):
         self.jugar.set_sensitive(valor)
 
 
-class FrameMapa(gtk.Frame):
-
-    def __init__(self):
-
-        gtk.Frame.__init__(self)
-
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
-        self.set_border_width(4)
-        self.set_label(" Selecciona el Mapa: ")
-
-        event = gtk.EventBox()
-        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
-        event.set_border_width(4)
-        self.add(event)
-
-        self.lista = Lista()
-        self.lista.set_headers_visible(False)
-
-        scroll = gtk.ScrolledWindow()
-        scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
-        scroll.add(self.lista)
-        event.add(scroll)
-
-        self.show_all()
-
 class FrameTanque(gtk.Frame):
 
     def __init__(self):
@@ -211,13 +137,13 @@ class FrameTanque(gtk.Frame):
         self.set_label(" Selecciona tu Tanque: ")
 
         self.lista = Lista()
-        self.lista.set_headers_visible(False)
 
         event = gtk.EventBox()
         event.set_border_width(4)
         event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.add(event)
 
+        self.lista.set_headers_visible(False)
         scroll = gtk.ScrolledWindow()
         scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         scroll.add(self.lista)
