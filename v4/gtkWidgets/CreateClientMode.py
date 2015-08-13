@@ -55,7 +55,7 @@ class CreateClient(gtk.EventBox):
         self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
 
         self.game_dict = {
-            'server': True,
+            'server': "",
             'nick': '',
             'tanque': "",
             }
@@ -64,6 +64,12 @@ class CreateClient(gtk.EventBox):
 
         tabla = gtk.Table(columns=5, rows=6, homogeneous=True)
         tabla.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+
+        self.framejuegos = FrameJuegos()
+        tabla.attach_defaults(self.framejuegos, 0, 3, 0, 3)
+
+        self.mapview = gtk.Image()
+        tabla.attach_defaults(self.mapview, 3, 5, 3, 5)
 
         self.frametanque = FrameTanque()
         tabla.attach_defaults(self.frametanque, 0, 2, 3, 5)
@@ -78,7 +84,7 @@ class CreateClient(gtk.EventBox):
         tabla.attach_defaults(button, 0, 1, 5, 6)
         button.connect("clicked", self.__accion, "salir")
 
-        self.jugar = gtk.Button("Jugar")
+        self.jugar = gtk.Button("Unirme")
         self.jugar.set_sensitive(False)
         self.jugar.connect("clicked", self.__accion, "run")
         tabla.attach_defaults(self.jugar, 4, 5, 5, 6)
@@ -169,5 +175,31 @@ class FrameNick(gtk.Frame):
         self.nick = gtk.Entry()
         self.nick.set_max_length(10)
         event.add(self.nick)
+
+        self.show_all()
+
+
+class FrameJuegos(gtk.Frame):
+
+    def __init__(self):
+
+        gtk.Frame.__init__(self)
+
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        self.set_border_width(4)
+        self.set_label(" Juegos Creados: ")
+
+        self.lista = Lista()
+
+        event = gtk.EventBox()
+        event.set_border_width(4)
+        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        self.add(event)
+
+        self.lista.set_headers_visible(False)
+        scroll = gtk.ScrolledWindow()
+        scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+        scroll.add(self.lista)
+        event.add(scroll)
 
         self.show_all()

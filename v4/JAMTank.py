@@ -92,6 +92,7 @@ class JAMTank(gtk.Window):
         elif valor == 4:
             # Unirse a Juego en Red
             print "Esta PC será Cliente"
+            #FIXME: hay que lanzar el listenservers e ir actualizando CreateClientMode
             win = CreateClientMode(self)
             win.connect("close", self.__switch, 1)  # Escape en dialog
             win.connect("accion", self.__accion_create_client)
@@ -101,7 +102,7 @@ class JAMTank(gtk.Window):
 
     def __accion_create_client(self, create_client, accion, _dict):
         if accion == "run":
-            print "FIXME: Jugar en cliente no host"
+            print "FIXME: Jugar en cliente no host. Mata listenservers y lanza ClientModelGame"
         elif accion == "salir":
             self.__switch(False, 1)
 
@@ -134,7 +135,7 @@ class JAMTank(gtk.Window):
             self.__switch(False, 1)
 
     def __play_run(self, servermodel):
-        print "FIXME: Lanzar el juego"
+        print "FIXME: Lanzar el juego (cambiar 'register' por otro mensaje)"
         win = StatusGame(self, self.screen_wh)
 
     def __accion_connecting_players(self, con_players, valor):
