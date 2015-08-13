@@ -3,7 +3,7 @@
 
 import gobject
 import socket
-import sys
+#import sys
 import pickle
 import threading
 import ctypes

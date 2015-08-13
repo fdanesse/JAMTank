@@ -4,6 +4,7 @@
 import os
 import gtk
 import gobject
+import time
 
 from SelectWidgets import Lista
 
@@ -31,11 +32,12 @@ class CreateClientMode(gtk.Dialog):
         for child in self.vbox.get_children():
             self.vbox.remove(child)
             child.destroy()
-        create_client = CreateClient()
-        create_client.connect("accion", self.__accion)
-        self.vbox.pack_start(create_client, True, True, 0)
+        self.create_client = CreateClient()
+        self.create_client.connect("accion", self.__accion)
+        self.vbox.pack_start(self.create_client, True, True, 0)
         self.show_all()
 
+        self.servers = {}
         self.listen_servers = listen_servers
         self.listen_servers.connect("server", self.__update_servers)
         self.listen_servers.new_handler_listen(True)
@@ -49,11 +51,17 @@ class CreateClientMode(gtk.Dialog):
 
     def __update_servers(self, listen_servers, _dict):
         ip = _dict.get('ip', '')
-        mapa = _dict.get('mapa', None)
-        jugadores = _dict.get('jugadores', 0)
-        vidas = _dict.get('vidas', 0)
-        nickh = _dict.get('nickh', '')
-        print "Server:", _dict
+        del(_dict['ip'])
+        del(_dict['z'])
+        _dict['time'] = time.time()
+        remove = []
+        for key in self.servers.keys():
+            if _dict['time'] - self.servers[key].get('time', 1.5) > 1.4:
+                remove.append(key)
+        for ip in reversed(remove):
+            del(self.servers[ip])
+        self.servers[ip] = _dict
+        self.create_client.framejuegos.lista.update_servers(self.servers)
 
 
 class CreateClient(gtk.EventBox):
@@ -205,7 +213,7 @@ class FrameJuegos(gtk.Frame):
         self.set_border_width(4)
         self.set_label(" Juegos Creados: ")
 
-        self.lista = Lista()
+        self.lista = NewLista()
 
         event = gtk.EventBox()
         event.set_border_width(4)
@@ -219,3 +227,107 @@ class FrameJuegos(gtk.Frame):
         event.add(scroll)
 
         self.show_all()
+
+
+class NewLista(gtk.TreeView):
+
+    def __init__(self):
+
+        gtk.TreeView.__init__(self, gtk.ListStore(gtk.gdk.Pixbuf,
+            gobject.TYPE_STRING, gobject.TYPE_STRING,
+            gobject.TYPE_STRING, gobject.TYPE_STRING))
+
+        self.set_property("rules-hint", True)
+        self.set_headers_clickable(True)
+        self.set_headers_visible(True)
+
+        self.__setear_columnas()
+        self.show_all()
+
+    def __setear_columnas(self):
+        self.append_column(self.__construir_columa_icono('mapa', 0, True))
+        self.append_column(self.__construir_columa('nickh', 1, True))
+        self.append_column(self.__construir_columa('jugadores', 2, False))
+        self.append_column(self.__construir_columa('vidas', 3, False))
+        self.append_column(self.__construir_columa('ip', 4, False))
+
+    def __construir_columa(self, text, index, visible):
+        render = gtk.CellRendererText()
+        columna = gtk.TreeViewColumn(text, render, text=index)
+        columna.set_sort_column_id(index)
+        columna.set_property('visible', visible)
+        columna.set_property('resizable', False)
+        columna.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
+        return columna
+
+    def __construir_columa_icono(self, text, index, visible):
+        render = gtk.CellRendererPixbuf()
+        columna = gtk.TreeViewColumn(text, render, pixbuf=index)
+        columna.set_property('visible', visible)
+        columna.set_property('resizable', False)
+        columna.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
+        return columna
+
+    def __ejecutar_agregar_elemento(self, elementos):
+        if not elementos:
+            return False
+        pixbuf, nick, jugadores, vidas, ip = elementos[0]
+        if pixbuf:
+            if os.path.exists(pixbuf):
+                pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(pixbuf, 50, -1)
+        self.get_model().append([pixbuf, nick, jugadores, vidas, ip])
+        elementos.remove(elementos[0])
+        gobject.idle_add(self.__ejecutar_agregar_elemento, elementos)
+        return False
+
+    def __buscar(self, texto):
+        model = self.get_model()
+        _iter = model.get_iter_first()
+        while _iter:
+            contenido = model.get_value(_iter, 4)
+            if texto == contenido:
+                return _iter
+            _iter = model.iter_next(_iter)
+        return None
+
+    def agregar_items(self, elementos):
+        gobject.idle_add(self.__ejecutar_agregar_elemento, elementos)
+
+    def update_servers(self, _dict):
+        news = _dict.keys()
+        model = self.get_model()
+        # Los que no vienen en _dict, hay que quitarlos
+        remover = []
+        _iter = model.get_iter_first()
+        while _iter:
+            ip = model.get_value(_iter, 4)
+            if ip not in news:
+                remover.append(_iter)
+            _iter = model.iter_next(_iter)
+        for item in reversed(remover):
+            model.remove(item)
+        # Todos los que vienen en _dict, deben estar en la lista
+        items = []
+        for key in news:
+            _iter = self.__buscar(key)
+            if _iter:
+                pixbuf = os.path.join(IMGPATH, "Mapas",
+                    _dict[key].get('mapa', ''))
+                if pixbuf:
+                    if os.path.exists(pixbuf):
+                        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(
+                            pixbuf, 50, -1)
+                        model.set_value(_iter, 0, pixbuf)
+                model.set_value(_iter, 1, _dict[key].get('nickh', ''))
+                model.set_value(_iter, 2, _dict[key].get('jugadores', ''))
+                model.set_value(_iter, 3, _dict[key].get('vidas', ''))
+                model.set_value(_iter, 4, key)
+            else:
+                pixbuf = os.path.join(IMGPATH, "Mapas",
+                    _dict[key].get('mapa', ''))
+                items.append([pixbuf, _dict[key].get('nickh', ''),
+                    _dict[key].get('jugadores', ''),
+                    _dict[key].get('vidas', ''), key])
+                # FIXME: Emitir sonido de conexión
+        if items:
+            self.agregar_items(items)
