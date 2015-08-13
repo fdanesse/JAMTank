@@ -16,10 +16,11 @@ from gtkWidgets.CreateServerMode import CreateServerMode
 from gtkWidgets.ConnectingPlayers import ConnectingPlayers
 from ServerModelGame import ServerModelGame
 from gtkWidgets.CreateClientMode import CreateClientMode
+from ListenServers import ListenServers
 
 BASE = os.path.dirname(__file__)
 
-#gobject.threads_init()
+gobject.threads_init()
 
 
 class JAMTank(gtk.Window):
@@ -93,7 +94,7 @@ class JAMTank(gtk.Window):
             # Unirse a Juego en Red
             print "Esta PC será Cliente"
             #FIXME: hay que lanzar el listenservers e ir actualizando CreateClientMode
-            win = CreateClientMode(self)
+            win = CreateClientMode(self, ListenServers())
             win.connect("close", self.__switch, 1)  # Escape en dialog
             win.connect("accion", self.__accion_create_client)
         elif valor == 5:
@@ -197,6 +198,7 @@ class JAMTank(gtk.Window):
 
     def __salir(self, widget=None, event=None):
         self.__kill_server_model()
+        gtk.main_quit()
         sys.exit(0)
 
 

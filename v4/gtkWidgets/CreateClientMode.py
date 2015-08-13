@@ -17,7 +17,7 @@ class CreateClientMode(gtk.Dialog):
         gobject.TYPE_NONE, (gobject.TYPE_STRING,
         gobject.TYPE_PYOBJECT))}
 
-    def __init__(self, top):
+    def __init__(self, top, listen_servers):
 
         gtk.Dialog.__init__(self)
 
@@ -36,9 +36,24 @@ class CreateClientMode(gtk.Dialog):
         self.vbox.pack_start(create_client, True, True, 0)
         self.show_all()
 
+        self.listen_servers = listen_servers
+        self.listen_servers.connect("server", self.__update_servers)
+        self.listen_servers.new_handler_listen(True)
+
     def __accion(self, widget, accion, _dict):
         self.emit("accion", accion, _dict)
+        self.listen_servers.new_handler_listen(False)
+        del(self.listen_servers)
+        self.listen_servers = False
         self.destroy()
+
+    def __update_servers(self, listen_servers, _dict):
+        ip = _dict.get('ip', '')
+        mapa = _dict.get('mapa', None)
+        jugadores = _dict.get('jugadores', 0)
+        vidas = _dict.get('vidas', 0)
+        nickh = _dict.get('nickh', '')
+        print "Server:", _dict
 
 
 class CreateClient(gtk.EventBox):
@@ -92,7 +107,8 @@ class CreateClient(gtk.EventBox):
         self.add(tabla)
 
         self.connect("realize", self.__do_realize)
-        self.frametanque.lista.connect("nueva-seleccion", self.__seleccion_tanque)
+        self.frametanque.lista.connect(
+            "nueva-seleccion", self.__seleccion_tanque)
         self.framenick.nick.connect("changed", self.__change_nick)
 
         self.show_all()
