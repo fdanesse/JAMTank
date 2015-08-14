@@ -48,15 +48,6 @@ class ClientModelGame(gobject.GObject):
             self.emit("error")
         return bool(self.registro)
 
-    def client_run(self):
-        self.client = Client(self._host)
-        connected = self.client.conectarse()
-        print "Cliente Creado:", connected
-        if connected:
-            return self.__register_client_in_server()
-        else:
-            return False
-
     def __register_client_in_server(self):
         print "Registrando Cliente no host en el Servidor..."
         new = {
@@ -89,6 +80,15 @@ class ClientModelGame(gobject.GObject):
         if reset:
             print "Esperando Jugadores..."
             self.registro = gobject.timeout_add(100, self.__handler_registro)
+
+    def client_run(self):
+        self.client = Client(self._host)
+        connected = self.client.conectarse()
+        print "Cliente Creado:", connected
+        if connected:
+            return self.__register_client_in_server()
+        else:
+            return False
 
     def close_all_and_exit(self):
         self.new_handler_registro(False)

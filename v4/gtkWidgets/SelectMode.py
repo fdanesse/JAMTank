@@ -6,7 +6,7 @@ import gobject
 
 
 #FIXME: Analizar si no es mejor un dialog
-class SelectMode(gtk.Window):
+class SelectMode(gtk.Dialog):
 
     __gsignals__ = {
     "switch": (gobject.SIGNAL_RUN_LAST,
@@ -14,16 +14,21 @@ class SelectMode(gtk.Window):
 
     def __init__(self, top):
 
-        gtk.Window.__init__(self, gtk.WINDOW_POPUP)
+        #gtk.Window.__init__(self, gtk.WINDOW_POPUP)
+        gtk.Dialog.__init__(self)
 
         self.set_resizable(False)
         self.set_position(3)
         self.set_deletable(False)
+        self.set_decorated(False)
         self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_transient_for(top)
 
+        for child in self.vbox.get_children():
+            self.vbox.remove(child)
+            child.destroy()
         child = IntroWidget()
-        self.add(child)
+        self.vbox.pack_start(child, True, True, 0)
         self.show_all()
 
         child.connect("switch", self.__emit_switch)
