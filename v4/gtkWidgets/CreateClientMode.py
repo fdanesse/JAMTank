@@ -16,7 +16,7 @@ class CreateClientMode(gtk.Dialog):
     __gsignals__ = {
     "accion": (gobject.SIGNAL_RUN_FIRST,
         gobject.TYPE_NONE, (gobject.TYPE_STRING,
-        gobject.TYPE_PYOBJECT))}
+        gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT))}
 
     def __init__(self, top, listen_servers):
 
@@ -42,11 +42,11 @@ class CreateClientMode(gtk.Dialog):
         self.listen_servers.connect("server", self.__update_servers)
         self.listen_servers.new_handler_listen(True)
 
-    def __accion(self, widget, accion, _dict):
-        self.emit("accion", accion, _dict)
+    def __accion(self, widget, accion, server_dict, player_dict):
         self.listen_servers.new_handler_listen(False)
         del(self.listen_servers)
         self.listen_servers = False
+        self.emit("accion", accion, server_dict, player_dict)
         self.destroy()
 
     def __update_servers(self, listen_servers, _dict):
@@ -58,7 +58,7 @@ class CreateClientMode(gtk.Dialog):
         for key in self.servers.keys():
             if _dict['time'] - self.servers[key].get('time', 1.5) > 1.4:
                 remove.append(key)
-        for ip in reversed(remove):
+        for ip in remove:
             del(self.servers[ip])
         self.servers[ip] = _dict
         self.create_client.framejuegos.lista.update_servers(self.servers)
@@ -69,7 +69,7 @@ class CreateClient(gtk.EventBox):
     __gsignals__ = {
     "accion": (gobject.SIGNAL_RUN_FIRST,
         gobject.TYPE_NONE, (gobject.TYPE_STRING,
-        gobject.TYPE_PYOBJECT))}
+        gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT))}
 
     def __init__(self):
 
@@ -77,11 +77,8 @@ class CreateClient(gtk.EventBox):
 
         self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
 
-        self.game_dict = {
-            'server': "",
-            'nick': '',
-            'tanque': "",
-            }
+        self.player = {}
+        self.server = {}
 
         self.set_border_width(10)
 
@@ -118,8 +115,13 @@ class CreateClient(gtk.EventBox):
         self.frametanque.lista.connect(
             "nueva-seleccion", self.__seleccion_tanque)
         self.framenick.nick.connect("changed", self.__change_nick)
+        self.framejuegos.lista.connect("selected", self.__update_server)
 
         self.show_all()
+
+    def __update_server(self, lista, _dict):
+        self.server = _dict
+        self.__check_dict()
 
     def __do_realize(self, widget):
         elementos = []
@@ -134,25 +136,27 @@ class CreateClient(gtk.EventBox):
     def __change_nick(self, widget):
         nick = widget.get_text().replace('\n', '').replace('\r', '')
         nick = nick.replace('*', '').replace(' ', '_').replace('|', '')
-        self.game_dict['nick'] = nick
+        self.player['nick'] = nick
         self.__check_dict()
 
     def __seleccion_tanque(self, widget, path):
         rect = self.tanqueview.get_allocation()
         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, -1, rect.height)
         self.tanqueview.set_from_pixbuf(pixbuf)
-        self.game_dict['tanque'] = os.path.basename(path)
+        self.player['tanque'] = os.path.basename(path)
         self.__check_dict()
 
     def __accion(self, widget, accion):
-        self.emit("accion", accion, dict(self.game_dict))
+        self.emit("accion", accion, dict(self.server), dict(self.player))
 
     def __check_dict(self):
         valor = True
-        for item in self.game_dict.items():
+        for item in self.player.items():
             if not item[1]:
                 valor = False
                 break
+        if not self.server:
+            valor = False
         self.jugar.set_sensitive(valor)
 
 
@@ -231,18 +235,42 @@ class FrameJuegos(gtk.Frame):
 
 class NewLista(gtk.TreeView):
 
+    __gsignals__ = {
+    "selected": (gobject.SIGNAL_RUN_FIRST,
+        gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT, ))}
+
     def __init__(self):
 
         gtk.TreeView.__init__(self, gtk.ListStore(gtk.gdk.Pixbuf,
-            gobject.TYPE_STRING, gobject.TYPE_STRING,
-            gobject.TYPE_STRING, gobject.TYPE_STRING))
+            gobject.TYPE_STRING, gobject.TYPE_INT,
+            gobject.TYPE_INT, gobject.TYPE_STRING))
 
         self.set_property("rules-hint", True)
         self.set_headers_clickable(True)
         self.set_headers_visible(True)
 
         self.__setear_columnas()
+        self.get_selection().set_select_function(
+            self.__selecciones, self.get_model())
         self.show_all()
+
+    def __selecciones(self, path, column):
+        _iter = self.get_model().get_iter(path)
+        mapa = self.get_model().get_value(_iter, 0)
+        nick = self.get_model().get_value(_iter, 1)
+        jugadores = self.get_model().get_value(_iter, 2)
+        vidas = self.get_model().get_value(_iter, 3)
+        ip = self.get_model().get_value(_iter, 4)
+        _dict = {
+            'mapa': mapa,
+            'ip': ip,
+            'nick': nick,
+            'jugadores': jugadores,
+            'vidas': vidas,
+            }
+        self.emit('selected', _dict)
+        self.scroll_to_cell(self.get_model().get_path(_iter))
+        return True
 
     def __setear_columnas(self):
         self.append_column(self.__construir_columa_icono('mapa', 0, True))

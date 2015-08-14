@@ -110,7 +110,7 @@ class ServerModelGame(gobject.GObject):
         new = dict(self._dict)
         new["ip"] = self._host
         new["nickh"] = self._nick_host
-        print "Anunciando:", time.time(), new
+        #print "Anunciando:", time.time(), new
         message = "%s\n" % self.__make_anuncio(new)  # carga debe ser 150
         my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -178,7 +178,7 @@ class ServerModelGame(gobject.GObject):
             self.registro = False
         if reset:
             print "Esperando Jugadores..."
-            self.registro = gobject.timeout_add(35, self.__handler_registro)
+            self.registro = gobject.timeout_add(100, self.__handler_registro)
 
     def server_run(self):
         try:

@@ -14,7 +14,7 @@ class ConnectingPlayers(gtk.Dialog):
     "accion": (gobject.SIGNAL_RUN_FIRST,
         gobject.TYPE_NONE, (gobject.TYPE_STRING, ))}
 
-    def __init__(self, top, nick, tanque, _dict):
+    def __init__(self, top, nick, _dict):
 
         gtk.Dialog.__init__(self)
 
@@ -39,9 +39,10 @@ class ConnectingPlayers(gtk.Dialog):
             nick, _dict['vidas'])
         self.internal_widget.label.set_text(text)
         rect = self.internal_widget.framemapa.mapaview.get_allocation()
-        path = os.path.join(ROOTPATH, "Mapas", _dict['mapa'])
-        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, -1, rect.height)
-        self.internal_widget.framemapa.mapaview.set_from_pixbuf(pixbuf)
+        # FIXME: Puede ser un pixbuf
+        #path = os.path.join(ROOTPATH, "Mapas", _dict['mapa'])
+        #pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, -1, rect.height)
+        #self.internal_widget.framemapa.mapaview.set_from_pixbuf(pixbuf)
 
         items = []
         for x in range(_dict['jugadores']):
@@ -215,7 +216,7 @@ class NewLista(gtk.TreeView):
         _iter = model.get_iter_first()
         while _iter:
             ip = model.get_value(_iter, 2)
-            if ip != "" and ip not in news:
+            if ip != "" and not (ip in news):
                 remover.append(_iter)
             _iter = model.iter_next(_iter)
         for item in reversed(remover):
