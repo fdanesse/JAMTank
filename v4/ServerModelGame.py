@@ -65,26 +65,27 @@ class ServerModelGame(gobject.GObject):
                 "nick": "%s" % self._nick_host,
                 },
             }
-        if self.running:
-            new['running'] = True
+        #if self.running:
+        #    new['running'] = True
         self.client.enviar(new)
         _dict = self.client.recibir()
         if _dict.get("aceptado", False):
             self.emit("players", dict(_dict.get("players", {})))
-            if _dict.get("todos", False):
+            dict_game = _dict.get("game", False)
+            if dict_game.get("todos", False):
                 self.new_handler_anuncio(False)
                 self.emit("play-enabled", True)
             else:
                 # FIXME: Verificar esto 2
-                self.running = False
+                #self.running = False
                 self.emit("play-enabled", False)
                 if not self.publicar:
                     self.new_handler_anuncio(True)
-            if _dict.get("running", False):
-                # FIXME: Verificar si esto debe ir acá
-                self.new_handler_anuncio(False)
-                self.new_handler_registro(False)
-                self.emit("play-run")
+            #if _dict.get("running", False):
+            #    # FIXME: Verificar si esto debe ir acá
+            #    self.new_handler_anuncio(False)
+            #    self.new_handler_registro(False)
+            #    self.emit("play-run")
         else:
             print "FIXME: Host no aceptado como jugador."
             self.close_all_and_exit()

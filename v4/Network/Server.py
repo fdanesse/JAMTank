@@ -97,7 +97,6 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         self.socket.setblocking(0)
 
         self.ip = host
-        self.registrados = 0
         self._dict_game = dict(_dict)  # n°de jugadores, mapa, vidas
         self._dict_game["mapa"] = _dict["mapa"]
         self._players_dict = {}
@@ -107,38 +106,33 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         for item in self._dict_game.items():
             print "\t\t", item
 
+    def __registrar(self, ip, _dict):
+        self._players_dict[ip] = dict(_dict["register"])
+        self._dict_game["todos"] = bool(len(self._players_dict.keys()) == self._dict_game["jugadores"])
+        _dict["aceptado"] = True
+        _dict["game"] = dict(self._dict_game)
+        _dict["players"] = dict(self._players_dict)
+        return _dict
+
     def registrar(self, ip, _dict):
         permitidos = self._dict_game["jugadores"]
         new = {}
-        if self.registrados == 0 or self.registrados < permitidos:
-            # El jugador se registra
-            self._players_dict[ip] = dict(_dict["register"])
-            self.registrados = len(self._players_dict.keys())
-            self._dict_game["todos"] = bool(
-                self.registrados == self._dict_game["jugadores"])
-            new["aceptado"] = True
-            new["game"] = dict(self._dict_game)
-            new["players"] = dict(self._players_dict)
-        elif self.registrados != 0 and self.registrados == permitidos:
-            # Todos están registrados y el juego está cerrado a nuevas ips
-            if self._players_dict.get(ip, False):
-                self._dict_game["todos"] = bool(
-                    self.registrados == self._dict_game["jugadores"])
-                new["aceptado"] = True
-                new["game"] = dict(self._dict_game)
-                new["players"] = dict(self._players_dict)
-                # Si running == True, desde el host,
-                # running a todos para lanzar el juego
-                if ip == self.ip:
-                    if _dict.get("running", False):
-                        self._dict_game["running"] = True
-            else:
-                # este jugador no puede jugar
-                new["aceptado"] = False
+        if self._players_dict.get(ip, False):
+            # jugadores en handler registro
+            new = self.__registrar(ip, _dict)
+            # Si running == True, desde el host,
+            # running a todos para lanzar el juego
+            #if ip == self.ip:
+            #    if _dict.get("running", False):
+            #        self._dict_game["running"] = True
         else:
-            print "FIXME: hay más jugadores de los permitidos"
-            # este jugador no puede jugar
-            new["aceptado"] = False
+            if len(self._players_dict.keys()) < permitidos:
+                # El jugador se registra
+                print "Servidor Registrando un nuevo jugador:", ip, _dict
+                new = self.__registrar(ip, _dict)
+            else:
+                # Este jugador no puede jugar, el juego está cerrado a nuevas ips.
+                new["aceptado"] = False
         return new
 
     def shutdown(self):
