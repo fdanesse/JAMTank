@@ -4,6 +4,7 @@
 import socket
 import SocketServer
 import ast
+import time
 
 T = "\n"
 
@@ -98,13 +99,22 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
 
         self.ip = host
         self._dict_game = dict(_dict)  # n°de jugadores, mapa, vidas
-        self._dict_game["mapa"] = _dict["mapa"]
+        #self._dict_game["mapa"] = _dict["mapa"]
         self._players_dict = {}
+        self._time_control_players = {}
 
         print "Server ON:", "ip:", host, "Port:", port
         print "\tDatos:"
         for item in self._dict_game.items():
             print "\t\t", item
+
+    def __timer_control_players(self, _ip):
+        now = time.time()
+        self._time_control_players[_ip] = now
+        for ip in self._players_dict.keys():
+            if now - self._time_control_players[ip] > 1.5:
+                del(self._players_dict[ip])
+                del(self._time_control_players[ip])
 
     def __registrar(self, ip, _dict):
         self._players_dict[ip] = dict(_dict["register"])
@@ -115,6 +125,7 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         return _dict
 
     def registrar(self, ip, _dict):
+        self.__timer_control_players(ip)
         permitidos = self._dict_game["jugadores"]
         new = {}
         if self._players_dict.get(ip, False):
@@ -136,5 +147,5 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         return new
 
     def shutdown(self):
-        print "Server OFF"
         SocketServer.ThreadingTCPServer.shutdown(self)
+        print "Server OFF"

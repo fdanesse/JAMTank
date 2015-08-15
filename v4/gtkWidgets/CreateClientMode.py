@@ -39,9 +39,15 @@ class CreateClientMode(gtk.Dialog):
         self.show_all()
 
         self.servers = {}
+        self.listen_servers = False
+
+        gobject.timeout_add(500, self.__run_listen)
+
+    def __run_listen(self):
         self.listen_servers = ListenServers()
         self.listen_servers.connect("server", self.__update_servers)
         self.listen_servers.new_handler_listen(True)
+        return False
 
     def __accion(self, widget, accion, server_dict, player_dict):
         self.listen_servers.new_handler_listen(False)

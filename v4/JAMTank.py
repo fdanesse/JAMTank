@@ -5,10 +5,10 @@
 #   Flavio Danesse <fdanesse@gmail.com>
 #   Uruguay
 
+import gobject
 import os
 import sys
 import gtk
-import gobject
 
 from gtkWidgets.SelectMode import SelectMode
 from gtkWidgets.StatusGame import StatusGame
@@ -19,9 +19,9 @@ from gtkWidgets.CreateClientMode import CreateClientMode
 import Network
 from ClientModelGame import ClientModelGame
 
-BASE = os.path.dirname(__file__)
-
 gobject.threads_init()
+
+BASE = os.path.dirname(__file__)
 
 
 class JAMTank(gtk.Window):

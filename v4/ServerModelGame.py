@@ -54,6 +54,7 @@ class ServerModelGame(gobject.GObject):
         self._tank_host = _tank_host
         self.server_thread = False
         self.server = False
+        self.client = False
         self.publicar = False
         self.registro = False
         self.running = False
