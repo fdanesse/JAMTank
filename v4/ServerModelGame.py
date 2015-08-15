@@ -111,7 +111,7 @@ class ServerModelGame(gobject.GObject):
     def __client_run(self):
         self.client = Client(self._host)
         connected = self.client.conectarse()
-        print "Cliente Creado:", connected
+        print "Cliente del Host Creado:", connected
         if connected:
             return self.__register_client_in_server()
         else:

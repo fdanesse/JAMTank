@@ -173,10 +173,8 @@ class JAMTank(gtk.Window):
                 self.handlers['servermodel'].append(_id)
                 _id = self.servermodel.connect("play-enabled", self.connectingplayers.play_enabled)
                 self.handlers['servermodel'].append(_id)
-                _id = self.servermodel.connect("play-run", self.__play_run)
-                self.handlers['servermodel'].append(_id)
                 self.servermodel.new_handler_registro(True)
-                self.servermodel.new_handler_anuncio(True)
+                # self.servermodel.new_handler_anuncio(True) lanzado desde handler_registro
             else:
                 print "FIXME:", self.__accion_create_server
         elif accion == "salir":

@@ -119,6 +119,8 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
     def __registrar(self, ip, _dict):
         self._players_dict[ip] = dict(_dict["register"])
         self._dict_game["todos"] = bool(len(self._players_dict.keys()) == self._dict_game["jugadores"])
+        if _dict.get('register', False):
+            del(_dict['register'])
         _dict["aceptado"] = True
         _dict["game"] = dict(self._dict_game)
         _dict["players"] = dict(self._players_dict)

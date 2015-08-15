@@ -30,8 +30,10 @@ Host crea el juego:
         {
             "aceptado": True,
             "game": {
-                "todos": False, "jugadores": 2, "vidas": 5,
-                "mapa": "f0.png"
+                "jugadores": 2,
+                "vidas": 5,
+                "mapa": "f0.png",
+                "todos": False,
                 },
             "players": {
                 "192.168.1.11": {
