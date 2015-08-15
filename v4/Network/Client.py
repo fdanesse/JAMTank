@@ -64,5 +64,6 @@ class Client(gobject.GObject):
                 self.rfile.flush()
             except socket.error, err:
                 print "Error del cliente al recibir datos:", err
+                # [Errno 11] Recurso no disponible temporalmente
                 time.sleep(0.02)
         return entrada

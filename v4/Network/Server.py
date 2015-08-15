@@ -61,13 +61,17 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         Espera una linea string que termina con "\n" y que ast puede convertir
         en un diccionario python.
         """
-        ret = {}
+        ret = {"aceptado": False}
         try:
             _dict = ast.literal_eval(entrada)
             if _dict.get("register", False):
                 ret = self.server.registrar(ip, _dict)
+            elif _dict.get("ingame", False):
+                ret = self.server.ingame(ip, _dict)
+            else:
+                print "Server Recibe:", entrada
         except:
-            print "Server pickle Error:"
+            print "Server Error:"
         return self.__make_resp(ret)
 
     def __make_resp(self, new):
@@ -119,8 +123,8 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
     def __registrar(self, ip, _dict):
         self._players_dict[ip] = dict(_dict["register"])
         self._dict_game["todos"] = bool(len(self._players_dict.keys()) == self._dict_game["jugadores"])
-        if _dict.get('register', False):
-            del(_dict['register'])
+        if _dict.get("register", False):
+            del(_dict["register"])
         _dict["aceptado"] = True
         _dict["game"] = dict(self._dict_game)
         _dict["players"] = dict(self._players_dict)
@@ -146,6 +150,12 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
             else:
                 # Este jugador no puede jugar, el juego está cerrado a nuevas ips.
                 new["aceptado"] = False
+        return new
+
+    def ingame(self, ip, _dict):
+        #FIXME: Guardar _dict
+        self.__timer_control_players(ip)
+        new = {"ingame": {"players": dict(self._players_dict)}}
         return new
 
     def shutdown(self):

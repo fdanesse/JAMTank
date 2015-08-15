@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import gobject
 import socket
 import time
@@ -11,6 +12,9 @@ import cPickle as pickle
 from Network.Server import Server
 from Network.Server import RequestHandler
 from Network.Client import Client
+from Juego.Juego import Juego
+
+BASE_PATH = os.path.realpath(os.path.dirname(__file__))
 
 
 def terminate_thread(thread):
@@ -128,7 +132,7 @@ class ServerModelGame(gobject.GObject):
         self.client.enviar(new)
         _dict = self.client.recibir()
         if _dict.get("aceptado", False):
-            print "\t Cliente del Host Registrado:"
+            print "\tCliente del Host Registrado:"
             for item in _dict.items():
                 print "\t\t", item
             return True
@@ -201,3 +205,11 @@ class ServerModelGame(gobject.GObject):
         self.new_handler_registro(False)
         self.__kill_client()
         self.__kill_server()
+
+    def rungame(self, xid, res):
+        # Debe comenzar a correr en menos de 1.5 segundos
+        mapa = os.path.join(BASE_PATH, "Mapas", self._dict.get('mapa', ''))
+        self.juego = Juego()
+        self.juego.config(time=35, res=res, client=self.client, xid=xid)
+        self.juego.load(mapa)
+        self.juego.run()

@@ -14,9 +14,9 @@ from gtkWidgets.SelectMode import SelectMode
 from gtkWidgets.StatusGame import StatusGame
 from gtkWidgets.CreateServerMode import CreateServerMode
 from gtkWidgets.ConnectingPlayers import ConnectingPlayers
-from ServerModelGame import ServerModelGame
 from gtkWidgets.CreateClientMode import CreateClientMode
 import Network
+from ServerModelGame import ServerModelGame
 from ClientModelGame import ClientModelGame
 
 gobject.threads_init()
@@ -32,11 +32,11 @@ class JAMTank(gtk.Window):
 
         self.set_title("JAMTank")
         self.set_icon_from_file(os.path.join(BASE, "Iconos", "jamtank.svg"))
-        #self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#000000"))
         self.fullscreen()
 
         self.screen_wh = (640, 480)
-        #self.widget_game = False
+        self.gameres = (640, 480)
         self.eventos = []
         self.handlers = {
             'selectmode': [],
@@ -52,6 +52,7 @@ class JAMTank(gtk.Window):
         self.createservermode = False
         self.createclientmode = False
         self.connectingplayers = False
+        self.juego = False
 
         self.connect("delete-event", self.__salir)
         self.connect('key-press-event', self.__key_press_event)
@@ -65,11 +66,14 @@ class JAMTank(gtk.Window):
     def __do_realize(self, widget):
         screen = self.get_screen()
         self.screen_wh = (screen.get_width(), screen.get_height())
+        self.gameres = (self.screen_wh[0]/4*3, self.screen_wh[1])
         xid = self.get_property('window').xid
         #os.putenv('SDL_WINDOWID', str(xid))
         print "Resolución del Monitor:", self.screen_wh
         print "id de la ventana:", xid
-        print "Geometria:", "Game:", self.screen_wh[0]/4*3, self.screen_wh[1], "StatusGame:", self.screen_wh[0]/4, self.screen_wh[1]
+        print "Geometria:"
+        print "\tGame:", self.gameres
+        print "\tStatusGame:", (self.screen_wh[0]/4, self.screen_wh[1])
 
     def __reset(self):
         self.eventos = []
@@ -186,18 +190,20 @@ class JAMTank(gtk.Window):
 
     def __accion_connecting_players_server(self, con_players, valor):
         if valor == "jugar":
-            print "connecting_players_server recibe jugar"
-            # FIXME:
-            #   self.servermodel.new_handler_registro(False)
-            #   run game con handler propio?
-            self.servermodel.running = True
+            self.servermodel.new_handler_anuncio(False)
+            self.servermodel.new_handler_registro(False)
+            self.__kill_connectingplayers()
+            xid = self.get_property('window').xid
+            self.servermodel.rungame(xid, self.gameres)
+            #win = StatusGame(self, self.screen_wh)
         elif valor == "cancelar":
             self.__switch(False, 3)
 
     def __accion_connecting_players_client(self, con_players, valor):
-        if valor == "jugar":
-            print "connecting_players_client recibe jugar"
-        elif valor == "cancelar":
+        #if valor == "jugar":
+        #    print "connecting_players_client recibe jugar"
+        #elif valor == "cancelar":
+        if valor == "cancelar":
             self.__switch(False, 4)
 
     def __kill_client_model(self):

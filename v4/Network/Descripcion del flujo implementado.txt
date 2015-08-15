@@ -43,11 +43,11 @@ Host crea el juego:
                 }
             }
         Envía los datos a la interfaz
-        Cuando recibe "todos" == True, Detiene handler_anuncio y envia "play-enabled" == True a la interfaz
         Cuando recibe "todos" == False, Reinicia handler_anuncio y envia "play-enabled" == False a la interfaz
-        Cuando desde la interfaz gráfica se lanza jugar:
-            Detiene handler_registro
-            Lanza el juego con handler_game
+        Cuando recibe "todos" == True, Detiene handler_anuncio y envia "play-enabled" == True a la interfaz
+            Cuando desde la interfaz gráfica se lanza jugar:
+                Detiene handler_registro
+                Lanza el juego
 
 
 Cliente no host:
@@ -58,4 +58,3 @@ Cliente no host:
         Levanta su cliente
         Registra su cliente en el servidor configurando nick y tanque
         inicia handler_registro
-        Cuando recibe "running" == True Detiene los handlers y envia "play-run" a la interfaz para que se lance el juego
