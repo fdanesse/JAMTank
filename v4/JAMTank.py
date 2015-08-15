@@ -189,13 +189,15 @@ class JAMTank(gtk.Window):
     def __accion_connecting_players_server(self, con_players, valor):
         if valor == "jugar":
             print "connecting_players_server recibe jugar"
+            # FIXME:
+            #   self.servermodel.new_handler_registro(False)
+            #   run game con handler propio?
             self.servermodel.running = True
         elif valor == "cancelar":
             self.__switch(False, 3)
 
     def __accion_connecting_players_client(self, con_players, valor):
         if valor == "jugar":
-            #self.clientmodel.running = True
             print "connecting_players_client recibe jugar"
         elif valor == "cancelar":
             self.__switch(False, 4)
