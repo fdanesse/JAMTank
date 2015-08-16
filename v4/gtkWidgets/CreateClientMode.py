@@ -64,7 +64,7 @@ class CreateClientMode(gtk.Dialog):
         _dict['time'] = time.time()
         remove = []
         for key in self.servers.keys():
-            if _dict['time'] - self.servers[key].get('time', 2.0) > 1.9:
+            if _dict['time'] - self.servers[key].get('time', 0) > 1.4:
                 remove.append(key)
         for ip in remove:
             del(self.servers[ip])
@@ -337,7 +337,7 @@ class NewLista(gtk.TreeView):
         remover = []
         _iter = model.get_iter_first()
         while _iter:
-            ip = model.get_value(_iter, 4)
+            ip = model.get_value(_iter, 5)
             if ip not in news:
                 remover.append(_iter)
             _iter = model.iter_next(_iter)

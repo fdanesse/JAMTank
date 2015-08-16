@@ -60,6 +60,7 @@ class ServerModelGame(gobject.GObject):
         self.client = False
         self.publicar = False
         self.registro = False
+        self.default_retorno = {"aceptado": False, "game": {}}
 
     def __handler_registro(self):
         new = {
@@ -69,9 +70,11 @@ class ServerModelGame(gobject.GObject):
                 },
             }
         self.client.enviar(new)
-        _dict = self.client.recibir()
+        _dict = self.client.recibir(dict(self.default_retorno))
+        self.default_retorno["aceptado"] = _dict.get("aceptado", False)
         if _dict.get("aceptado", False):
             self.emit("players", dict(_dict.get("players", {})))
+            self.default_retorno["game"] = _dict.get("game", {})
             dict_game = _dict.get("game", False)
             if dict_game.get("todos", False):
                 self.new_handler_anuncio(False)
@@ -117,6 +120,7 @@ class ServerModelGame(gobject.GObject):
         connected = self.client.conectarse()
         print "Cliente del Host Creado:", connected
         if connected:
+            self.client.connect("error", self.__client_error)
             return self.__register_client_in_server()
         else:
             return False
@@ -130,7 +134,8 @@ class ServerModelGame(gobject.GObject):
                 },
             }
         self.client.enviar(new)
-        _dict = self.client.recibir()
+        _dict = self.client.recibir(dict(self.default_retorno))
+        self.default_retorno["aceptado"] = _dict.get("aceptado", False)
         if _dict.get("aceptado", False):
             print "\tCliente del Host Registrado:"
             for item in _dict.items():
@@ -157,6 +162,10 @@ class ServerModelGame(gobject.GObject):
             self.client.desconectarse()
             del(self.client)
             self.client = False
+
+    def __client_error(self, client, valor):
+        print valor
+        self.emit("error")
 
     def new_handler_anuncio(self, reset):
         if self.publicar:

@@ -11,6 +11,10 @@ T = "\n"
 
 class Client(gobject.GObject):
 
+    __gsignals__ = {
+    "error": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
+        (gobject.TYPE_STRING,))}
+
     def __init__(self, ip):
 
         gobject.GObject.__init__(self)
@@ -29,10 +33,11 @@ class Client(gobject.GObject):
             return True
         except socket.error, err:
             # FIXME: socket.error: [Errno 111] Conexión rehusada
-            print "Error en el cliente:", err
+            self.emit("error", "Cliente Conectarse: %s" % err)
             return False
 
     def desconectarse(self):
+        self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
         self.rfile.close()
         time.sleep(0.5)
@@ -48,10 +53,11 @@ class Client(gobject.GObject):
                 self.rfile.flush()
                 enviado = True
             except socket.error, err:
-                print "Error del cliente al enviar datos:", err
+                self.emit("error", "Cliente Enviar: %s" % err)
+                break
             time.sleep(0.02)
 
-    def recibir(self):
+    def recibir(self, ret):
         """
         Espera una linea string que termina con "\n" y que ast puede convertir
         en un diccionario python.
@@ -62,8 +68,14 @@ class Client(gobject.GObject):
                 entrada = self.rfile.readline()
                 entrada = ast.literal_eval(entrada)
                 self.rfile.flush()
+                ret = entrada
             except socket.error, err:
-                print "Error del cliente al recibir datos:", err
                 # [Errno 11] Recurso no disponible temporalmente
+                # Desconexion: [Errno 104] Conexión reinicializada por la máquina remota
+                if err[0] == 11:
+                    print "FIXME: break recibir en cliente"
+                else:
+                    self.emit("error", "Cliente Recibir: %s" % err)
+                break
                 time.sleep(0.02)
-        return entrada
+        return ret

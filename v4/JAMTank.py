@@ -211,6 +211,8 @@ class JAMTank(gtk.Window):
             self.servermodel.rungame(xid, self.gameres)
             #win = StatusGame(self, self.screen_wh)
         elif valor == "cancelar":
+            # FIXME: El Servidor debe avisar a todos sobre esta desconexion
+            # De lo contrario, la interfaz queda colgada
             self.__switch(False, 3)
 
     def __accion_connecting_players_client(self, con_players, valor):
@@ -222,24 +224,24 @@ class JAMTank(gtk.Window):
 
     def __kill_client_model(self):
         if self.clientmodel:
+            self.clientmodel.close_all_and_exit()
             for h in self.handlers.get('clientmodel', []):
                 if self.clientmodel.handler_is_connected(h):
                     self.clientmodel.handler_disconnect(h)
             for h in self.handlers.get('clientmodel', []):
                 del(h)
-            self.clientmodel.close_all_and_exit()
         self.handlers['clientmodel'] = []
         del(self.clientmodel)
         self.clientmodel = False
 
     def __kill_server_model(self):
         if self.servermodel:
+            self.servermodel.close_all_and_exit()
             for h in self.handlers.get('servermodel', []):
                 if self.servermodel.handler_is_connected(h):
                     self.servermodel.handler_disconnect(h)
             for h in self.handlers.get('servermodel', []):
                 del(h)
-            self.servermodel.close_all_and_exit()
         self.handlers['servermodel'] = []
         del(self.servermodel)
         self.servermodel = False

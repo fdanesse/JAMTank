@@ -27,6 +27,7 @@ class ClientModelGame(gobject.GObject):
         self._nick_host = _nick_host
         self._tank_host = _tank_host
         self.registro = False
+        self.default_retorno = {"aceptado": False, "game": {}}
 
     def __handler_registro(self):
         new = {
@@ -36,9 +37,11 @@ class ClientModelGame(gobject.GObject):
                 },
             }
         self.client.enviar(new)
-        _dict = self.client.recibir()
+        _dict = self.client.recibir(dict(self.default_retorno))
+        self.default_retorno["aceptado"] = _dict.get("aceptado", False)
         if _dict.get("aceptado", False):
             self.emit("players", dict(_dict.get("players", {})))
+            self.default_retorno["game"] = _dict.get("game", {})
             if _dict["game"].get("run", False):
                 self.emit("play-run")
         else:
@@ -56,7 +59,8 @@ class ClientModelGame(gobject.GObject):
                 },
             }
         self.client.enviar(new)
-        _dict = self.client.recibir()
+        _dict = self.client.recibir(dict(self.default_retorno))
+        self.default_retorno["aceptado"] = _dict.get("aceptado", False)
         if _dict.get("aceptado", False):
             print "\t Cliente no Host Registrado:"
             for item in _dict.items():
@@ -72,6 +76,10 @@ class ClientModelGame(gobject.GObject):
             del(self.client)
             self.client = False
 
+    def __client_error(self, client, valor):
+        print valor
+        self.emit("error")
+
     def new_handler_registro(self, reset):
         if self.registro:
             gobject.source_remove(self.registro)
@@ -85,6 +93,7 @@ class ClientModelGame(gobject.GObject):
         connected = self.client.conectarse()
         print "Cliente Creado:", connected
         if connected:
+            self.client.connect("error", self.__client_error)
             return self.__register_client_in_server()
         else:
             return False

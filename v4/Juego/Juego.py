@@ -36,6 +36,8 @@ class Juego(gobject.GObject):
         self._balas = pygame.sprite.RenderUpdates()
         self._explosiones = pygame.sprite.RenderUpdates()
 
+        self.default_retorno = {"ingame": {"players": {}}}
+
         print "Nuevo Juego Creado"
 
     def __enviar_datos(self):
@@ -45,7 +47,8 @@ class Juego(gobject.GObject):
 
     def __recibir_datos(self):
         if self._client:
-            _dic = self._client.recibir()
+            _dic = self._client.recibir(dict(self.default_retorno))
+            self.default_retorno = _dict
             print "Juego Recibe:", _dic
 
     def __emit_update(self):
