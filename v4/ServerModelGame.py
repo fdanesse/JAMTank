@@ -85,7 +85,6 @@ class ServerModelGame(gobject.GObject):
                     self.new_handler_anuncio(True)
         else:
             print "FIXME: Host no aceptado como jugador."
-            self.close_all_and_exit()
             self.emit("error")
         return bool(self.registro)
 
@@ -212,6 +211,15 @@ class ServerModelGame(gobject.GObject):
     def close_all_and_exit(self):
         self.new_handler_anuncio(False)
         self.new_handler_registro(False)
+
+        if self.client:
+            time.sleep(0.5)
+            new = {"register": {"off": True}}
+            self.client.enviar(new)
+            _dict = self.client.recibir(dict(self.default_retorno))
+            print "ServerModel recibe:", _dict
+            time.sleep(0.5)
+
         self.__kill_client()
         self.__kill_server()
 

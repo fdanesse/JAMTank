@@ -3,7 +3,6 @@
 
 import gobject
 import socket
-#import sys
 import pickle
 import threading
 import ctypes
@@ -49,7 +48,7 @@ class ListenServers(gobject.GObject):
 
     def __handler_listen(self):
         print "ListenServers > Buscando Juegos en la Red..."
-        while self.listen_thread:
+        while bool(self.listen_thread):
             mensaje, remote = self.socket.recvfrom(10000)
             data = pickle.loads(mensaje)
             #print >>sys.stderr, remote, 'Recibido: "%s"' % data

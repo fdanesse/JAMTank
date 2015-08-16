@@ -211,8 +211,6 @@ class JAMTank(gtk.Window):
             self.servermodel.rungame(xid, self.gameres)
             #win = StatusGame(self, self.screen_wh)
         elif valor == "cancelar":
-            # FIXME: El Servidor debe avisar a todos sobre esta desconexion
-            # De lo contrario, la interfaz queda colgada
             self.__switch(False, 3)
 
     def __accion_connecting_players_client(self, con_players, valor):
@@ -230,6 +228,10 @@ class JAMTank(gtk.Window):
                     self.clientmodel.handler_disconnect(h)
             for h in self.handlers.get('clientmodel', []):
                 del(h)
+            try:
+                self.clientmodel.destroy()
+            except:
+                pass
         self.handlers['clientmodel'] = []
         del(self.clientmodel)
         self.clientmodel = False
@@ -242,6 +244,10 @@ class JAMTank(gtk.Window):
                     self.servermodel.handler_disconnect(h)
             for h in self.handlers.get('servermodel', []):
                 del(h)
+            try:
+                self.servermodel.destroy()
+            except:
+                pass
         self.handlers['servermodel'] = []
         del(self.servermodel)
         self.servermodel = False
@@ -288,6 +294,10 @@ class JAMTank(gtk.Window):
                     self.createclientmode.handler_disconnect(h)
             for h in self.handlers.get('createclientmode', []):
                 del(h)
+            try:
+                self.createclientmode.destroy()
+            except:
+                pass
         self.handlers['createclientmode'] = []
         del(self.createclientmode)
         self.createclientmode = False
@@ -297,6 +307,10 @@ class JAMTank(gtk.Window):
                     self.createservermode.handler_disconnect(h)
             for h in self.handlers.get('createservermode', []):
                 del(h)
+            try:
+                self.createservermode.destroy()
+            except:
+                pass
         self.handlers['createservermode'] = []
         del(self.createservermode)
         self.createservermode = False
@@ -308,6 +322,10 @@ class JAMTank(gtk.Window):
                     self.selectmode.handler_disconnect(h)
             for h in self.handlers.get('selectmode', []):
                 del(h)
+            try:
+                self.selectmode.destroy()
+            except:
+                pass
         self.handlers['clientmodel'] = []
         del(self.selectmode)
         self.selectmode = False
@@ -319,6 +337,10 @@ class JAMTank(gtk.Window):
                     self.connectingplayers.handler_disconnect(h)
             for h in self.handlers.get('connectingplayers', []):
                 del(h)
+            try:
+                self.connectingplayers.destroy()
+            except:
+                pass
         self.handlers['clientmodel'] = []
         del(self.connectingplayers)
         self.connectingplayers = False

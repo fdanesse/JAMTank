@@ -6,6 +6,7 @@ import pygame
 import random
 import gobject
 import gtk
+import time
 
 RES = (800, 600)
 BASE_PATH = os.path.realpath(os.path.dirname(__file__))
@@ -47,9 +48,9 @@ class Juego(gobject.GObject):
 
     def __recibir_datos(self):
         if self._client:
-            _dic = self._client.recibir(dict(self.default_retorno))
+            _dict = self._client.recibir(dict(self.default_retorno))
             self.default_retorno = _dict
-            print "Juego Recibe:", _dic
+            print "Juego Recibe:", _dict
 
     def __emit_update(self):
         if bool(self._estado):
@@ -75,33 +76,34 @@ class Juego(gobject.GObject):
         pygame.time.wait(3)
         #gobject.timeout_add(1500, self.__emit_update)
         while self._estado == "En Juego":
-            try:
-                self._clock.tick(self._time)
-                while gtk.events_pending():
-                    gtk.main_iteration()
-                self._jugadores.clear(self._win, self._escenario)
-                self._balas.clear(self._win, self._escenario)
-                self._explosiones.clear(self._win, self._escenario)
+            #try:
+            print time.time()
+            self._clock.tick(self._time)
+            while gtk.events_pending():
+                gtk.main_iteration()
+            self._jugadores.clear(self._win, self._escenario)
+            self._balas.clear(self._win, self._escenario)
+            self._explosiones.clear(self._win, self._escenario)
 
-                self.__enviar_datos()
-                self.__recibir_datos()
+            self.__enviar_datos()
+            self.__recibir_datos()
 
-                self._explosiones.update()
+            self._explosiones.update()
 
-                self._jugadores.draw(self._win)
-                self._balas.draw(self._win)
-                self._explosiones.draw(self._win)
+            self._jugadores.draw(self._win)
+            self._balas.draw(self._win)
+            self._explosiones.draw(self._win)
 
-                self._real_win.blit(pygame.transform.scale(
-                    self._win, self._res), (0, 0))
+            self._real_win.blit(pygame.transform.scale(
+                self._win, self._res), (0, 0))
 
-                pygame.display.update()
-                pygame.event.pump()
-                pygame.event.clear()
-                #pygame.time.wait(1)
-            except:
-                "Error en run game"
-                self._estado = False
+            pygame.display.update()
+            pygame.event.pump()
+            pygame.event.clear()
+            #pygame.time.wait(1)
+            #except:
+            #    "Error en run game"
+            #    self._estado = False
 
     def update_events(self, eventos):
         #if "space" in eventos:

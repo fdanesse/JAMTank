@@ -46,7 +46,6 @@ class ClientModelGame(gobject.GObject):
                 self.emit("play-run")
         else:
             print "FIXME: Cliente no aceptado como jugador."
-            self.close_all_and_exit()
             self.emit("error")
         return bool(self.registro)
 

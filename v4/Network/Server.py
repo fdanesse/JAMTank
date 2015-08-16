@@ -134,6 +134,12 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
 
     def registrar(self, ip, _dict):
         self.__timer_control_players(ip)
+
+        if _dict["register"].get("off", False):
+            print "Server Recibe off"
+            self._dict_game["jugadores"] = 0
+            self._players_dict = {}
+
         permitidos = self._dict_game["jugadores"]
         new = {}
         if self._players_dict.get(ip, False):

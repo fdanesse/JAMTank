@@ -37,10 +37,13 @@ class Client(gobject.GObject):
             return False
 
     def desconectarse(self):
-        self.socket.shutdown(socket.SHUT_RDWR)
-        self.socket.close()
-        self.rfile.close()
-        time.sleep(0.5)
+        try:
+            self.socket.shutdown(socket.SHUT_RDWR)
+            self.socket.close()
+            self.rfile.close()
+            time.sleep(0.5)
+        except:
+            pass
 
     def enviar(self, message):
         """
