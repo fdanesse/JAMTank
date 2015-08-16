@@ -3,6 +3,7 @@
 
 import os
 import gobject
+import gtk
 
 from Network.Client import Client
 from Juego.Juego import Juego
@@ -26,6 +27,9 @@ class ClientModelGame(gobject.GObject):
         self._dict = _dict  # jugadores, mapa, vidas
         self._nick_host = _nick_host
         self._tank_host = _tank_host
+        self.client = False
+        self.juego = False
+        self.eventos = []
         self.registro = False
         self.default_retorno = {"aceptado": False, "game": {}}
 
@@ -101,10 +105,48 @@ class ClientModelGame(gobject.GObject):
         self.new_handler_registro(False)
         self.__kill_client()
 
+    def process_key_press(self, event):
+        nombre = gtk.gdk.keyval_name(event.keyval)
+        if self.juego:
+            teclas = ["w", "s", "d", "a", "space", "Escape"]
+            if nombre in teclas and not nombre in self.eventos:
+                if nombre == "w" and "s" in self.eventos:
+                    self.eventos.remove("s")
+                elif nombre == "s" and "w" in self.eventos:
+                    self.eventos.remove("w")
+                elif nombre == "d" and "a" in self.eventos:
+                    self.eventos.remove("a")
+                elif nombre == "a" and "d" in self.eventos:
+                    self.eventos.remove("d")
+                self.eventos.append(nombre)
+            self.juego.update_events(self.eventos)
+        else:
+            if nombre == "Escape":
+                print "MAL"
+                self.emit("error")
+
+    def process_key_release(self, event):
+        if self.juego:
+            nombre = gtk.gdk.keyval_name(event.keyval)
+            teclas = ["w", "s", "d", "a", "space", "Escape"]
+            if nombre in teclas and nombre in self.eventos:
+                self.eventos.remove(nombre)
+            self.juego.update_events(self.eventos)
+        else:
+            self.eventos = []
+
     def rungame(self, xid, res):
         # Debe comenzar a correr en menos de 1.5 segundos
         mapa = os.path.join(BASE_PATH, "Mapas", self._dict.get('mapa', ''))
         self.juego = Juego()
+        self.juego.connect("exit", self.__exit_game)
         self.juego.config(time=35, res=res, client=self.client, xid=xid)
         self.juego.load(mapa)
         self.juego.run()
+
+    def __exit_game(self, game):
+        if self.juego:
+            self.juego.disconnect_by_func(self.__exit_game)
+            del(self.juego)
+            self.juego = False
+        self.emit("error")

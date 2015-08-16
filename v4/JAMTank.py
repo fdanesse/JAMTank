@@ -37,7 +37,6 @@ class JAMTank(gtk.Window):
 
         self.screen_wh = (640, 480)
         self.gameres = (640, 480)
-        self.eventos = []
         self.handlers = {
             'selectmode': [],
             'createservermode': [],
@@ -52,7 +51,6 @@ class JAMTank(gtk.Window):
         self.createservermode = False
         self.createclientmode = False
         self.connectingplayers = False
-        self.juego = False
 
         self.connect("delete-event", self.__salir)
         self.connect('key-press-event', self.__key_press_event)
@@ -76,12 +74,12 @@ class JAMTank(gtk.Window):
         print "\tStatusGame:", (self.screen_wh[0] / 4, self.screen_wh[1])
 
     def __reset(self):
-        self.eventos = []
         self.__kill_client_model()
         self.__kill_server_model()
         self.__kill_connectingplayers()
         self.__kill_create_mode()
         self.__kill_select_mode()
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#000000"))
 
     def __select_mode(self, widget, valor):
         self.__reset()  # Necesario
@@ -253,39 +251,22 @@ class JAMTank(gtk.Window):
         self.servermodel = False
 
     def __key_press_event(self, widget, event):
-        if gtk.gdk.keyval_name(event.keyval) == "Escape":
-            self.__salir()
-            return False
-        #if not self.widget_game:
-        #    return False
-        #nombre = gtk.gdk.keyval_name(event.keyval)
-        #teclas = ["w", "s", "d", "a", "space", "Escape"]
-        #if nombre in teclas and not nombre in self.eventos:
-        #    if nombre == "w" and "s" in self.eventos:
-        #        self.eventos.remove("s")
-        #    elif nombre == "s" and "w" in self.eventos:
-        #        self.eventos.remove("w")
-        #    elif nombre == "d" and "a" in self.eventos:
-        #        self.eventos.remove("a")
-        #    elif nombre == "a" and "d" in self.eventos:
-        #        self.eventos.remove("d")
-        #    self.eventos.append(nombre)
-        #self.__update_events()
+        if self.selectmode:
+            if gtk.gdk.keyval_name(event.keyval) == "Escape":
+                self.__salir()
+                return False
+        elif self.servermodel:
+            self.servermodel.process_key_press(event)
+        elif self.clientmodel:
+            self.clientmodel.process_key_press(event)
         return False
 
     def __key_release_event(self, widget, event):
-        #if not self.widget_game:
-        #    return False
-        #nombre = gtk.gdk.keyval_name(event.keyval)
-        #teclas = ["w", "s", "d", "a", "space", "Escape"]
-        #if nombre in teclas and nombre in self.eventos:
-        #    self.eventos.remove(nombre)
-        #self.__update_events()
+        if self.servermodel:
+            self.servermodel.process_key_release(event)
+        elif self.clientmodel:
+            self.clientmodel.process_key_release(event)
         return False
-
-    #def __update_events(self):
-    #    if self.widget_game:
-    #        self.widget_game.update_events(self.eventos)
 
     def __kill_create_mode(self):
         if self.createclientmode:

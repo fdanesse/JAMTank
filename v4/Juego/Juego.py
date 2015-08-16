@@ -14,11 +14,13 @@ BASE_PATH = os.path.realpath(os.path.dirname(__file__))
 
 class Juego(gobject.GObject):
 
-    #__gsignals__ = {
+    __gsignals__ = {
     #"update": (gobject.SIGNAL_RUN_LAST,
     #    gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT, )),
     #"end": (gobject.SIGNAL_RUN_LAST,
-    #    gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT, ))}
+    #    gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT, )),
+    "exit": (gobject.SIGNAL_RUN_LAST,
+        gobject.TYPE_NONE, [])}
 
     def __init__(self):
 
@@ -50,23 +52,7 @@ class Juego(gobject.GObject):
         if self._client:
             _dict = self._client.recibir(dict(self.default_retorno))
             self.default_retorno = _dict
-            print "Juego Recibe:", _dict
-
-    def __emit_update(self):
-        if bool(self._estado):
-            #self.emit("update", dict(self.JUGADORES))
-            #gobject.timeout_add(1500, self.__emit_update)
-            pass
-        return False
-
-    def __end(self):
-        self._estado = False
-        pygame.quit()
-        if self._client:
-            self._client.desconectarse()
-            del(self._client)
-            self._client = False
-        #self.emit("end", dict(self.JUGADORES))
+            #print "Juego Recibe:", _dict
 
     def run(self):
         print "Comenzando a Correr el juego..."
@@ -77,7 +63,6 @@ class Juego(gobject.GObject):
         #gobject.timeout_add(1500, self.__emit_update)
         while self._estado == "En Juego":
             #try:
-            print time.time()
             self._clock.tick(self._time)
             while gtk.events_pending():
                 gtk.main_iteration()
@@ -85,8 +70,15 @@ class Juego(gobject.GObject):
             self._balas.clear(self._win, self._escenario)
             self._explosiones.clear(self._win, self._escenario)
 
+            #if self.jugador:
+            #    El jugador actualiza su posicion y disparos segun eventos
+            #    self.jugador.status_update()
+            #    los nuevos datos deben enviarse al server
+
             self.__enviar_datos()
             self.__recibir_datos()
+
+            #Con los datos recibidos se actualizan todos los objetos
 
             self._explosiones.update()
 
@@ -105,30 +97,12 @@ class Juego(gobject.GObject):
             #    "Error en run game"
             #    self._estado = False
 
-    def update_events(self, eventos):
-        #if "space" in eventos:
-        #    if not self.bala:
-        #        self.disparo = True
-        #    eventos.remove("space")
-        #if self.jugador:
-        #    self.jugador.update_events(eventos)
-        pass
-
-    def salir(self, valor):
-        """
-        La Interfaz gtk manda salir del juego.
-        """
-        self._estado = False
         pygame.quit()
-        if self._client:
-            #self._client.enviar(valor)
-            #datos = self._client.recibir()
-            #self._client.desconectarse()
-            #del(self._client)
-            #self._client = False
-            #if datos == "END":
-            #    self.__end()
-            pass
+        self.emit('exit')
+
+    def update_events(self, eventos):
+        if "Escape" in eventos:
+            self._estado = False
 
     def load(self, mapa):
         print "Cargando mapa:", mapa
@@ -187,9 +161,9 @@ class Juego(gobject.GObject):
         pygame.mixer.music.set_volume(1.0)
 
 
-if __name__ == "__main__":
-    mapa = os.path.join(os.path.dirname(BASE_PATH), "Mapas", "f2.png")
-    juego = Juego()
-    juego.config(time=35, res=(800, 600), client=False, xid=False)
-    juego.load(mapa)
-    juego.run()
+#if __name__ == "__main__":
+#    mapa = os.path.join(os.path.dirname(BASE_PATH), "Mapas", "f2.png")
+#    juego = Juego()
+#    juego.config(time=35, res=(800, 600), client=False, xid=False)
+#    juego.load(mapa)
+#    juego.run()

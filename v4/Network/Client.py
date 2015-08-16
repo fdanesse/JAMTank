@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# Errores: https://docs.python.org/2/library/errno.html
+
 import socket
 import time
 import gobject
@@ -26,7 +28,7 @@ class Client(gobject.GObject):
     def conectarse(self):
         try:
             self.socket.connect(self.dir)
-            self.socket.setblocking(0)
+            #self.socket.setblocking(0)
             self.rfile = self.socket.makefile("rwb") #, bufsize=1024
             self.rfile.flush()
             time.sleep(0.5)
