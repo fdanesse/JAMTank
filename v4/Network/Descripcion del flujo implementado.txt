@@ -48,6 +48,10 @@ Host crea el juego:
             Cuando desde la interfaz gráfica se lanza jugar:
                 Detiene handler_registro
                 Lanza el juego
+        NOTA:
+            Al Comenzar el juego, se envia al server: _dict = {"ingame": {"nada": ""}}
+            Cuando el servidor recibe esto, agrega: self._dict_game['run'] = True
+            Cuando los clientes no host reciben esto en handler_registro, emiten "play-run" a la interfaz gráfica, la cual lanza el juego
 
 
 Cliente no host:
@@ -58,3 +62,4 @@ Cliente no host:
         Levanta su cliente
         Registra su cliente en el servidor configurando nick y tanque
         inicia handler_registro
+        Cuando recibe _dict_game['run'] = True handler_registro y lanza el juego

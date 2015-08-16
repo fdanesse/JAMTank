@@ -64,7 +64,7 @@ class CreateClientMode(gtk.Dialog):
         _dict['time'] = time.time()
         remove = []
         for key in self.servers.keys():
-            if _dict['time'] - self.servers[key].get('time', 1.5) > 1.4:
+            if _dict['time'] - self.servers[key].get('time', 2.0) > 1.9:
                 remove.append(key)
         for ip in remove:
             del(self.servers[ip])
@@ -250,8 +250,8 @@ class NewLista(gtk.TreeView):
     def __init__(self):
 
         gtk.TreeView.__init__(self, gtk.ListStore(gtk.gdk.Pixbuf,
-            gobject.TYPE_STRING, gobject.TYPE_INT,
-            gobject.TYPE_INT, gobject.TYPE_STRING))
+            gobject.TYPE_STRING, gobject.TYPE_STRING,
+            gobject.TYPE_INT, gobject.TYPE_INT, gobject.TYPE_STRING))
 
         self.set_property("rules-hint", True)
         self.set_headers_clickable(True)
@@ -264,11 +264,11 @@ class NewLista(gtk.TreeView):
 
     def __selecciones(self, path, column):
         _iter = self.get_model().get_iter(path)
-        mapa = self.get_model().get_value(_iter, 0)
-        nick = self.get_model().get_value(_iter, 1)
-        jugadores = self.get_model().get_value(_iter, 2)
-        vidas = self.get_model().get_value(_iter, 3)
-        ip = self.get_model().get_value(_iter, 4)
+        mapa = self.get_model().get_value(_iter, 1)
+        nick = self.get_model().get_value(_iter, 2)
+        jugadores = self.get_model().get_value(_iter, 3)
+        vidas = self.get_model().get_value(_iter, 4)
+        ip = self.get_model().get_value(_iter, 5)
         _dict = {
             'mapa': mapa,
             'ip': ip,
@@ -282,10 +282,11 @@ class NewLista(gtk.TreeView):
 
     def __setear_columnas(self):
         self.append_column(self.__construir_columa_icono('mapa', 0, True))
-        self.append_column(self.__construir_columa('nickh', 1, True))
-        self.append_column(self.__construir_columa('jugadores', 2, False))
-        self.append_column(self.__construir_columa('vidas', 3, False))
-        self.append_column(self.__construir_columa('ip', 4, False))
+        self.append_column(self.__construir_columa('mappath', 1, False))
+        self.append_column(self.__construir_columa('nickh', 2, True))
+        self.append_column(self.__construir_columa('jugadores', 3, False))
+        self.append_column(self.__construir_columa('vidas', 4, False))
+        self.append_column(self.__construir_columa('ip', 5, False))
 
     def __construir_columa(self, text, index, visible):
         render = gtk.CellRendererText()
@@ -307,11 +308,11 @@ class NewLista(gtk.TreeView):
     def __ejecutar_agregar_elemento(self, elementos):
         if not elementos:
             return False
-        pixbuf, nick, jugadores, vidas, ip = elementos[0]
+        pixbuf, mappath, nick, jugadores, vidas, ip = elementos[0]
         if pixbuf:
             if os.path.exists(pixbuf):
                 pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(pixbuf, 50, -1)
-        self.get_model().append([pixbuf, nick, jugadores, vidas, ip])
+        self.get_model().append([pixbuf, mappath, nick, jugadores, vidas, ip])
         elementos.remove(elementos[0])
         gobject.idle_add(self.__ejecutar_agregar_elemento, elementos)
         return False
@@ -320,7 +321,7 @@ class NewLista(gtk.TreeView):
         model = self.get_model()
         _iter = model.get_iter_first()
         while _iter:
-            contenido = model.get_value(_iter, 4)
+            contenido = model.get_value(_iter, 5)
             if texto == contenido:
                 return _iter
             _iter = model.iter_next(_iter)
@@ -354,14 +355,16 @@ class NewLista(gtk.TreeView):
                         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(
                             pixbuf, 50, -1)
                         model.set_value(_iter, 0, pixbuf)
-                model.set_value(_iter, 1, _dict[key].get('nickh', ''))
-                model.set_value(_iter, 2, _dict[key].get('jugadores', ''))
-                model.set_value(_iter, 3, _dict[key].get('vidas', ''))
-                model.set_value(_iter, 4, key)
+                model.set_value(_iter, 1, _dict[key].get('mapa', ''))
+                model.set_value(_iter, 2, _dict[key].get('nickh', ''))
+                model.set_value(_iter, 3, _dict[key].get('jugadores', ''))
+                model.set_value(_iter, 4, _dict[key].get('vidas', ''))
+                model.set_value(_iter, 5, key)
             else:
                 pixbuf = os.path.join(IMGPATH, "Mapas",
                     _dict[key].get('mapa', ''))
-                items.append([pixbuf, _dict[key].get('nickh', ''),
+                items.append([pixbuf, _dict[key].get('mapa', ''),
+                    _dict[key].get('nickh', ''),
                     _dict[key].get('jugadores', ''),
                     _dict[key].get('vidas', ''), key])
                 # FIXME: Emitir sonido de conexión

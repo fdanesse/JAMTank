@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import gobject
-import socket
-import time
 
 from Network.Client import Client
+from Juego.Juego import Juego
+
+BASE_PATH = os.path.realpath(os.path.dirname(__file__))
 
 
 class ClientModelGame(gobject.GObject):
@@ -37,11 +39,8 @@ class ClientModelGame(gobject.GObject):
         _dict = self.client.recibir()
         if _dict.get("aceptado", False):
             self.emit("players", dict(_dict.get("players", {})))
-            #if _dict.get("running", False):
-            #    # FIXME: Verificar si esto debe ir acá
-            #    #self.new_handler_anuncio(False)
-            #    self.new_handler_registro(False)
-            #    self.emit("play-run")
+            if _dict["game"].get("run", False):
+                self.emit("play-run")
         else:
             print "FIXME: Cliente no aceptado como jugador."
             self.close_all_and_exit()
@@ -93,3 +92,11 @@ class ClientModelGame(gobject.GObject):
     def close_all_and_exit(self):
         self.new_handler_registro(False)
         self.__kill_client()
+
+    def rungame(self, xid, res):
+        # Debe comenzar a correr en menos de 1.5 segundos
+        mapa = os.path.join(BASE_PATH, "Mapas", self._dict.get('mapa', ''))
+        self.juego = Juego()
+        self.juego.config(time=35, res=res, client=self.client, xid=xid)
+        self.juego.load(mapa)
+        self.juego.run()

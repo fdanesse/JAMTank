@@ -103,7 +103,6 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
 
         self.ip = host
         self._dict_game = dict(_dict)  # n°de jugadores, mapa, vidas
-        #self._dict_game["mapa"] = _dict["mapa"]
         self._players_dict = {}
         self._time_control_players = {}
 
@@ -113,6 +112,9 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
             print "\t\t", item
 
     def __timer_control_players(self, _ip):
+        """
+        Más de 1.5 segundos entre conexiones = jugador desconectado
+        """
         now = time.time()
         self._time_control_players[_ip] = now
         for ip in self._players_dict.keys():
@@ -137,11 +139,6 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         if self._players_dict.get(ip, False):
             # jugadores en handler registro
             new = self.__registrar(ip, _dict)
-            # Si running == True, desde el host,
-            # running a todos para lanzar el juego
-            #if ip == self.ip:
-            #    if _dict.get("running", False):
-            #        self._dict_game["running"] = True
         else:
             if len(self._players_dict.keys()) < permitidos:
                 # El jugador se registra
@@ -153,8 +150,11 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         return new
 
     def ingame(self, ip, _dict):
-        #FIXME: Guardar _dict
         self.__timer_control_players(ip)
+        #FIXME: Guardar _dict
+        if ip == self.ip:
+            # Anuncia inicio del juego a quienes estan en fase de registro
+            self._dict_game['run'] = True
         new = {"ingame": {"players": dict(self._players_dict)}}
         return new
 

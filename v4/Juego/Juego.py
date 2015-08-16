@@ -46,7 +46,7 @@ class Juego(gobject.GObject):
     def __recibir_datos(self):
         if self._client:
             _dic = self._client.recibir()
-            #print "Juego Recibe:", _dic
+            print "Juego Recibe:", _dic
 
     def __emit_update(self):
         if bool(self._estado):

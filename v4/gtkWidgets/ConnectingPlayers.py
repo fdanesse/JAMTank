@@ -39,10 +39,9 @@ class ConnectingPlayers(gtk.Dialog):
             nick, _dict['vidas'])
         self.internal_widget.label.set_text(text)
         rect = self.internal_widget.framemapa.mapaview.get_allocation()
-        # FIXME: Puede ser un pixbuf
-        #path = os.path.join(ROOTPATH, "Mapas", _dict['mapa'])
-        #pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, -1, rect.height)
-        #self.internal_widget.framemapa.mapaview.set_from_pixbuf(pixbuf)
+        path = os.path.join(ROOTPATH, "Mapas", _dict['mapa'])
+        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, -1, rect.height)
+        self.internal_widget.framemapa.mapaview.set_from_pixbuf(pixbuf)
 
         items = []
         for x in range(_dict['jugadores']):

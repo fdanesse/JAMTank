@@ -66,14 +66,14 @@ class JAMTank(gtk.Window):
     def __do_realize(self, widget):
         screen = self.get_screen()
         self.screen_wh = (screen.get_width(), screen.get_height())
-        self.gameres = (self.screen_wh[0]/4*3, self.screen_wh[1])
+        self.gameres = (self.screen_wh[0] / 4 * 3, self.screen_wh[1])
         xid = self.get_property('window').xid
         #os.putenv('SDL_WINDOWID', str(xid))
         print "Resolución del Monitor:", self.screen_wh
         print "id de la ventana:", xid
         print "Geometria:"
         print "\tGame:", self.gameres
-        print "\tStatusGame:", (self.screen_wh[0]/4, self.screen_wh[1])
+        print "\tStatusGame:", (self.screen_wh[0] / 4, self.screen_wh[1])
 
     def __reset(self):
         self.eventos = []
@@ -111,22 +111,25 @@ class JAMTank(gtk.Window):
         elif valor == 3:
             # Crear Juego en Red
             self.createservermode = CreateServerMode(self)
-            _id = self.createservermode.connect("close", self.__switch, 1)  # Escape en dialog
+            _id = self.createservermode.connect("close", self.__switch, 1)
             self.handlers['createservermode'].append(_id)
-            _id = self.createservermode.connect("accion", self.__accion_create_server)
+            _id = self.createservermode.connect("accion",
+                self.__accion_create_server)
             self.handlers['createservermode'].append(_id)
         elif valor == 4:
             # Unirse a Juego en Red
             self.createclientmode = CreateClientMode(self)
-            _id = self.createclientmode.connect("close", self.__switch, 1)  # Escape en dialog
+            _id = self.createclientmode.connect("close", self.__switch, 1)
             self.handlers['createclientmode'].append(_id)
-            _id = self.createclientmode.connect("accion", self.__accion_create_client)
+            _id = self.createclientmode.connect("accion",
+                self.__accion_create_client)
             self.handlers['createclientmode'].append(_id)
         elif valor == 5:
             # Creditos
             pass
 
-    def __accion_create_client(self, mode_client, accion, server_dict, player_dict):
+    def __accion_create_client(self, mode_client, accion,
+        server_dict, player_dict):
         self.__reset()
         if accion == "run":
             host = server_dict.get('ip', 'localhost')
@@ -134,17 +137,21 @@ class JAMTank(gtk.Window):
             del(server_dict['ip'])
             del(server_dict['nick'])
             self.clientmodel = ClientModelGame(host, server_dict,
-                player_dict.get('nick', 'JAMTank'), player_dict.get('tanque', ''))
+                player_dict.get('nick', 'JAMTank'),
+                player_dict.get('tanque', ''))
             _id = self.clientmodel.connect("error", self.__switch, 4)
             self.handlers['clientmodel'].append(_id)
             if self.clientmodel.client_run():
-                self.connectingplayers = ConnectingPlayers(self, nickh, server_dict)
+                self.connectingplayers = ConnectingPlayers(
+                    self, nickh, server_dict)
                 self.connectingplayers.internal_widget.jugar.hide()
-                _id = self.connectingplayers.connect("close", self.__switch, 4)  # Escape en dialog
+                _id = self.connectingplayers.connect("close", self.__switch, 4)
                 self.handlers['connectingplayers'].append(_id)
-                _id = self.connectingplayers.connect("accion", self.__accion_connecting_players_client)
+                _id = self.connectingplayers.connect("accion",
+                    self.__accion_connecting_players_client)
                 self.handlers['connectingplayers'].append(_id)
-                _id = self.clientmodel.connect("players", self.connectingplayers.update_playeres)
+                _id = self.clientmodel.connect("players",
+                    self.connectingplayers.update_playeres)
                 self.handlers['clientmodel'].append(_id)
                 _id = self.clientmodel.connect("play-run", self.__play_run)
                 self.handlers['clientmodel'].append(_id)
@@ -162,30 +169,37 @@ class JAMTank(gtk.Window):
                 'mapa': str(_dict.get('mapa', '')),
                 'vidas': int(_dict.get('vidas', 5))
                 }
-            self.servermodel = ServerModelGame(_dict.get('server', 'localhost'),
-                new_dict, _dict.get('nick', 'JAMTank'), _dict.get('tanque', ''))
+            self.servermodel = ServerModelGame(
+                _dict.get('server', 'localhost'),
+                new_dict, _dict.get('nick', 'JAMTank'),
+                _dict.get('tanque', ''))
             _id = self.servermodel.connect("error", self.__switch, 3)
             self.handlers['servermodel'].append(_id)
             if self.servermodel.server_run():
                 self.connectingplayers = ConnectingPlayers(self,
                     _dict.get('nick', 'JAMTank'), new_dict)
-                _id = self.connectingplayers.connect("close", self.__switch, 3)  # Escape en dialog
+                _id = self.connectingplayers.connect("close", self.__switch, 3)
                 self.handlers['connectingplayers'].append(_id)
-                _id = self.connectingplayers.connect("accion", self.__accion_connecting_players_server)
+                _id = self.connectingplayers.connect("accion",
+                    self.__accion_connecting_players_server)
                 self.handlers['connectingplayers'].append(_id)
-                _id = self.servermodel.connect("players", self.connectingplayers.update_playeres)
+                _id = self.servermodel.connect("players",
+                    self.connectingplayers.update_playeres)
                 self.handlers['servermodel'].append(_id)
-                _id = self.servermodel.connect("play-enabled", self.connectingplayers.play_enabled)
+                _id = self.servermodel.connect("play-enabled",
+                    self.connectingplayers.play_enabled)
                 self.handlers['servermodel'].append(_id)
                 self.servermodel.new_handler_registro(True)
-                # self.servermodel.new_handler_anuncio(True) lanzado desde handler_registro
             else:
                 print "FIXME:", self.__accion_create_server
         elif accion == "salir":
             self.__switch(False, 1)
 
-    def __play_run(self, server_or_client_model):
-        print "FIXME: Lanzar el juego (cambiar 'register' por otro mensaje)"
+    def __play_run(self, client_model):
+        self.clientmodel.new_handler_registro(False)
+        self.__kill_connectingplayers()
+        xid = self.get_property('window').xid
+        self.clientmodel.rungame(xid, self.gameres)
         #win = StatusGame(self, self.screen_wh)
 
     def __accion_connecting_players_server(self, con_players, valor):
