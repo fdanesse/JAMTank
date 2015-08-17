@@ -38,22 +38,32 @@ class CreateClientMode(gtk.Dialog):
         self.vbox.pack_start(self.create_client, True, True, 0)
         self.show_all()
 
-        self.servers = {}
-        self.listen_servers = False
+        self._servers = {}
+        self._listen_servers = False
+        self._update = False
 
         gobject.timeout_add(500, self.__run_listen)
 
     def __run_listen(self):
-        self.listen_servers = ListenServers()
-        self.listen_servers.connect("server", self.__update_servers)
-        self.listen_servers.new_handler_listen(True)
+        self._listen_servers = ListenServers()
+        self._listen_servers.connect("server", self.__update_servers)
+        self._listen_servers.new_handler_listen(True)
+        self._update = gobject.timeout_add(200, self.__update)
         return False
 
+    def __update(self):
+        t = time.time()
+        remove = []
+        for key in self._servers.keys():
+            if t - self._servers[key].get('time', 0) > 1.4:
+                remove.append(key)
+        for i in remove:
+            del(self._servers[i])
+        self.create_client.framejuegos.lista.update_servers(self._servers)
+        return bool(self._update)
+
     def __accion(self, widget, accion, server_dict, player_dict):
-        self.listen_servers.new_handler_listen(False)
-        self.listen_servers.disconnect_by_func(self.__update_servers)
-        del(self.listen_servers)
-        self.listen_servers = False
+        self.kill_all()
         self.emit("accion", accion, server_dict, player_dict)
         self.destroy()
 
@@ -62,14 +72,17 @@ class CreateClientMode(gtk.Dialog):
         del(_dict['ip'])
         del(_dict['z'])
         _dict['time'] = time.time()
-        remove = []
-        for key in self.servers.keys():
-            if _dict['time'] - self.servers[key].get('time', 0) > 1.4:
-                remove.append(key)
-        for ip in remove:
-            del(self.servers[ip])
-        self.servers[ip] = _dict
-        self.create_client.framejuegos.lista.update_servers(self.servers)
+        self._servers[ip] = _dict
+
+    def kill_all(self, widget=False):
+        if self._listen_servers:
+            self._listen_servers.disconnect_by_func(self.__update_servers)
+            self._listen_servers.new_handler_listen(False)
+            del(self._listen_servers)
+            self._listen_servers = False
+        if self._update:
+            gobject.source_remove(self._update)
+            self._update = False
 
 
 class CreateClient(gtk.EventBox):

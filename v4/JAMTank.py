@@ -275,6 +275,7 @@ class JAMTank(gtk.Window):
                     self.createclientmode.handler_disconnect(h)
             for h in self.handlers.get('createclientmode', []):
                 del(h)
+            self.createclientmode.kill_all()
             try:
                 self.createclientmode.destroy()
             except:

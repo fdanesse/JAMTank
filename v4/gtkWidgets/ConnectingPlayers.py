@@ -33,6 +33,13 @@ class ConnectingPlayers(gtk.Dialog):
         self.internal_widget.jugar.connect("clicked", self.__accion)
         self.vbox.pack_start(self.internal_widget, True, True, 0)
 
+        x = 0
+        items = []
+        while x < _dict['jugadores']:
+            items.append([None, "Esperando...", ""])
+            x = len(items)
+        self.internal_widget.framejugadores.jugadores.agregar_items(items)
+
         self.show_all()
 
         text = "Host: %s  Límite de Vidas: %s" % (
@@ -43,19 +50,15 @@ class ConnectingPlayers(gtk.Dialog):
         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, -1, rect.height)
         self.internal_widget.framemapa.mapaview.set_from_pixbuf(pixbuf)
 
-        items = []
-        for x in range(_dict['jugadores']):
-            pix = None
-            nom = "Esperando..."
-            items.append([pix, nom, ""])
-        self.internal_widget.framejugadores.jugadores.agregar_items(items)
-
     def __accion(self, widget):
         self.emit("accion", widget.get_label().lower())
         self.destroy()
 
     def update_playeres(self, servermodel, _dict):
-        self.internal_widget.framejugadores.jugadores.update_playeres(_dict)
+        items = []
+        for key in _dict.keys():
+            items.append([_dict[key]['tank'], _dict[key]['nick'], key])
+        self.internal_widget.framejugadores.jugadores.update_playeres(items)
 
     def play_enabled(self, servermodel, valor):
         self.internal_widget.jugar.set_sensitive(valor)
@@ -206,38 +209,29 @@ class NewLista(gtk.TreeView):
     def agregar_items(self, elementos):
         gobject.idle_add(self.__ejecutar_agregar_elemento, elementos)
 
-    def update_playeres(self, _dict):
-        #{'192.168.1.11': {'nick': 'flavio', 'tank': 't1.png'}}
-        news = _dict.keys()
+    def update_playeres(self, items):
         model = self.get_model()
-        # Los que no vienen en _dict, hay que quitarlos
-        remover = []
+        # Quitar los que no estan
+        ip_news = []
+        for item in items:
+            ip_news.append(item[-1])
         _iter = model.get_iter_first()
         while _iter:
             ip = model.get_value(_iter, 2)
-            if ip != "" and not (ip in news):
-                remover.append(_iter)
+            if ip != "" and not (ip in ip_news):
+                model.set_value(_iter, 0, None)
+                model.set_value(_iter, 1, "Esperando...")
+                model.set_value(_iter, 2, "")
             _iter = model.iter_next(_iter)
-        for item in reversed(remover):
-            model.remove(item)
-        # Todos los que vienen en _dict, deben estar en la lista
-        items = []
-        for key in news:
-            _iter = self.__buscar(key)
+        # Actualizar
+        for item in items:
+            pix, nick, ip = item
+            if pix:
+                pix = os.path.join(ROOTPATH, "Tanques", pix)
+            _iter = self.__buscar(ip)
             if _iter:
-                pixbuf = os.path.join(ROOTPATH, "Tanques",
-                    _dict[key].get('tank', ''))
-                if pixbuf:
-                    if os.path.exists(pixbuf):
-                        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(
-                            pixbuf, 50, -1)
-                        model.set_value(_iter, 0, pixbuf)
-                model.set_value(_iter, 1, _dict[key].get('nick', ''))
-                model.set_value(_iter, 2, key)
-            else:
-                pixbuf = os.path.join(ROOTPATH, "Tanques",
-                    _dict[key].get('tank', ''))
-                items.append([pixbuf, _dict[key].get('nick', ''), key])
-                # FIXME: Emitir sonido de conexión
-        if items:
-            self.agregar_items(items)
+                if os.path.exists(pix):
+                    pix = gtk.gdk.pixbuf_new_from_file_at_size(pix, 50, -1)
+                model.set_value(_iter, 0, pix)
+                model.set_value(_iter, 1, nick)
+                model.set_value(_iter, 2, ip)

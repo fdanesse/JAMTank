@@ -40,27 +40,33 @@ class ListenServers(gobject.GObject):
 
         gobject.GObject.__init__(self)
 
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.socket.bind(('', 10000))
-        self.listen_thread = False
+        self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self._socket.bind(('', 10000))
+        self._listen_thread = False
+        self._estado = False
         print "ListenServers Creado"
 
     def __handler_listen(self):
         print "ListenServers > Buscando Juegos en la Red..."
-        while bool(self.listen_thread):
-            mensaje, remote = self.socket.recvfrom(10000)
+        while self._estado:
+            mensaje, remote = self._socket.recvfrom(10000)
             data = pickle.loads(mensaje)
             #print >>sys.stderr, remote, 'Recibido: "%s"' % data
             self.emit("server", data)
 
     def new_handler_listen(self, reset):
         print "Activar ListenServers:", reset
-        if self.listen_thread:
-            terminate_thread(self.listen_thread)
-            del(self.listen_thread)
-            self.listen_thread = False
+        if self._estado:
+            self._estado = False
+        if self._listen_thread:
+            terminate_thread(self._listen_thread)
+            del(self._listen_thread)
+            self._listen_thread = False
         if reset:
-            self.listen_thread = threading.Thread(
+            self._estado = True
+            self._listen_thread = threading.Thread(
                 target=self.__handler_listen, args=[])
-            self.listen_thread.start()
+            self._listen_thread.start()
+        else:
+            self._socket.close()
