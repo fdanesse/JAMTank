@@ -48,14 +48,14 @@ class ServerModelGame(gobject.GObject):
     "play-enabled": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
         (gobject.TYPE_BOOLEAN, ))}
 
-    def __init__(self, _host, _dict, _nick_host, _tank_host):
+    def __init__(self, _host, _dict, _nick, _tank):
 
         gobject.GObject.__init__(self)
 
         self._host = _host
         self._dict = _dict  # jugadores, mapa, vidas
-        self._nick_host = _nick_host
-        self._tank_host = _tank_host
+        self._nick = _nick
+        self._tank = _tank
         self.server_thread = False
         self.server = False
         self.client = False
@@ -68,8 +68,8 @@ class ServerModelGame(gobject.GObject):
     def __handler_registro(self):
         new = {
             "register": {
-                "tank": "%s" % self._tank_host,
-                "nick": "%s" % self._nick_host,
+                "tank": "%s" % self._tank,
+                "nick": "%s" % self._nick,
                 },
             }
         self.client.enviar(new)
@@ -109,7 +109,7 @@ class ServerModelGame(gobject.GObject):
             return False
         new = dict(self._dict)
         new["ip"] = self._host
-        new["nickh"] = self._nick_host
+        new["nickh"] = self._nick
         message = "%s\n" % self.__make_anuncio(new)  # carga debe ser 150
         my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -131,8 +131,8 @@ class ServerModelGame(gobject.GObject):
         print "Registrando Cliente del host en el Servidor..."
         new = {
             "register": {
-                "tank": "%s" % self._tank_host,
-                "nick": "%s" % self._nick_host,
+                "tank": "%s" % self._tank,
+                "nick": "%s" % self._nick,
                 },
             }
         self.client.enviar(new)
@@ -200,7 +200,7 @@ class ServerModelGame(gobject.GObject):
             return False
 
         print "Server Corriendo: True"
-        print self._nick_host, "Ha Creado un Juego en la red"
+        print self._nick, "Ha Creado un Juego en la red"
 
         if self.__client_run():
             return True

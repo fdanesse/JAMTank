@@ -52,7 +52,6 @@ class JAMTank(gtk.Window):
         self.createclientmode = False
         self.connectingplayers = False
 
-        self.connect("delete-event", self.__salir)
         self.connect('key-press-event', self.__key_press_event)
         self.connect('key-release-event', self.__key_release_event)
         self.connect("realize", self.__do_realize)
@@ -329,14 +328,18 @@ class JAMTank(gtk.Window):
 
     def __salir(self, widget=None, event=None):
         self.__reset()
-        self.disconnect_by_func(self.__salir)
         self.disconnect_by_func(self.__key_press_event)
         self.disconnect_by_func(self.__key_release_event)
         self.disconnect_by_func(self.__do_realize)
-        gtk.main_quit()
-        sys.exit(0)
+        self.destroy()
+
+
+def salir(widget=None, event=None):
+    #gtk.main_quit()
+    sys.exit(0)
 
 
 if __name__ == "__main__":
-    JAMTank()
+    jamtank = JAMTank()
+    jamtank.connect("delete-event", salir)
     gtk.main()

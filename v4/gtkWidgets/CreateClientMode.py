@@ -60,6 +60,7 @@ class CreateClientMode(gtk.Dialog):
         for i in remove:
             del(self._servers[i])
         self.create_client.framejuegos.lista.update_servers(self._servers)
+
         return bool(self._update)
 
     def __accion(self, widget, accion, server_dict, player_dict):
@@ -142,6 +143,7 @@ class CreateClient(gtk.EventBox):
 
     def __update_server(self, lista, _dict):
         self.server = _dict
+        self.__change_nick(self.framenick.nick)
         self.__check_dict()
 
     def __do_realize(self, widget):
@@ -165,6 +167,7 @@ class CreateClient(gtk.EventBox):
         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, -1, rect.height)
         self.tanqueview.set_from_pixbuf(pixbuf)
         self.player['tanque'] = os.path.basename(path)
+        self.__change_nick(self.framenick.nick)
         self.__check_dict()
 
     def __accion(self, widget, accion):
@@ -383,3 +386,7 @@ class NewLista(gtk.TreeView):
                 # FIXME: Emitir sonido de conexión
         if items:
             self.agregar_items(items)
+        modelo, _iter = self.get_selection().get_selected()
+        if not _iter:
+            _dict = {}
+            self.emit('selected', _dict)

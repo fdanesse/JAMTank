@@ -19,14 +19,14 @@ class ClientModelGame(gobject.GObject):
         (gobject.TYPE_PYOBJECT, )),
     "play-run": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, [])}
 
-    def __init__(self, _host, _dict, _nick_host, _tank_host):
+    def __init__(self, _host, _dict, _nick, _tank):
 
         gobject.GObject.__init__(self)
 
         self._host = _host
         self._dict = _dict  # jugadores, mapa, vidas
-        self._nick_host = _nick_host
-        self._tank_host = _tank_host
+        self._nick = _nick
+        self._tank = _tank
         self.client = False
         self.juego = False
         self.eventos = []
@@ -36,8 +36,8 @@ class ClientModelGame(gobject.GObject):
     def __handler_registro(self):
         new = {
             "register": {
-                "tank": "%s" % self._tank_host,
-                "nick": "%s" % self._nick_host,
+                "tank": "%s" % self._tank,
+                "nick": "%s" % self._nick,
                 },
             }
         self.client.enviar(new)
@@ -57,8 +57,8 @@ class ClientModelGame(gobject.GObject):
         print "Registrando Cliente no host en el Servidor..."
         new = {
             "register": {
-                "tank": "%s" % self._tank_host,
-                "nick": "%s" % self._nick_host,
+                "tank": "%s" % self._tank,
+                "nick": "%s" % self._nick,
                 },
             }
         self.client.enviar(new)
