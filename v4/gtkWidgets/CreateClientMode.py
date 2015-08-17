@@ -48,7 +48,7 @@ class CreateClientMode(gtk.Dialog):
         self._listen_servers = ListenServers()
         self._listen_servers.connect("server", self.__update_servers)
         self._listen_servers.new_handler_listen(True)
-        self._update = gobject.timeout_add(200, self.__update)
+        self._update = gobject.timeout_add(300, self.__update)
         return False
 
     def __update(self):
@@ -143,7 +143,6 @@ class CreateClient(gtk.EventBox):
 
     def __update_server(self, lista, _dict):
         self.server = _dict
-        self.__change_nick(self.framenick.nick)
         self.__check_dict()
 
     def __do_realize(self, widget):
@@ -157,9 +156,6 @@ class CreateClient(gtk.EventBox):
         self.frametanque.lista.agregar_items(elementos)
 
     def __change_nick(self, widget):
-        nick = widget.get_text().replace('\n', '').replace('\r', '')
-        nick = nick.replace('*', '').replace(' ', '_').replace('|', '')
-        self.player['nick'] = nick
         self.__check_dict()
 
     def __seleccion_tanque(self, widget, path):
@@ -167,13 +163,16 @@ class CreateClient(gtk.EventBox):
         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, -1, rect.height)
         self.tanqueview.set_from_pixbuf(pixbuf)
         self.player['tanque'] = os.path.basename(path)
-        self.__change_nick(self.framenick.nick)
         self.__check_dict()
 
     def __accion(self, widget, accion):
         self.emit("accion", accion, dict(self.server), dict(self.player))
 
     def __check_dict(self):
+        nick = self.framenick.nick.get_text().replace(
+            '\n', '').replace('\r', '')
+        nick = nick.replace('*', '').replace(' ', '_').replace('|', '')
+        self.player['nick'] = nick
         valor = True
         for item in self.player.items():
             if not item[1]:
@@ -323,6 +322,10 @@ class NewLista(gtk.TreeView):
 
     def __ejecutar_agregar_elemento(self, elementos):
         if not elementos:
+            model, _iter = self.get_selection().get_selected()
+            if not _iter:
+                _iter = model.get_iter_first()
+            self.get_selection().select_iter(_iter)
             return False
         pixbuf, mappath, nick, jugadores, vidas, ip = elementos[0]
         if pixbuf:

@@ -191,28 +191,3 @@ class Lista(gtk.TreeView):
 
     def seleccionar_primero(self, widget=None):
         self.get_selection().select_path(0)
-
-'''
-class IpFrame(gtk.Frame):
-
-    def __init__(self):
-
-        gtk.Frame.__init__(self)
-
-        self.set_label(" Ip Local: 192.168.1.1  ")
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
-        event = gtk.EventBox()
-        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
-        event.set_border_width(4)
-
-        hbox = gtk.HBox()
-        self.serverip = gtk.Entry()
-        #self.serverip.connect("changed", self.__change_ip)
-        #self.serverip.set_size_request(100, -1)
-        hbox.pack_start(gtk.Label("Ip del Servidor:"), False, False, 5)
-        hbox.pack_end(self.serverip, True, True, 0)
-
-        event.add(hbox)
-        self.add(event)
-        self.show_all()
-'''
