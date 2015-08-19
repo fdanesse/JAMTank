@@ -19,7 +19,7 @@ class Juego(gobject.GObject):
     #"end": (gobject.SIGNAL_RUN_LAST,
     #    gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT, )),
     "exit": (gobject.SIGNAL_RUN_LAST,
-        gobject.TYPE_NONE, [])}
+        gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT, ))}
 
     def __init__(self):
 
@@ -35,6 +35,7 @@ class Juego(gobject.GObject):
         self._time = 35
 
         self._jugador = False
+        self._data_game_players = {}
 
         self._jugadores = pygame.sprite.RenderUpdates()
         self._balas = pygame.sprite.RenderUpdates()
@@ -66,10 +67,11 @@ class Juego(gobject.GObject):
         if _dict.get("off", False):
             self._estado = False
         else:
-            if _dict.get("ingame", False):
-                # FIXME: Realizar aca el Chequeo de Colisiones
-                _dict = dict(_dict["ingame"])
-                self._jugadores.update(_dict)
+            new = dict(_dict["ingame"])
+            # FIXME: Realizar aca el Chequeo de Colisiones
+            for key in new.keys():
+                self._data_game_players[key] = new[key]
+            #self._jugadores.update(new)
 
     def run(self):
         print "Comenzando a Correr el juego..."
@@ -116,7 +118,7 @@ class Juego(gobject.GObject):
             #    self._estado = False
 
         pygame.quit()
-        self.emit('exit')
+        self.emit('exit', self._data_game_players)
 
     def update_events(self, eventos):
         if "Escape" in eventos:

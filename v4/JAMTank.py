@@ -136,6 +136,8 @@ class JAMTank(gtk.Window):
                 player_dict.get('tanque', ''))
             _id = self.clientmodel.connect("error", self.__switch, 4)
             self.handlers['clientmodel'].append(_id)
+            _id = self.clientmodel.connect("end-game", self.__end_game)
+            self.handlers['clientmodel'].append(_id)
             if self.clientmodel.client_run():
                 self.connectingplayers = ConnectingPlayers(
                     self, nickh, server_dict)
@@ -170,6 +172,8 @@ class JAMTank(gtk.Window):
                 _dict.get('tanque', ''))
             _id = self.servermodel.connect("error", self.__switch, 3)
             self.handlers['servermodel'].append(_id)
+            _id = self.servermodel.connect("end-game", self.__end_game)
+            self.handlers['servermodel'].append(_id)
             if self.servermodel.server_run():
                 self.connectingplayers = ConnectingPlayers(self,
                     _dict.get('nick', 'JAMTank'), new_dict)
@@ -189,6 +193,12 @@ class JAMTank(gtk.Window):
                 print "FIXME:", self.__accion_create_server
         elif accion == "salir":
             self.__switch(False, 1)
+
+    def __end_game(self, modelgame, _dict):
+        print "Juego Terminado:"
+        for item in _dict.items():
+            print "\t", item
+        self.__switch(False, 1)
 
     def __play_run(self, client_model):
         self.clientmodel.new_handler_registro(False)

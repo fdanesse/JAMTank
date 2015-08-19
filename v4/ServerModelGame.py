@@ -46,7 +46,9 @@ class ServerModelGame(gobject.GObject):
     "players": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
         (gobject.TYPE_PYOBJECT, )),
     "play-enabled": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
-        (gobject.TYPE_BOOLEAN, ))}
+        (gobject.TYPE_BOOLEAN, )),
+    "end-game": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
+        (gobject.TYPE_PYOBJECT, ))}
 
     def __init__(self, _host, _dict, _nick, _tank):
 
@@ -216,10 +218,10 @@ class ServerModelGame(gobject.GObject):
         # registro de los jugadores. Si hay un juego corriendo todo cae.
         if self.client:
             time.sleep(0.5)
-            new = {"register": {"off": True}}
+            new = {"ingame": True, "off": True}
             self.client.enviar(new)
             _dict = self.client.recibir(dict(self.default_retorno))
-            print "ServerModel recibe:", _dict
+            print "ServerModel close_all_and_exit recibe:", _dict
             time.sleep(0.5)
 
         self.__kill_client()
@@ -264,18 +266,16 @@ class ServerModelGame(gobject.GObject):
         self.juego.load(mapa, tanque, self._nick)
         self.juego.run()
 
-    def __exit_game(self, game):
+    def __exit_game(self, game, _dict):
         if self.juego:
             self.juego.disconnect_by_func(self.__exit_game)
             del(self.juego)
             self.juego = False
             time.sleep(0.5)
-            new = {"ingame": {"off": True}}
+            new = {"ingame": True, "off": True}
             self.client.enviar(new)
-            _dict = self.client.recibir(dict(self.default_retorno))
-            print "ServerModel Saliendo del Juego recibe:", _dict
+            new = self.client.recibir(dict(self.default_retorno))
             time.sleep(0.5)
         self.__kill_client()
         #self.__kill_server()
-        # Fixme: agregar se;al para hacer esto
-        self.emit("error")
+        self.emit("end-game", _dict)

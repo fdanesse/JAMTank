@@ -4,7 +4,7 @@
 import os
 import gobject
 import gtk
-
+import time
 from Network.Client import Client
 from Juego.Juego import Juego
 
@@ -17,7 +17,9 @@ class ClientModelGame(gobject.GObject):
     "error": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, []),
     "players": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
         (gobject.TYPE_PYOBJECT, )),
-    "play-run": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, [])}
+    "play-run": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, []),
+    "end-game": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
+        (gobject.TYPE_PYOBJECT, ))}
 
     def __init__(self, _host, _dict, _nick, _tank):
 
@@ -144,10 +146,11 @@ class ClientModelGame(gobject.GObject):
         self.juego.load(mapa, tanque, self._nick)
         self.juego.run()
 
-    def __exit_game(self, game):
+    def __exit_game(self, game, _dict):
         if self.juego:
             self.juego.disconnect_by_func(self.__exit_game)
             del(self.juego)
             self.juego = False
-        # Fixme: agregar se;al para hacer esto
-        self.emit("error")
+            time.sleep(0.5)
+        self.__kill_client()
+        self.emit("end-game", _dict)

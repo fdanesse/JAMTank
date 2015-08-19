@@ -67,7 +67,6 @@ class RequestHandler(SocketServer.StreamRequestHandler):
             if _dict.get("register", False):
                 ret = self.server.registrar(ip, _dict)
             elif _dict.get("ingame", False):
-                print "Servidor Recibe:", _dict
                 ret = self.server.ingame(ip, _dict)
             else:
                 print "No Implementado Server Recibe:", entrada
@@ -139,7 +138,7 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
 
         if ip == self.ip:
             if _dict["register"].get("off", False):
-                print "Server Recibe register off"
+                print "Server Recibe register off:", _dict
                 self._dict_game["jugadores"] = 0
                 self._players_dict = {}
 
@@ -161,16 +160,16 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
     def ingame(self, ip, _dict):
         self.__timer_control_players(ip)
         if ip == self.ip:
-            if _dict["ingame"].get("off", False):
+            if _dict.get("off", False):
                 # El host quiere salir, manda desconectar a todos
                 self._dict_game['run'] = False
             else:
                 # Anuncia inicio del juego a quienes estan en fase de registro
                 self._dict_game['run'] = True
-        new = {"ingame": {"off": True}}
+        new = {"ingame": True, "off": True}
         if self._dict_game['run']:
             # Persistencia de datos del juego
-            _dict = _dict["ingame"]
+            _dict = dict(_dict["ingame"])
             for key in _dict.keys():
                 self._players_dict[ip][key] = _dict[key]
             new = {"ingame": dict(self._players_dict)}
