@@ -10,7 +10,6 @@ import os
 import sys
 import gtk
 
-from gtkWidgets.SelectWidgets import DialogoSalir
 from gtkWidgets.SelectMode import SelectMode
 from gtkWidgets.StatusGame import StatusGame
 from gtkWidgets.CreateServerMode import CreateServerMode
@@ -92,15 +91,13 @@ class JAMTank(gtk.Window):
         elif valor == "creditos":
             self.__switch(False, 5)
         elif valor == "salir":
-            self.__salir()
+            self.destroy()
 
     def __switch(self, widget, valor):
         self.__reset()  # Necesario
         if valor == 1:
             # Selección de tipo de juego
             self.selectmode = SelectMode(self)
-            #_id = self.selectmode.connect("close", self.__salir)
-            #self.handlers['selectmode'].append(_id)
             _id = self.selectmode.connect("switch", self.__select_mode)
             self.handlers['selectmode'].append(_id)
         elif valor == 2:
@@ -251,11 +248,7 @@ class JAMTank(gtk.Window):
         self.servermodel = False
 
     def __key_press_event(self, widget, event):
-        if self.selectmode:
-            if gtk.gdk.keyval_name(event.keyval) == "Escape":
-                self.__salir()
-                return False
-        elif self.servermodel:
+        if self.servermodel:
             self.servermodel.process_key_press(event)
         elif self.clientmodel:
             self.clientmodel.process_key_press(event)
@@ -326,20 +319,6 @@ class JAMTank(gtk.Window):
         self.handlers['clientmodel'] = []
         del(self.connectingplayers)
         self.connectingplayers = False
-
-    def __salir(self, widget=None, event=None):
-        dialog = DialogoSalir(parent=self,
-            text="¿Confirmas que Deseas Salir de JAMTank?")
-        ret = dialog.run()
-        dialog.destroy()
-        if ret == gtk.RESPONSE_ACCEPT:
-            self.__reset()
-            self.disconnect_by_func(self.__key_press_event)
-            self.disconnect_by_func(self.__key_release_event)
-            self.disconnect_by_func(self.__do_realize)
-            self.destroy()
-        elif ret == gtk.RESPONSE_CANCEL:
-            self.__switch(False, 1)
 
 
 def salir(widget=None, event=None):

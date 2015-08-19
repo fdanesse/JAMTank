@@ -3,10 +3,10 @@
 
 import gtk
 import gobject
+from gtkWidgets.SelectWidgets import DialogoSalir
 
 
-#FIXME: Analizar si no es mejor un dialog
-class SelectMode(gtk.Dialog):
+class SelectMode(gtk.Window):
 
     __gsignals__ = {
     "switch": (gobject.SIGNAL_RUN_LAST,
@@ -14,8 +14,7 @@ class SelectMode(gtk.Dialog):
 
     def __init__(self, top):
 
-        #gtk.Window.__init__(self, gtk.WINDOW_POPUP)
-        gtk.Dialog.__init__(self)
+        gtk.Window.__init__(self, gtk.WINDOW_POPUP)
 
         self.set_resizable(False)
         self.set_position(3)
@@ -24,18 +23,25 @@ class SelectMode(gtk.Dialog):
         self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_transient_for(top)
 
-        for child in self.vbox.get_children():
-            self.vbox.remove(child)
-            child.destroy()
         child = IntroWidget()
-        self.vbox.pack_start(child, True, True, 0)
+        self.add(child)
         self.show_all()
 
         child.connect("switch", self.__emit_switch)
-        self.connect("close", self.__emit_switch, "salir")
 
     def __emit_switch(self, widget, valor):
-        self.emit("switch", valor)
+        if valor == "salir":
+            self.hide()
+            dialog = DialogoSalir(parent=self,
+                text="¿Confirmas que Deseas Salir de JAMTank?")
+            ret = dialog.run()
+            dialog.destroy()
+            if ret == gtk.RESPONSE_ACCEPT:
+                self.emit("switch", valor)
+            else:
+                self.show()
+        else:
+            self.emit("switch", valor)
 
 
 class IntroWidget(gtk.Table):
@@ -49,8 +55,6 @@ class IntroWidget(gtk.Table):
         gtk.Table.__init__(self, rows=7, columns=3, homogeneous=True)
 
         self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
-        #self.imagen = False
-        #self.temp_path = "/dev/shm/jamtank_intro_img.png"
 
         boton = gtk.Button("Jugar Solo")
         boton.connect("clicked", self.__emit_switch, "solo")
@@ -76,30 +80,5 @@ class IntroWidget(gtk.Table):
 
         self.show_all()
 
-    #def __do_draw(self, widget, event):
-    #    context = widget.window.cairo_create()
-    #    rect = self.get_allocation()
-    #    src = self.imagen
-    #    dst = gtk.gdk.pixbuf_new_from_file_at_size(
-    #        self.temp_path, rect.width, rect.height)
-    #    gtk.gdk.Pixbuf.scale(src, dst, 0, 0, 100, 100, 0, 0, 1.5, 1.5,
-    #        0) #GdkPixbuf.InterpType.BILINEAR
-    #    x = rect.width / 2 - dst.get_width() / 2
-    #    y = rect.height / 2 - dst.get_height() / 2
-    #    context.set_source_pixbuf(dst, x, y)
-    #    context.paint()
-    #    return True
-
     def __emit_switch(self, widget, valor):
         self.emit("switch", valor)
-
-    #def load(self, path):
-    #    """
-    #    Carga una imagen para pintar el fondo.
-    #    """
-    #    if path:
-    #        if os.path.exists(path):
-    #            self.imagen = gtk.gdk.pixbuf_new_from_file(path)
-    #            self.imagen.save(self.temp_path, "png")#, [], [])
-    #            self.set_size_request(-1, -1)
-    #    self.connect("expose-event", self.__do_draw)
