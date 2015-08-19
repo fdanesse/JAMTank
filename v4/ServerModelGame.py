@@ -166,7 +166,7 @@ class ServerModelGame(gobject.GObject):
             self.client = False
 
     def __client_error(self, client, valor):
-        print valor
+        print "Error del Cliente recibido en ServerModel", valor
         self.emit("error")
 
     def new_handler_anuncio(self, reset):
@@ -198,10 +198,7 @@ class ServerModelGame(gobject.GObject):
             print "EL Servidor no pudo Iniciar."
             self.emit("error")
             return False
-
-        print "Server Corriendo: True"
         print self._nick, "Ha Creado un Juego en la red"
-
         if self.__client_run():
             return True
         else:
@@ -215,8 +212,8 @@ class ServerModelGame(gobject.GObject):
         self.new_handler_anuncio(False)
         self.new_handler_registro(False)
 
-        # FIXME: Terminar juego
-
+        # FIXME: Cuidado, no llamar a esta funcion si no se esta en fase de
+        # registro de los jugadores. Si hay un juego corriendo todo cae.
         if self.client:
             time.sleep(0.5)
             new = {"register": {"off": True}}
@@ -272,5 +269,13 @@ class ServerModelGame(gobject.GObject):
             self.juego.disconnect_by_func(self.__exit_game)
             del(self.juego)
             self.juego = False
-        # FIXME: El servidor debe desconectar a los clientes
+            time.sleep(0.5)
+            new = {"ingame": {"off": True}}
+            self.client.enviar(new)
+            _dict = self.client.recibir(dict(self.default_retorno))
+            print "ServerModel Saliendo del Juego recibe:", _dict
+            time.sleep(0.5)
+        self.__kill_client()
+        #self.__kill_server()
+        # Fixme: agregar se;al para hacer esto
         self.emit("error")

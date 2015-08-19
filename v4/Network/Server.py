@@ -67,11 +67,12 @@ class RequestHandler(SocketServer.StreamRequestHandler):
             if _dict.get("register", False):
                 ret = self.server.registrar(ip, _dict)
             elif _dict.get("ingame", False):
+                print "Servidor Recibe:", _dict
                 ret = self.server.ingame(ip, _dict)
             else:
-                print "Server Recibe:", entrada
+                print "No Implementado Server Recibe:", entrada
         except:
-            print "Server Error:"
+            print "Server Error:", entrada
         return self.__make_resp(ret)
 
     def __make_resp(self, new):
@@ -124,7 +125,8 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
 
     def __registrar(self, ip, _dict):
         self._players_dict[ip] = dict(_dict["register"])
-        self._dict_game["todos"] = bool(len(self._players_dict.keys()) == self._dict_game["jugadores"])
+        self._dict_game["todos"] = bool(
+            len(self._players_dict.keys()) == self._dict_game["jugadores"])
         if _dict.get("register", False):
             del(_dict["register"])
         _dict["aceptado"] = True
@@ -135,10 +137,11 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
     def registrar(self, ip, _dict):
         self.__timer_control_players(ip)
 
-        if _dict["register"].get("off", False):
-            print "Server Recibe off"
-            self._dict_game["jugadores"] = 0
-            self._players_dict = {}
+        if ip == self.ip:
+            if _dict["register"].get("off", False):
+                print "Server Recibe register off"
+                self._dict_game["jugadores"] = 0
+                self._players_dict = {}
 
         permitidos = self._dict_game["jugadores"]
         new = {}
@@ -151,17 +154,32 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
                 print "Servidor Registrando un nuevo jugador:", ip, _dict
                 new = self.__registrar(ip, _dict)
             else:
-                # Este jugador no puede jugar, el juego está cerrado a nuevas ips.
+                # Este jugador no jugara, el juego está cerrado a nuevas ips.
                 new["aceptado"] = False
         return new
 
     def ingame(self, ip, _dict):
         self.__timer_control_players(ip)
-        #FIXME: Guardar _dict
         if ip == self.ip:
-            # Anuncia inicio del juego a quienes estan en fase de registro
-            self._dict_game['run'] = True
-        new = {"ingame": {"players": dict(self._players_dict)}}
+            if _dict["ingame"].get("off", False):
+                # El host quiere salir, manda desconectar a todos
+                print "Server Recibe ingame off"
+                self._dict_game['run'] = False
+            else:
+                # Anuncia inicio del juego a quienes estan en fase de registro
+                self._dict_game['run'] = True
+        new = {"ingame": {"off": True}}
+        if self._dict_game['run']:
+            # Persistencia de datos del juego
+            _dict = _dict["ingame"]
+            for key in _dict.keys():
+                self._players_dict[ip][key] = _dict[key]
+            new = {"ingame": dict(self._players_dict)}
+        else:
+            # El host manda salir
+            new = {
+                "ingame": dict(self._players_dict),
+                "off": True}
         return new
 
     def shutdown(self):

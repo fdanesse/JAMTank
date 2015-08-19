@@ -30,7 +30,7 @@ class Client(gobject.GObject):
         try:
             self.socket.connect(self.dir)
             #self.socket.setblocking(0)
-            self.rfile = self.socket.makefile("rwb") #, bufsize=1024
+            self.rfile = self.socket.makefile("rwb")  #, bufsize=1024
             self.rfile.flush()
             time.sleep(0.5)
             return True
@@ -48,14 +48,14 @@ class Client(gobject.GObject):
         except:
             pass
 
-    def enviar(self, message):
+    def enviar(self, _dict):
         """
         Escribe un diccionario convertido a str y con la terminacion "\n"
         """
         enviado = False
         while not enviado:
             try:
-                self.rfile.write("%s%s" % (message, T))
+                self.rfile.write("%s%s" % (_dict, T))
                 self.rfile.flush()
                 enviado = True
             except socket.error, err:

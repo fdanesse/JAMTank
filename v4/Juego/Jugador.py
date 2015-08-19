@@ -69,8 +69,8 @@ class Jugador(Sprite):
         x = int(cos(radianes) * VELOCIDAD)
         y = int(sin(radianes) * VELOCIDAD)
         return x, y
-    '''
 
+    '''
     def __actualizar_posicion(self):
         """
         Cambia la posicion del rectangulo.
@@ -86,6 +86,7 @@ class Jugador(Sprite):
             self._temp_y += self._dy
             self._temp_x = int(self._temp_x)
             self._temp_y = int(self._temp_y)
+    '''
 
     def __set_posicion(self, angulo=0, centerx=0, centery=0):
         """
@@ -109,8 +110,18 @@ class Jugador(Sprite):
         """
         Solo Jugador Local.
         """
-        return (int(self._temp_angulo), int(self._temp_x), int(self._temp_y))
+        _dict = {
+            "ang": int(self._temp_angulo),
+            "x": int(self._temp_x),
+            "y": int(self._temp_y),
+            }
+        return _dict
 
+    def update(self, _dict):
+        #print "Jugador Recibe:", _dict
+        pass
+
+    '''
     def update_data(self, tanque, angulo=0, centerx=0, centery=0):
         if self.imagen_path != tanque:
             self.imagen_path = tanque

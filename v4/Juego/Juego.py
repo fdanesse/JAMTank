@@ -6,7 +6,6 @@ import pygame
 import random
 import gobject
 import gtk
-import time
 from Jugador import Jugador
 
 RES = (800, 600)
@@ -47,14 +46,30 @@ class Juego(gobject.GObject):
 
     def __enviar_datos(self):
         if self._client:
-            _dict = {"ingame": {"nada": ""}}
+            if self._jugador:
+                _dict = {"ingame": self._jugador.get_datos()}
+            else:
+                _dict = {
+                    "ingame": {
+                        "ang": 0,
+                        "x": 0,
+                        "y": 0}
+                    }
             self._client.enviar(_dict)
 
     def __recibir_datos(self):
         if self._client:
             _dict = self._client.recibir(dict(self._default_retorno))
-            self._default_retorno = _dict
-            #print "Juego Recibe:", _dict
+        return _dict
+
+    def __update(self, _dict):
+        if _dict.get("off", False):
+            self._estado = False
+        else:
+            if _dict.get("ingame", False):
+                # FIXME: Realizar aca el Chequeo de Colisiones
+                _dict = dict(_dict["ingame"])
+                self._jugadores.update(_dict)
 
     def run(self):
         print "Comenzando a Correr el juego..."
@@ -78,7 +93,8 @@ class Juego(gobject.GObject):
             #    los nuevos datos deben enviarse al server
 
             self.__enviar_datos()
-            self.__recibir_datos()
+            _dict = self.__recibir_datos()
+            self.__update(_dict)
 
             #Con los datos recibidos se actualizan todos los objetos
 
@@ -118,8 +134,9 @@ class Juego(gobject.GObject):
         #self.sound_disparo = pygame.mixer.Sound(disparo)
         #explosion = os.path.join(path, "Audio", "explosion.ogg")
         #self.sound_explosion = pygame.mixer.Sound(explosion)
-        self._jugador = Jugador(self._res, self._client.ip, tank, nick)
-        self._jugadores.add(self._jugador)
+        #print "Cargando Jugador:", nick, tank
+        #self._jugador = Jugador(self._res, self._client.ip, tank, nick)
+        #self._jugadores.add(self._jugador)
 
     def config(self, time=35, res=(800, 600), client=False, xid=False):
         print "Configurando Juego:"

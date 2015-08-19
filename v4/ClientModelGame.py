@@ -80,7 +80,7 @@ class ClientModelGame(gobject.GObject):
             self.client = False
 
     def __client_error(self, client, valor):
-        print valor
+        print "Error del Cliente recibido en ClientModel", valor
         self.emit("error")
 
     def new_handler_registro(self, reset):
@@ -103,7 +103,6 @@ class ClientModelGame(gobject.GObject):
 
     def close_all_and_exit(self):
         self.new_handler_registro(False)
-        # FIXME: Terminar juego
         self.__kill_client()
 
     def process_key_press(self, event):
@@ -123,7 +122,6 @@ class ClientModelGame(gobject.GObject):
             self.juego.update_events(self.eventos)
         else:
             if nombre == "Escape":
-                print "MAL"
                 self.emit("error")
 
     def process_key_release(self, event):
@@ -151,4 +149,5 @@ class ClientModelGame(gobject.GObject):
             self.juego.disconnect_by_func(self.__exit_game)
             del(self.juego)
             self.juego = False
+        # Fixme: agregar se;al para hacer esto
         self.emit("error")
