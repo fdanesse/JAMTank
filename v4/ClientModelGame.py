@@ -103,6 +103,7 @@ class ClientModelGame(gobject.GObject):
 
     def close_all_and_exit(self):
         self.new_handler_registro(False)
+        # FIXME: Terminar juego
         self.__kill_client()
 
     def process_key_press(self, event):
@@ -141,7 +142,8 @@ class ClientModelGame(gobject.GObject):
         self.juego = Juego()
         self.juego.connect("exit", self.__exit_game)
         self.juego.config(time=35, res=res, client=self.client, xid=xid)
-        self.juego.load(mapa)
+        tanque = os.path.join(BASE_PATH, "Tanques", self._tank)
+        self.juego.load(mapa, tanque, self._nick)
         self.juego.run()
 
     def __exit_game(self, game):

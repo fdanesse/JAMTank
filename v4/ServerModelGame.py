@@ -215,6 +215,8 @@ class ServerModelGame(gobject.GObject):
         self.new_handler_anuncio(False)
         self.new_handler_registro(False)
 
+        # FIXME: Terminar juego
+
         if self.client:
             time.sleep(0.5)
             new = {"register": {"off": True}}
@@ -261,7 +263,8 @@ class ServerModelGame(gobject.GObject):
         self.juego = Juego()
         self.juego.connect("exit", self.__exit_game)
         self.juego.config(time=35, res=res, client=self.client, xid=xid)
-        self.juego.load(mapa)
+        tanque = os.path.join(BASE_PATH, "Tanques", self._tank)
+        self.juego.load(mapa, tanque, self._nick)
         self.juego.run()
 
     def __exit_game(self, game):

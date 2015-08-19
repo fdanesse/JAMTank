@@ -7,9 +7,9 @@ import random
 import gobject
 import gtk
 import time
+from Jugador import Jugador
 
 RES = (800, 600)
-BASE_PATH = os.path.realpath(os.path.dirname(__file__))
 
 
 class Juego(gobject.GObject):
@@ -35,11 +35,13 @@ class Juego(gobject.GObject):
         self._client = False
         self._time = 35
 
+        self._jugador = False
+
         self._jugadores = pygame.sprite.RenderUpdates()
         self._balas = pygame.sprite.RenderUpdates()
         self._explosiones = pygame.sprite.RenderUpdates()
 
-        self.default_retorno = {"ingame": {"players": {}}}
+        self._default_retorno = {"ingame": {"players": {}}}
 
         print "Nuevo Juego Creado"
 
@@ -50,8 +52,8 @@ class Juego(gobject.GObject):
 
     def __recibir_datos(self):
         if self._client:
-            _dict = self._client.recibir(dict(self.default_retorno))
-            self.default_retorno = _dict
+            _dict = self._client.recibir(dict(self._default_retorno))
+            self._default_retorno = _dict
             #print "Juego Recibe:", _dict
 
     def run(self):
@@ -104,7 +106,7 @@ class Juego(gobject.GObject):
         if "Escape" in eventos:
             self._estado = False
 
-    def load(self, mapa):
+    def load(self, mapa, tank, nick):
         print "Cargando mapa:", mapa
         imagen = pygame.image.load(mapa)
         self._escenario = pygame.transform.scale(imagen, RES).convert_alpha()
@@ -116,9 +118,8 @@ class Juego(gobject.GObject):
         #self.sound_disparo = pygame.mixer.Sound(disparo)
         #explosion = os.path.join(path, "Audio", "explosion.ogg")
         #self.sound_explosion = pygame.mixer.Sound(explosion)
-        #self.jugador = Jugador(self.JUGADORES[self.ip]["tanque"],
-        #    RES, self.ip)
-        #self._jugadores.add(self.jugador)
+        self._jugador = Jugador(self._res, self._client.ip, tank, nick)
+        self._jugadores.add(self._jugador)
 
     def config(self, time=35, res=(800, 600), client=False, xid=False):
         print "Configurando Juego:"

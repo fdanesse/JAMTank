@@ -22,7 +22,8 @@ class Client(gobject.GObject):
         gobject.GObject.__init__(self)
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.dir = (ip, 5000)
+        self.ip = ip
+        self.dir = (self.ip, 5000)
         self.rfile = False
 
     def conectarse(self):
