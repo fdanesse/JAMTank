@@ -209,9 +209,6 @@ class JAMTank(gtk.Window):
             self.__switch(False, 3)
 
     def __accion_connecting_players_client(self, con_players, valor):
-        #if valor == "jugar":
-        #    print "connecting_players_client recibe jugar"
-        #elif valor == "cancelar":
         if valor == "cancelar":
             self.__switch(False, 4)
 
@@ -322,7 +319,7 @@ class JAMTank(gtk.Window):
 
 
 def salir(widget=None, event=None):
-    #gtk.main_quit()
+    gtk.main_quit()
     sys.exit(0)
 
 

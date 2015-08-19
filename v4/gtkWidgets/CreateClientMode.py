@@ -5,7 +5,6 @@ import os
 import gtk
 import gobject
 import time
-
 from SelectWidgets import Lista
 from Network.ListenServers import ListenServers
 

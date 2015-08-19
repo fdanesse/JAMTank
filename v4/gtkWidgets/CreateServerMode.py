@@ -4,7 +4,6 @@
 import os
 import gtk
 import gobject
-
 from SelectWidgets import Lista
 from SelectWidgets import OponentesSelectBox
 from Globales import get_ip
@@ -37,8 +36,6 @@ class CreateServerMode(gtk.Dialog):
         create_server.connect("accion", self.__accion)
         self.vbox.pack_start(create_server, True, True, 0)
         self.show_all()
-
-        #self.connect("close", self.__accion, "salir", False)
 
     def __accion(self, widget, accion, _dict):
         self.emit("accion", accion, _dict)
@@ -200,6 +197,7 @@ class FrameMapa(gtk.Frame):
         event.add(scroll)
 
         self.show_all()
+
 
 class FrameTanque(gtk.Frame):
 
