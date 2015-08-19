@@ -10,6 +10,7 @@ import os
 import sys
 import gtk
 
+from gtkWidgets.SelectWidgets import DialogoSalir
 from gtkWidgets.SelectMode import SelectMode
 from gtkWidgets.StatusGame import StatusGame
 from gtkWidgets.CreateServerMode import CreateServerMode
@@ -98,8 +99,8 @@ class JAMTank(gtk.Window):
         if valor == 1:
             # Selección de tipo de juego
             self.selectmode = SelectMode(self)
-            _id = self.selectmode.connect("close", self.__salir)
-            self.handlers['selectmode'].append(_id)
+            #_id = self.selectmode.connect("close", self.__salir)
+            #self.handlers['selectmode'].append(_id)
             _id = self.selectmode.connect("switch", self.__select_mode)
             self.handlers['selectmode'].append(_id)
         elif valor == 2:
@@ -327,11 +328,18 @@ class JAMTank(gtk.Window):
         self.connectingplayers = False
 
     def __salir(self, widget=None, event=None):
-        self.__reset()
-        self.disconnect_by_func(self.__key_press_event)
-        self.disconnect_by_func(self.__key_release_event)
-        self.disconnect_by_func(self.__do_realize)
-        self.destroy()
+        dialog = DialogoSalir(parent=self,
+            text="¿Confirmas que Deseas Salir de JAMTank?")
+        ret = dialog.run()
+        dialog.destroy()
+        if ret == gtk.RESPONSE_ACCEPT:
+            self.__reset()
+            self.disconnect_by_func(self.__key_press_event)
+            self.disconnect_by_func(self.__key_release_event)
+            self.disconnect_by_func(self.__do_realize)
+            self.destroy()
+        elif ret == gtk.RESPONSE_CANCEL:
+            self.__switch(False, 1)
 
 
 def salir(widget=None, event=None):

@@ -32,10 +32,10 @@ class SelectMode(gtk.Dialog):
         self.show_all()
 
         child.connect("switch", self.__emit_switch)
+        self.connect("close", self.__emit_switch, "salir")
 
     def __emit_switch(self, widget, valor):
         self.emit("switch", valor)
-        self.destroy()
 
 
 class IntroWidget(gtk.Table):

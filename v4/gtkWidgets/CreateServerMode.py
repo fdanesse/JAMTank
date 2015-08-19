@@ -38,9 +38,10 @@ class CreateServerMode(gtk.Dialog):
         self.vbox.pack_start(create_server, True, True, 0)
         self.show_all()
 
+        #self.connect("close", self.__accion, "salir", False)
+
     def __accion(self, widget, accion, _dict):
         self.emit("accion", accion, _dict)
-        self.destroy()
 
 
 class CreateServer(gtk.EventBox):

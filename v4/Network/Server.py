@@ -163,7 +163,6 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         if ip == self.ip:
             if _dict["ingame"].get("off", False):
                 # El host quiere salir, manda desconectar a todos
-                print "Server Recibe ingame off"
                 self._dict_game['run'] = False
             else:
                 # Anuncia inicio del juego a quienes estan en fase de registro
