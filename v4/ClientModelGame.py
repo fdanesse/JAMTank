@@ -38,8 +38,8 @@ class ClientModelGame(gobject.GObject):
     def __handler_registro(self):
         new = {
             "register": {
-                "tank": "%s" % self._tank,
-                "nick": "%s" % self._nick,
+                "t": "%s" % self._tank,
+                "n": "%s" % self._nick,
                 },
             }
         self.client.enviar(new)
@@ -59,8 +59,8 @@ class ClientModelGame(gobject.GObject):
         print "Registrando Cliente no host en el Servidor..."
         new = {
             "register": {
-                "tank": "%s" % self._tank,
-                "nick": "%s" % self._nick,
+                "t": "%s" % self._tank,
+                "n": "%s" % self._nick,
                 },
             }
         self.client.enviar(new)
@@ -138,7 +138,7 @@ class ClientModelGame(gobject.GObject):
 
     def rungame(self, xid, res):
         # Debe comenzar a correr en menos de 1.5 segundos
-        mapa = os.path.join(BASE_PATH, "Mapas", self._dict.get('mapa', ''))
+        mapa = os.path.join(BASE_PATH, "Mapas", self._dict.get("mapa", ""))
         self.juego = Juego()
         self.juego.connect("exit", self.__exit_game)
         self.juego.config(time=35, res=res, client=self.client, xid=xid)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import pygame
 from math import sin
 from math import cos
@@ -42,9 +43,13 @@ class Jugador(Sprite):
 
     def __derecha(self):
         self._temp_angulo += int(0.7 * INDICE_ROTACION)
+        if self._temp_angulo > 360:
+            self._temp_angulo = 360 - self._temp_angulo
 
     def __izquierda(self):
         self._temp_angulo -= int(0.7 * INDICE_ROTACION)
+        if self._temp_angulo < 0:
+            self._temp_angulo = 360 + self._temp_angulo
 
     def __adelante(self):
         self._dx, self._dy = self.__get_vector(self._temp_angulo)
@@ -105,27 +110,23 @@ class Jugador(Sprite):
         Solo Jugador Local.
         """
         _dict = {
-            "ang": int(self._temp_angulo),
+            "a": int(self._temp_angulo),
             "x": int(self._temp_x),
             "y": int(self._temp_y),
+            "n": self._nick,
+            "t": os.path.basename(self._imagen_path)  # tanque
             }
         return _dict
 
     def update(self, _dict):
-        mydict = _dict[self._ip]
-        self.__set_posicion(
-            angulo=mydict["ang"],
-            centerx=mydict["x"],
-            centery=mydict["y"])
-        '''
-        if self.imagen_path != tanque:
-            self.imagen_path = tanque
-            imagen = pygame.image.load(self.imagen_path)
-            imagen_escalada = pygame.transform.scale(imagen, (50, 50))
-            self._imagen_original = imagen_escalada.convert_alpha()
-            self.image = self._imagen_original.copy()
-            self.rect = self.image.get_rect()
-        '''
+        mydict = _dict.get(self._ip, False)
+        if mydict:
+            self.__set_posicion(
+                angulo=mydict.get("a", 0),
+                centerx=mydict.get("x", 0),
+                centery=mydict.get("y", 0))
+        else:
+            self.kill()
 
     def update_events(self, eventos):
         """

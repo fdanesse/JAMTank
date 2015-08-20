@@ -35,7 +35,7 @@ class ConnectingPlayers(gtk.Dialog):
 
         x = 0
         items = []
-        while x < _dict['jugadores']:
+        while x < _dict["jugadores"]:
             items.append([None, "Esperando...", ""])
             x = len(items)
         self.internal_widget.framejugadores.jugadores.agregar_items(items)
@@ -43,10 +43,10 @@ class ConnectingPlayers(gtk.Dialog):
         self.show_all()
 
         text = "Host: %s  Límite de Vidas: %s" % (
-            nick, _dict['vidas'])
+            nick, _dict["vidas"])
         self.internal_widget.label.set_text(text)
         rect = self.internal_widget.framemapa.mapaview.get_allocation()
-        path = os.path.join(ROOTPATH, "Mapas", _dict['mapa'])
+        path = os.path.join(ROOTPATH, "Mapas", _dict["mapa"])
         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, -1, rect.height)
         self.internal_widget.framemapa.mapaview.set_from_pixbuf(pixbuf)
 
@@ -57,7 +57,7 @@ class ConnectingPlayers(gtk.Dialog):
     def update_playeres(self, servermodel, _dict):
         items = []
         for key in _dict.keys():
-            items.append([_dict[key]['tank'], _dict[key]['nick'], key])
+            items.append([_dict[key]["t"], _dict[key]["n"], key])
         self.internal_widget.framejugadores.jugadores.update_playeres(items)
 
     def play_enabled(self, servermodel, valor):
@@ -163,24 +163,24 @@ class NewLista(gtk.TreeView):
         self.show_all()
 
     def __setear_columnas(self):
-        self.append_column(self.__construir_columa_icono('', 0, True))
-        self.append_column(self.__construir_columa('Nombre', 1, True))
-        self.append_column(self.__construir_columa('', 2, False))
+        self.append_column(self.__construir_columa_icono("", 0, True))
+        self.append_column(self.__construir_columa("Nombre", 1, True))
+        self.append_column(self.__construir_columa("", 2, False))
 
     def __construir_columa(self, text, index, visible):
         render = gtk.CellRendererText()
         columna = gtk.TreeViewColumn(text, render, text=index)
         columna.set_sort_column_id(index)
-        columna.set_property('visible', visible)
-        columna.set_property('resizable', False)
+        columna.set_property("visible", visible)
+        columna.set_property("resizable", False)
         columna.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
         return columna
 
     def __construir_columa_icono(self, text, index, visible):
         render = gtk.CellRendererPixbuf()
         columna = gtk.TreeViewColumn(text, render, pixbuf=index)
-        columna.set_property('visible', visible)
-        columna.set_property('resizable', False)
+        columna.set_property("visible", visible)
+        columna.set_property("resizable", False)
         columna.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
         return columna
 

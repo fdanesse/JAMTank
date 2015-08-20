@@ -10,6 +10,7 @@ from Globales import get_ip
 from Jugador import Jugador
 
 RES = (800, 600)
+BASE_PATH = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
 
 class Juego(gobject.GObject):
@@ -62,7 +63,12 @@ class Juego(gobject.GObject):
             del(_dict["off"])
         new = dict(_dict["ingame"])
         # FIXME: Realizar aca el Chequeo de Colisiones
+        ips = self._data_game_players.keys()
         for key in new.keys():
+            if not key in ips:
+                tanque = os.path.join(BASE_PATH, "Tanques", new[key]["t"])
+                jugador = Jugador(RES, key, tanque, new[key]["n"])
+                self._jugadores.add(jugador)
             self._data_game_players[key] = new[key]
         self._jugadores.update(new)
 
@@ -88,7 +94,7 @@ class Juego(gobject.GObject):
 
             #self._explosiones.update()
 
-            #self._jugadores.draw(self._win)
+            self._jugadores.draw(self._win)
             #self._balas.draw(self._win)
             #self._explosiones.draw(self._win)
 
@@ -100,7 +106,7 @@ class Juego(gobject.GObject):
             pygame.event.clear()
 
         pygame.quit()
-        self.emit('exit', self._data_game_players)
+        self.emit("exit", self._data_game_players)
 
     def update_events(self, eventos):
         if "Escape" in eventos:
@@ -122,8 +128,10 @@ class Juego(gobject.GObject):
         #explosion = os.path.join(path, "Audio", "explosion.ogg")
         #self.sound_explosion = pygame.mixer.Sound(explosion)
         #print "Cargando Jugador:", nick, tank
-        self._jugador = Jugador(self._res, get_ip(), tank, nick)
+        ip = get_ip()
+        self._jugador = Jugador(RES, ip, tank, nick)
         self._jugadores.add(self._jugador)
+        self._data_game_players[ip] = {}
 
     def config(self, time=35, res=(800, 600), client=False, xid=False):
         print "Configurando Juego:"
