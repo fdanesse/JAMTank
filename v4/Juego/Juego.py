@@ -6,6 +6,7 @@ import pygame
 import random
 import gobject
 import gtk
+from Globales import get_ip
 from Jugador import Jugador
 
 RES = (800, 600)
@@ -41,27 +42,19 @@ class Juego(gobject.GObject):
         self._balas = pygame.sprite.RenderUpdates()
         self._explosiones = pygame.sprite.RenderUpdates()
 
-        self._default_retorno = {"ingame": {"players": {}}}
+        self._default_retorno = {"ingame": True}
 
         print "Nuevo Juego Creado"
 
     def __enviar_datos(self):
         if self._client:
-            if self._jugador:
-                _dict = {"ingame": self._jugador.get_datos()}
-            else:
-                _dict = {
-                    "ingame": {
-                        "ang": 0,
-                        "x": 0,
-                        "y": 0}
-                    }
+            _dict = {"ingame": self._jugador.get_datos()}
             self._client.enviar(_dict)
 
     def __recibir_datos(self):
-        if self._client:
-            _dict = self._client.recibir(dict(self._default_retorno))
-        return _dict
+        self._default_retorno = self._client.recibir(
+            dict(self._default_retorno))
+        return self._default_retorno
 
     def __update(self, _dict):
         if _dict.get("off", False):
@@ -71,7 +64,7 @@ class Juego(gobject.GObject):
         # FIXME: Realizar aca el Chequeo de Colisiones
         for key in new.keys():
             self._data_game_players[key] = new[key]
-        #self._jugadores.update(new)
+        self._jugadores.update(new)
 
     def run(self):
         print "Comenzando a Correr el juego..."
@@ -81,30 +74,23 @@ class Juego(gobject.GObject):
         pygame.time.wait(3)
         #gobject.timeout_add(1500, self.__emit_update)
         while self._estado == "En Juego":
-            #try:
             self._clock.tick(self._time)
             while gtk.events_pending():
                 gtk.main_iteration()
             self._jugadores.clear(self._win, self._escenario)
-            self._balas.clear(self._win, self._escenario)
-            self._explosiones.clear(self._win, self._escenario)
+            #self._balas.clear(self._win, self._escenario)
+            #self._explosiones.clear(self._win, self._escenario)
 
-            #if self.jugador:
-            #    El jugador actualiza su posicion y disparos segun eventos
-            #    self.jugador.status_update()
-            #    los nuevos datos deben enviarse al server
-
+            if self._jugador:
+                self._jugador.process_events()
             self.__enviar_datos()
-            _dict = self.__recibir_datos()
-            self.__update(_dict)
+            self.__update(self.__recibir_datos())
 
-            #Con los datos recibidos se actualizan todos los objetos
+            #self._explosiones.update()
 
-            self._explosiones.update()
-
-            self._jugadores.draw(self._win)
-            self._balas.draw(self._win)
-            self._explosiones.draw(self._win)
+            #self._jugadores.draw(self._win)
+            #self._balas.draw(self._win)
+            #self._explosiones.draw(self._win)
 
             self._real_win.blit(pygame.transform.scale(
                 self._win, self._res), (0, 0))
@@ -112,10 +98,6 @@ class Juego(gobject.GObject):
             pygame.display.update()
             pygame.event.pump()
             pygame.event.clear()
-            #pygame.time.wait(1)
-            #except:
-            #    "Error en run game"
-            #    self._estado = False
 
         pygame.quit()
         self.emit('exit', self._data_game_players)
@@ -123,6 +105,9 @@ class Juego(gobject.GObject):
     def update_events(self, eventos):
         if "Escape" in eventos:
             self._estado = False
+        else:
+            if self._jugador:
+                self._jugador.update_events(eventos)
 
     def load(self, mapa, tank, nick):
         print "Cargando mapa:", mapa
@@ -137,8 +122,8 @@ class Juego(gobject.GObject):
         #explosion = os.path.join(path, "Audio", "explosion.ogg")
         #self.sound_explosion = pygame.mixer.Sound(explosion)
         #print "Cargando Jugador:", nick, tank
-        #self._jugador = Jugador(self._res, self._client.ip, tank, nick)
-        #self._jugadores.add(self._jugador)
+        self._jugador = Jugador(self._res, get_ip(), tank, nick)
+        self._jugadores.add(self._jugador)
 
     def config(self, time=35, res=(800, 600), client=False, xid=False):
         print "Configurando Juego:"
@@ -179,11 +164,3 @@ class Juego(gobject.GObject):
         self._real_win = pygame.display.get_surface()
         pygame.mixer.init(44100, -16, 2, 2048)
         pygame.mixer.music.set_volume(1.0)
-
-
-#if __name__ == "__main__":
-#    mapa = os.path.join(os.path.dirname(BASE_PATH), "Mapas", "f2.png")
-#    juego = Juego()
-#    juego.config(time=35, res=(800, 600), client=False, xid=False)
-#    juego.load(mapa)
-#    juego.run()

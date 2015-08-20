@@ -21,8 +21,8 @@ class Jugador(Sprite):
         self._res = res
         self._imagen_path = tank
         self._nick = nick
-        #self._ip = ip
-        self.eventos = []
+        self._ip = ip
+        self._eventos = []
 
         imagen = pygame.image.load(self._imagen_path)
         self._imagen_original = pygame.transform.scale(
@@ -40,9 +40,6 @@ class Jugador(Sprite):
         self._temp_x = self._res[0] / 2
         self._temp_y = self._res[1] / 2
 
-        #self.__set_posicion(angulo=0, centerx=self._temp_x, centery=self._temp_y)
-
-    '''
     def __derecha(self):
         self._temp_angulo += int(0.7 * INDICE_ROTACION)
 
@@ -51,14 +48,13 @@ class Jugador(Sprite):
 
     def __adelante(self):
         self._dx, self._dy = self.__get_vector(self._temp_angulo)
-        self.__actualizar_posicion()
+        self.__calcular_nueva_posicion()
 
     def __atras(self):
         x, y = self.__get_vector(self._temp_angulo)
         self._dx = x * -1
         self._dy = y * -1
-        self.__actualizar_posicion()
-    '''
+        self.__calcular_nueva_posicion()
 
     def __get_vector(self, angulo):
         """
@@ -70,8 +66,7 @@ class Jugador(Sprite):
         y = int(sin(radianes) * VELOCIDAD)
         return x, y
 
-    '''
-    def __actualizar_posicion(self):
+    def __calcular_nueva_posicion(self):
         """
         Cambia la posicion del rectangulo.
         Solo se ejecuta si el tanque se mueve hacia adelante o hacia atras.
@@ -86,7 +81,6 @@ class Jugador(Sprite):
             self._temp_y += self._dy
             self._temp_x = int(self._temp_x)
             self._temp_y = int(self._temp_y)
-    '''
 
     def __set_posicion(self, angulo=0, centerx=0, centery=0):
         """
@@ -118,11 +112,12 @@ class Jugador(Sprite):
         return _dict
 
     def update(self, _dict):
-        #print "Jugador Recibe:", _dict
-        pass
-
-    '''
-    def update_data(self, tanque, angulo=0, centerx=0, centery=0):
+        mydict = _dict[self._ip]
+        self.__set_posicion(
+            angulo=mydict["ang"],
+            centerx=mydict["x"],
+            centery=mydict["y"])
+        '''
         if self.imagen_path != tanque:
             self.imagen_path = tanque
             imagen = pygame.image.load(self.imagen_path)
@@ -130,44 +125,43 @@ class Jugador(Sprite):
             self._imagen_original = imagen_escalada.convert_alpha()
             self.image = self._imagen_original.copy()
             self.rect = self.image.get_rect()
-        self.__set_posicion(angulo=angulo, centerx=centerx, centery=centery)
+        '''
 
     def update_events(self, eventos):
         """
         Solo Jugador Local.
         """
-        self.eventos = list(eventos)
+        self._eventos = list(eventos)
 
-    def update(self):
+    def process_events(self):
         """
         Solo Jugador Local.
         """
-        if not self.eventos:
+        if not self._eventos:
             return
 
         # girar en movimiento
-        if "w" in self.eventos and "d" in self.eventos:
+        if "w" in self._eventos and "d" in self._eventos:
             self.__adelante()
             self.__derecha()
-        elif "w" in self.eventos and "a" in self.eventos:
+        elif "w" in self._eventos and "a" in self._eventos:
             self.__adelante()
             self.__izquierda()
-        elif "s" in self.eventos and "d" in self.eventos:
+        elif "s" in self._eventos and "d" in self._eventos:
             self.__atras()
             self.__izquierda()
-        elif "s" in self.eventos and "a" in self.eventos:
+        elif "s" in self._eventos and "a" in self._eventos:
             self.__atras()
             self.__derecha()
 
         # moverse sin girar
-        elif "w" in self.eventos:
+        elif "w" in self._eventos:
             self.__adelante()
-        elif "s" in self.eventos:
+        elif "s" in self._eventos:
             self.__atras()
 
         # girar sin moverse
-        elif "d" in self.eventos:
+        elif "d" in self._eventos:
             self.__derecha()
-        elif "a" in self.eventos:
+        elif "a" in self._eventos:
             self.__izquierda()
-    '''
