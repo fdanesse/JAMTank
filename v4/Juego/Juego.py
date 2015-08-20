@@ -66,12 +66,12 @@ class Juego(gobject.GObject):
     def __update(self, _dict):
         if _dict.get("off", False):
             self._estado = False
-        else:
-            new = dict(_dict["ingame"])
-            # FIXME: Realizar aca el Chequeo de Colisiones
-            for key in new.keys():
-                self._data_game_players[key] = new[key]
-            #self._jugadores.update(new)
+            del(_dict["off"])
+        new = dict(_dict["ingame"])
+        # FIXME: Realizar aca el Chequeo de Colisiones
+        for key in new.keys():
+            self._data_game_players[key] = new[key]
+        #self._jugadores.update(new)
 
     def run(self):
         print "Comenzando a Correr el juego..."
