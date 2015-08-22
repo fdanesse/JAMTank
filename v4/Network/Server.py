@@ -181,7 +181,7 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
             # Recalculo de latencia
             if "l" in _dict.keys():
                 self.latency[ip] = int(_dict.get("l", 0))
-                l = self.latency[ip]
+                l = 0
                 lat = dict(self.latency)
                 del(lat[ip])
                 if lat:

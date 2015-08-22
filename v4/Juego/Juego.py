@@ -59,11 +59,17 @@ class Juego(gobject.GObject):
     def __enviar_datos(self):
         if self._client:
             _dict = {"ingame": self._jugador.get_datos()}
+
             # Agrega datos de latencia cada LAT pasadas
             l = self.__check_latency()
             if l:
                 _dict["l"] = l
                 self._ultima_latencia = l
+            if not OLPC and self._lat_time and self._pause:
+                t = int(time.time() * 1000)
+                while t - self._lat_time < self._pause:
+                    t = int(time.time() * 1000)
+
             # Envia datos al server
             self._client.enviar(_dict)
 
@@ -112,12 +118,7 @@ class Juego(gobject.GObject):
         # Calcula espera para normalizar latencia con otros jugadores
         if not OLPC:
             if "l" in _dict.keys():
-                p = self._ultima_latencia - int(_dict.get("l", 0))
-                if p < 0:
-                    p = p * -1
-                if p < 60:
-                    self._pause = p
-                    print "recibo:", int(_dict.get("l", 0)), ":envio anterior:", self._ultima_latencia, ":diferencia:", self._pause
+                self._pause = int(_dict.get("l", 0)) - 25
 
     def run(self):
         print "Comenzando a Correr el juego..."
@@ -152,9 +153,6 @@ class Juego(gobject.GObject):
             pygame.display.update()
             pygame.event.pump()
             pygame.event.clear()
-
-            if self._pause and not OLPC:
-                pygame.time.wait(self._pause)
 
         pygame.quit()
         self.emit("exit", self._data_game_players)
