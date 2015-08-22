@@ -141,7 +141,7 @@ class ClientModelGame(gobject.GObject):
         mapa = os.path.join(BASE_PATH, "Mapas", self._dict.get("mapa", ""))
         self.juego = Juego()
         self.juego.connect("exit", self.__exit_game)
-        self.juego.config(time=35, res=res, client=self.client, xid=xid)
+        self.juego.config(_time=35, res=res, client=self.client, xid=xid)
         tanque = os.path.join(BASE_PATH, "Tanques", self._tank)
         self.juego.load(mapa, tanque, self._nick)
         self.juego.run()

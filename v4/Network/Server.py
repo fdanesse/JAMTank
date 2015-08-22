@@ -105,6 +105,7 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         self._dict_game = dict(_dict)  # n°de jugadores, mapa, vidas
         self._players_dict = {}
         self._time_control_players = {}
+        self.latency = {}
 
         print "Server ON:", "ip:", host, "Port:", port
         print "\tDatos:"
@@ -121,6 +122,7 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
             if now - self._time_control_players[ip] > 1.5:
                 del(self._players_dict[ip])
                 del(self._time_control_players[ip])
+                del(self.latency[ip])
 
     def __registrar(self, ip, _dict):
         self._players_dict[ip] = dict(_dict["register"])
@@ -168,11 +170,26 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
                 self._dict_game["run"] = True
         new = {"ingame": True, "off": True}
         if self._dict_game["run"]:
-            # Persistencia de datos del juego
+
+            # Recalculo de latencia
+            m = 0
+            if "l" in _dict.keys():
+                l = int(_dict.get("l", 0))
+                self.latency[ip] = l
+                lat = dict(self.latency)
+                del(lat[ip])
+                m = max(lat.values())
+
+            # Persistencia de datos de jugador
             _dict = dict(_dict["ingame"])
             for key in _dict.keys():
                 self._players_dict[ip][key] = _dict[key]
             new = {"ingame": dict(self._players_dict)}
+
+            # Envio de latencia
+            if m:
+                new["l"] = m
+
         else:
             # El host manda salir
             new = {

@@ -6,11 +6,15 @@ import pygame
 import random
 import gobject
 import gtk
+import time
+import platform
 from Globales import get_ip
 from Jugador import Jugador
 
 RES = (800, 600)
 BASE_PATH = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
+OLPC = bool('olpc' in platform.platform())
+LAT = 10
 
 
 class Juego(gobject.GObject):
@@ -34,7 +38,7 @@ class Juego(gobject.GObject):
         self._clock = False
         self._estado = False
         self._client = False
-        self._time = 35
+        self._fps = 35
 
         self._jugador = False
         self._data_game_players = {}
@@ -44,13 +48,42 @@ class Juego(gobject.GObject):
         self._explosiones = pygame.sprite.RenderUpdates()
 
         self._default_retorno = {"ingame": True}
+        self._lat_time = 0
+        self._lat = []
+        self._envio = 0
+        self._pause = 0
 
-        print "Nuevo Juego Creado"
+        print "Nuevo Juego Creado:", platform.platform()
+
 
     def __enviar_datos(self):
         if self._client:
             _dict = {"ingame": self._jugador.get_datos()}
+            # Agrega datos de latencia cada LAT pasadas
+            l = self.__check_latency()
+            if l:
+                _dict["l"] = l
+                self._envio = l
+            # Envia datos al server
             self._client.enviar(_dict)
+
+    def __check_latency(self):
+        """
+        Envia el maximo de latencia de las ultimas LAT conexiones o 0
+        """
+        t = int(time.time() * 1000)
+        if not self._lat_time:
+            self._lat_time = t
+        else:
+            if len(self._lat) >= LAT:
+                m = int(sum(self._lat) / len(self._lat))
+                self._lat = []
+                self._lat_time = 0
+                return m
+            else:
+                self._lat.append(t - self._lat_time)
+                self._lat_time = t
+        return 0
 
     def __recibir_datos(self):
         self._default_retorno = self._client.recibir(
@@ -61,6 +94,10 @@ class Juego(gobject.GObject):
         if _dict.get("off", False):
             self._estado = False
             del(_dict["off"])
+        # FIXME: Posibles errores si no lee correctamente ingame
+        if not _dict.get("ingame"):
+            print "Error al leer ingame en el juego", _dict
+            return False
         new = dict(_dict["ingame"])
         # FIXME: Realizar aca el Chequeo de Colisiones
         ips = self._data_game_players.keys()
@@ -72,6 +109,16 @@ class Juego(gobject.GObject):
             self._data_game_players[key] = new[key]
         self._jugadores.update(new)
 
+        # Calcula espera para normalizar latencia con otros jugadores
+        if not OLPC:
+            if "l" in _dict.keys():
+                p = self._envio - int(_dict.get("l", 0))
+                if p < 0:
+                    p = p * -1
+                if p < 60:
+                    self._pause = p
+                    print "recibo:", int(_dict.get("l", 0)), ":envio anterior:", self._envio, ":diferencia:", self._pause
+
     def run(self):
         print "Comenzando a Correr el juego..."
         self._estado = "En Juego"
@@ -80,7 +127,8 @@ class Juego(gobject.GObject):
         pygame.time.wait(3)
         #gobject.timeout_add(1500, self.__emit_update)
         while self._estado == "En Juego":
-            self._clock.tick(self._time)
+            if not OLPC:
+                self._clock.tick_busy_loop(self._fps)
             while gtk.events_pending():
                 gtk.main_iteration()
             self._jugadores.clear(self._win, self._escenario)
@@ -104,6 +152,9 @@ class Juego(gobject.GObject):
             pygame.display.update()
             pygame.event.pump()
             pygame.event.clear()
+
+            if self._pause and not OLPC:
+                pygame.time.wait(self._pause)
 
         pygame.quit()
         self.emit("exit", self._data_game_players)
@@ -133,13 +184,13 @@ class Juego(gobject.GObject):
         self._jugadores.add(self._jugador)
         self._data_game_players[ip] = {}
 
-    def config(self, time=35, res=(800, 600), client=False, xid=False):
+    def config(self, _time=35, res=(800, 600), client=False, xid=False):
         print "Configurando Juego:"
-        print "\ttime:", time
+        print "\ttime:", _time
         print "\tres:", res
         print "\tclient", client
         print "\txid", xid
-        self._time = time
+        self._fps = _time
         self._res = res
         self._client = client
         if xid:
