@@ -168,27 +168,25 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
             else:
                 # Anuncia inicio del juego a quienes estan en fase de registro
                 self._dict_game["run"] = True
+
         new = {"ingame": True, "off": True}
         if self._dict_game["run"]:
 
-            # Recalculo de latencia
-            m = 0
-            if "l" in _dict.keys():
-                l = int(_dict.get("l", 0))
-                self.latency[ip] = l
-                lat = dict(self.latency)
-                del(lat[ip])
-                m = max(lat.values())
-
             # Persistencia de datos de jugador
-            _dict = dict(_dict["ingame"])
-            for key in _dict.keys():
-                self._players_dict[ip][key] = _dict[key]
+            _ing = dict(_dict["ingame"])
+            for key in _ing.keys():
+                self._players_dict[ip][key] = _ing[key]
             new = {"ingame": dict(self._players_dict)}
 
-            # Envio de latencia
-            if m:
-                new["l"] = m
+            # Recalculo de latencia
+            if "l" in _dict.keys():
+                self.latency[ip] = int(_dict.get("l", 0))
+                l = self.latency[ip]
+                lat = dict(self.latency)
+                del(lat[ip])
+                if lat:
+                    l = max(lat.values())
+                new["l"] = l
 
         else:
             # El host manda salir

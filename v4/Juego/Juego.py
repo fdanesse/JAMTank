@@ -50,7 +50,7 @@ class Juego(gobject.GObject):
         self._default_retorno = {"ingame": True}
         self._lat_time = 0
         self._lat = []
-        self._envio = 0
+        self._ultima_latencia = 0
         self._pause = 0
 
         print "Nuevo Juego Creado:", platform.platform()
@@ -63,13 +63,13 @@ class Juego(gobject.GObject):
             l = self.__check_latency()
             if l:
                 _dict["l"] = l
-                self._envio = l
+                self._ultima_latencia = l
             # Envia datos al server
             self._client.enviar(_dict)
 
     def __check_latency(self):
         """
-        Envia el maximo de latencia de las ultimas LAT conexiones o 0
+        Envia el promedio de latencia de las ultimas LAT conexiones o 0
         """
         t = int(time.time() * 1000)
         if not self._lat_time:
@@ -112,12 +112,12 @@ class Juego(gobject.GObject):
         # Calcula espera para normalizar latencia con otros jugadores
         if not OLPC:
             if "l" in _dict.keys():
-                p = self._envio - int(_dict.get("l", 0))
+                p = self._ultima_latencia - int(_dict.get("l", 0))
                 if p < 0:
                     p = p * -1
                 if p < 60:
                     self._pause = p
-                    print "recibo:", int(_dict.get("l", 0)), ":envio anterior:", self._envio, ":diferencia:", self._pause
+                    print "recibo:", int(_dict.get("l", 0)), ":envio anterior:", self._ultima_latencia, ":diferencia:", self._pause
 
     def run(self):
         print "Comenzando a Correr el juego..."
