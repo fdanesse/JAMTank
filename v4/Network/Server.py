@@ -12,8 +12,8 @@ T = "\n"
 class RequestHandler(SocketServer.StreamRequestHandler):
     """
     s.RequestHandlerClass.disable_nagle_algorithm  s.RequestHandlerClass.setup
-    s.RequestHandlerClass.finish                   s.RequestHandlerClass.timeout
-    s.RequestHandlerClass.handle                   s.RequestHandlerClass.wbufsize
+    s.RequestHandlerClass.finish                 s.RequestHandlerClass.timeout
+    s.RequestHandlerClass.handle                 s.RequestHandlerClass.wbufsize
     s.RequestHandlerClass.rbufsize
     """
     """
@@ -26,14 +26,16 @@ class RequestHandler(SocketServer.StreamRequestHandler):
         while 1:
             try:
                 """
-                ["__class__", "__del__", "__delattr__", "__doc__", "__format__",
-                "__getattribute__", "__hash__", "__init__", "__iter__", "__module__",
-                "__new__", "__reduce__", "__reduce_ex__", "__repr__", "__setattr__",
-                "__sizeof__", "__slots__", "__str__", "__subclasshook__",
-                "_close", "_getclosed", "_rbuf", "_rbufsize", "_sock", "_wbuf",
+                ["__class__", "__del__", "__delattr__", "__doc__",
+                "__format__", "__getattribute__", "__hash__", "__init__",
+                "__iter__","__module__", "__new__", "__reduce__",
+                "__reduce_ex__", "__repr__", "__setattr__", "__sizeof__",
+                "__slots__", "__str__", "__subclasshook__", "_close",
+                "_getclosed", "_rbuf", "_rbufsize", "_sock", "_wbuf",
                 "_wbuf_len", "_wbufsize", "bufsize", "close", "closed",
-                "default_bufsize", "fileno", "flush", "mode", "name", "next",
-                "read", "readline", "readlines", "softspace", "write", "writelines"]
+                "default_bufsize", "fileno", "flush", "mode", "name",
+                "next", "read", "readline", "readlines", "softspace",
+                "write", "writelines"]
                 """
                 entrada = self.rfile.readline()
                 if not entrada:
@@ -83,15 +85,15 @@ class RequestHandler(SocketServer.StreamRequestHandler):
 
 class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
     """
-    s.RequestHandlerClass     s.finish_request          s.process_request_thread
-    s.address_family          s.get_request             s.server_bind
-    s.allow_reuse_address     s.handle_error            s.server_close
-    s.close_request           s.handle_request          s.request_queue_size
-    s.daemon_threads          s.handle_timeout          s.serve_forever
-    s.fileno                  s.process_request         s.server_activate
-    s.socket_type             s.socket                  s.shutdown_request
-    s.shutdown                s.verify_request          s.timeout
-    s.server_address
+    RequestHandlerClass     finish_request        process_request_thread
+    address_family          get_request           server_bind
+    allow_reuse_address     handle_error          server_close
+    close_request           handle_request        request_queue_size
+    daemon_threads          handle_timeout        serve_forever
+    fileno                  process_request       server_activate
+    socket_type             socket                shutdown_request
+    shutdown                verify_request        timeout
+    server_address
     """
 
     def __init__(self, logger=None, host="localhost",
@@ -105,7 +107,9 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         self._dict_game = dict(_dict)  # n°de jugadores, mapa, vidas
         self._players_dict = {}
         self._time_control_players = {}
-        self.latency = {}
+        self._latencias = {}
+        self._max_lat = 0.0
+        self._enviar_lat = []
 
         print "Server ON:", "ip:", host, "Port:", port
         print "\tDatos:"
@@ -122,7 +126,27 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
             if now - self._time_control_players[ip] > 1.5:
                 del(self._players_dict[ip])
                 del(self._time_control_players[ip])
-                del(self.latency[ip])
+                del(self._latencias[ip])
+                self.__latency_recalc()
+
+    def __latency_recalc(self):
+        self._max_lat = float("%.3f" % max(self._latencias.values()))
+        print "Server Recalculando Latencia General:", self._max_lat
+        # ips a las que se debe informar
+        self._enviar_lat = self._latencias.keys()
+
+    def __latency_check(self, ip, latencia, new):
+        # Almacenar latencias de clientes
+        if latencia:
+            self._latencias[ip] = latencia
+            print "Server Almacenando Latencia:", ip, latencia
+            if len(self._latencias) == self._dict_game["jugadores"]:
+                # Cuando todos esten conectados se calcula latencia general
+                self.__latency_recalc()
+        if ip in self._enviar_lat:
+            # Informe de latencia
+            self._enviar_lat.remove(ip)
+            new["l"] = self._max_lat
 
     def __registrar(self, ip, _dict):
         self._players_dict[ip] = dict(_dict["register"])
@@ -171,23 +195,15 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
 
         new = {"ingame": True, "off": True}
         if self._dict_game["run"]:
-
             # Persistencia de datos de jugador
             _ing = dict(_dict["ingame"])
             for key in _ing.keys():
                 self._players_dict[ip][key] = _ing[key]
             new = {"ingame": dict(self._players_dict)}
 
-            # Recalculo de latencia
-            if "l" in _dict.keys():
-                self.latency[ip] = int(_dict.get("l", 0))
-                l = 0
-                lat = dict(self.latency)
-                del(lat[ip])
-                if lat:
-                    l = max(lat.values())
-                new["l"] = l
-
+            # Control de latencia
+            self.__latency_check(ip,
+                float("%.3f" % (_dict.get("l", 0.0))), new)
         else:
             # El host manda salir
             new = {
