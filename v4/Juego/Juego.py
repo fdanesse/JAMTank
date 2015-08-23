@@ -46,9 +46,11 @@ class Juego(gobject.GObject):
         self._explosiones = pygame.sprite.RenderUpdates()
 
         self._default_retorno = {"ingame": True}
+
+        # Variables para control de latencia
         self._while = False
-        self._time = False
         self._latencias = []
+        self._time = False
         self._promedio = 0.0
         self._max_lat_server = 0.0
         self._pausa = 0.0
@@ -206,9 +208,8 @@ class Juego(gobject.GObject):
         self._jugadores.add(self._jugador)
         self._data_game_players[ip] = {}
 
-    def config(self, _time=35, res=(800, 600), client=False, xid=False):
+    def config(self, res=(800, 600), client=False, xid=False):
         print "Configurando Juego:"
-        print "\ttime:", _time
         print "\tres:", res
         print "\tclient", client
         print "\txid", xid

@@ -131,7 +131,7 @@ class JAMTank(gtk.Window):
             nickh = server_dict.get('nick', 'JAMTank')
             del(server_dict['ip'])
             del(server_dict['nick'])
-            self.clientmodel = ClientModelGame(host, server_dict,
+            self.clientmodel = ClientModelGame(self, host, server_dict,
                 player_dict.get('nick', 'JAMTank'),
                 player_dict.get('tanque', ''))
             _id = self.clientmodel.connect("error", self.__switch, 4)
@@ -166,7 +166,7 @@ class JAMTank(gtk.Window):
                 'mapa': str(_dict.get('mapa', '')),
                 'vidas': int(_dict.get('vidas', 5))
                 }
-            self.servermodel = ServerModelGame(
+            self.servermodel = ServerModelGame(self,
                 _dict.get('server', 'localhost'),
                 new_dict, _dict.get('nick', 'JAMTank'),
                 _dict.get('tanque', ''))

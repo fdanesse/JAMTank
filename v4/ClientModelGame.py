@@ -5,6 +5,7 @@ import os
 import gobject
 import gtk
 import time
+from gtkWidgets.SelectWidgets import DialogoSalir
 from Network.Client import Client
 from Juego.Juego import Juego
 
@@ -21,10 +22,11 @@ class ClientModelGame(gobject.GObject):
     "end-game": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
         (gobject.TYPE_PYOBJECT, ))}
 
-    def __init__(self, _host, _dict, _nick, _tank):
+    def __init__(self, topwin, _host, _dict, _nick, _tank):
 
         gobject.GObject.__init__(self)
 
+        self._topwin = topwin
         self._host = _host
         self._dict = _dict  # jugadores, mapa, vidas
         self._nick = _nick
@@ -121,6 +123,15 @@ class ClientModelGame(gobject.GObject):
                 elif nombre == "a" and "d" in self.eventos:
                     self.eventos.remove("d")
                 self.eventos.append(nombre)
+            if "Escape" in self.eventos:
+                dialog = DialogoSalir(parent=self._topwin,
+                text="¿Abandonas el Juego?")
+                ret = dialog.run()
+                dialog.destroy()
+                if ret == gtk.RESPONSE_ACCEPT:
+                    self.eventos = ["Escape"]
+                elif ret == gtk.RESPONSE_CANCEL:
+                    self.eventos = []
             self.juego.update_events(self.eventos)
         else:
             if nombre == "Escape":
@@ -141,7 +152,7 @@ class ClientModelGame(gobject.GObject):
         mapa = os.path.join(BASE_PATH, "Mapas", self._dict.get("mapa", ""))
         self.juego = Juego()
         self.juego.connect("exit", self.__exit_game)
-        self.juego.config(_time=35, res=res, client=self.client, xid=xid)
+        self.juego.config(res=res, client=self.client, xid=xid)
         tanque = os.path.join(BASE_PATH, "Tanques", self._tank)
         self.juego.load(mapa, tanque, self._nick)
         self.juego.run()
