@@ -208,6 +208,14 @@ class Juego(gobject.GObject):
         self._jugadores.add(self._jugador)
         self._data_game_players[ip] = {}
 
+    def pause_player(self):
+        if self._jugador:
+            self._jugador.pausar()
+
+    def reactivar_player(self):
+        if self._jugador:
+            self._jugador.reactivar()
+
     def config(self, res=(800, 600), client=False, xid=False):
         print "Configurando Juego:"
         print "\tres:", res

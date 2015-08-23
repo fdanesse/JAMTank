@@ -19,6 +19,7 @@ class Jugador(Sprite):
 
         Sprite.__init__(self)
 
+        self._estado = "activo"
         self._res = res
         self._imagen_path = tank
         self._nick = nick
@@ -132,7 +133,10 @@ class Jugador(Sprite):
         """
         Solo Jugador Local.
         """
-        self._eventos = list(eventos)
+        if self._estado == "activo":
+            self._eventos = list(eventos)
+        elif self._estado == "paused":
+            self._eventos = []
 
     def process_events(self):
         """
@@ -166,3 +170,12 @@ class Jugador(Sprite):
             self.__derecha()
         elif "a" in self._eventos:
             self.__izquierda()
+
+    def pausar(self):
+        self._estado = "paused"
+        self.__set_posicion(angulo=0, centerx=-200, centery=-200)
+
+    def reactivar(self):
+        self._estado = "activo"
+        self.__set_posicion(angulo=0, centerx=self._res[0] / 2,
+            centery=self._res[1] / 2)
