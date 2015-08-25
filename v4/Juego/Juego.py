@@ -11,6 +11,7 @@ import platform
 from Globales import get_ip
 from Jugador import Jugador
 from Bala import Bala
+from Sound import Sound
 
 RES = (800, 600)
 BASE_PATH = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
@@ -32,6 +33,7 @@ class Juego(gobject.GObject):
 
         gobject.GObject.__init__(self)
 
+        self._audio = False
         self._ip = get_ip()
         self._res = False
         self._escenario = False
@@ -166,7 +168,7 @@ class Juego(gobject.GObject):
 
     def __save_balas_data(self, _dict):
         path = os.path.join(BASE_PATH, "Balas", "bala.png")
-
+        audio = False
         for ip in _dict.keys():
             # balas en server
             balas = _dict[ip].get("b", [])
@@ -184,7 +186,7 @@ class Juego(gobject.GObject):
                 b = Bala(balas[_id], path, RES, ip)
                 self._balas.add(b)
                 actuales.append(b)
-                # FIXME: audio Disparar
+                audio = True
 
             while len(actuales) > len(balas):
                 # Quitar las que sobran
@@ -199,6 +201,8 @@ class Juego(gobject.GObject):
                 _id = actuales.index(sprite)
                 datos = balas[_id]
                 sprite.set_posicion(centerx=datos["x"], centery=datos["y"])
+            if audio:
+                self._audio.disparo()
 
     def __update_data(self, _dict):
         if _dict.get("off", False):
@@ -326,5 +330,4 @@ class Juego(gobject.GObject):
         pygame.display.set_caption("JAMtank")
         self._win = pygame.Surface(RES)
         self._real_win = pygame.display.get_surface()
-        pygame.mixer.init(44100, -16, 2, 2048)
-        pygame.mixer.music.set_volume(1.0)
+        self._audio = Sound()
