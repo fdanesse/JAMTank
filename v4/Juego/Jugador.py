@@ -106,6 +106,17 @@ class Jugador(Sprite):
         self.image = pygame.transform.rotate(
             self._imagen_original, -self._angulo)
 
+    def get_disparo(self):
+        """
+        Solo Jugador Local.
+        """
+        _dict = {
+            "a": int(self._temp_angulo),
+            "x": int(self._temp_x),
+            "y": int(self._temp_y),
+            }
+        return _dict
+
     def get_datos(self):
         """
         Solo Jugador Local.

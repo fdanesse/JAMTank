@@ -10,6 +10,7 @@ import time
 import platform
 from Globales import get_ip
 from Jugador import Jugador
+from Bala import Bala
 
 RES = (800, 600)
 BASE_PATH = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
@@ -39,6 +40,8 @@ class Juego(gobject.GObject):
         self._estado = False
 
         self._jugador = False
+        self._disparo = False
+        self._disparos_activos = True
         self._data_game_players = {}
 
         self._jugadores = pygame.sprite.RenderUpdates()
@@ -57,8 +60,29 @@ class Juego(gobject.GObject):
 
         print "Nuevo Juego Creado:", platform.platform()
 
+    def __reactivar_disparos(self):
+        self._disparos_activos = True
+        return False
+
+    def __check_disparos_and_balas(self):
+        """
+        Disparos se convierte en balas rumbo al server
+        """
+        mybalas = []
+        for bala in self._balas.sprites():
+            if bala.ip == self._client.ip:
+                mybalas.append(bala.get_datos())
+        self._data_game_players[self._client.ip]["b"] = mybalas
+
+        if self._disparo:
+            self._disparo = False
+            self._data_game_players[self._client.ip]["b"].append(
+                self._jugador.get_disparo())
+            gobject.timeout_add(1000, self.__reactivar_disparos)
+
     def __enviar_datos(self):
         if self._client:
+            # Datos de posicion del jugador local
             _dict = {"ingame": self._jugador.get_datos()}
 
             if not self._promedio:
@@ -67,6 +91,10 @@ class Juego(gobject.GObject):
                 if promedio:
                     print "Cliente Enviando Latencia local:", promedio
                     _dict["l"] = promedio
+
+            # Datos de Balas locales
+            _dict["ingame"]["b"] = self._data_game_players[
+                self._client.ip].get("b",[])
 
             if self._pausa:
                 # Si hay que corregir segun latencia general en el server
@@ -120,11 +148,10 @@ class Juego(gobject.GObject):
             dict(self._default_retorno))
         return self._default_retorno
 
-    def __save_game_data(self, _dict):
+    def __save_players_data(self, new):
         """
-        Persistencia de datos de jugadores.
+        Persistencia de datos de jugadores y balas.
         """
-        new = dict(_dict["ingame"])
         ips = self._data_game_players.keys()
         for key in new.keys():
             if not key in ips:
@@ -134,7 +161,48 @@ class Juego(gobject.GObject):
             self._data_game_players[key] = new[key]
         self._jugadores.update(new)
 
-    def __update(self, _dict):
+    def __save_balas_data(self, _dict):
+        path = os.path.join(BASE_PATH, "Balas", "bala.png")
+        for ip in _dict.keys():
+            # balas en server
+            balas = _dict[ip].get("b", [])
+            # sprites de balas actuales
+            actuales = []
+            for sprite in self._balas:
+                if sprite.ip == ip:
+                    actuales.append(sprite)
+
+            if not actuales:
+                # Si no hay balas de este jugador, crear las que vienen
+                for bdict in balas:
+                    self._balas.add(Bala(bdict, path, RES, self._client.ip))
+            else:
+                if len(actuales) < len(balas):
+                    # Agregar las que faltan pero en orden en el que viene en balas
+                    _id = actuales.index(actuales[-1])
+                    for bdict in balas[_id + 1:]:
+                        self._balas.add(Bala(bdict, path, RES, self._client.ip))
+
+                while len(actuales) > len(balas):
+                    # Quitar las que sobran
+                    a = actuales[0]
+                    for g in a.groups():
+                        g.remove(a)
+                    a.kill()
+
+            # Balas actuales de este jugador
+            actuales = []
+            for sprite in self._balas:
+                if sprite.ip == ip:
+                    actuales.append(sprite)
+
+            # Actualizar posiciones
+            for sprite in actuales:
+                _id = actuales.index(sprite)
+                datos = balas[_id]
+                sprite.set_posicion(centerx=datos["x"], centery=datos["y"])
+
+    def __update_data(self, _dict):
         if _dict.get("off", False):
             # Recibe salir desde el server
             self._estado = False
@@ -144,7 +212,8 @@ class Juego(gobject.GObject):
             print "Error al leer ingame en el juego", _dict
             return False
 
-        self.__save_game_data(_dict)
+        self.__save_players_data(dict(_dict.get("ingame", {})))
+        self.__save_balas_data(_dict["ingame"])
 
         if "l" in _dict.keys():
             self.__set_latency(_dict)
@@ -153,14 +222,19 @@ class Juego(gobject.GObject):
     def __run(self):
         while gtk.events_pending():
             gtk.main_iteration()
+        self._balas.clear(self._win, self._escenario)
         self._jugadores.clear(self._win, self._escenario)
 
         if self._jugador:
             self._jugador.process_events()
-        self.__enviar_datos()
-        self.__update(self.__recibir_datos())
+        self._balas.update(self._client.ip)
+        # chekear colisiones
+        self.__check_disparos_and_balas()  # Pasar Disparos a balas
+        self.__enviar_datos()  # Recoger y Enviar datos de jugador y balas locales
+        self.__update_data(self.__recibir_datos())  # Recibir datos
 
         self._jugadores.draw(self._win)
+        self._balas.draw(self._win)
 
         self._real_win.blit(pygame.transform.scale(
             self._win, self._res), (0, 0))
@@ -195,6 +269,11 @@ class Juego(gobject.GObject):
             return False
         if "Escape" in eventos:
             self._estado = False
+            return False
+        if "space" in eventos:
+            if not self._disparo and self._disparos_activos:
+                self._disparo = True
+                self._disparos_activos = False
         else:
             if self._jugador:
                 self._jugador.update_events(eventos)

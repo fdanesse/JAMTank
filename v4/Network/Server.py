@@ -195,15 +195,18 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
 
         new = {"ingame": True, "off": True}
         if self._dict_game["run"]:
-            # Persistencia de datos de jugador
+            # Persistencia de datos de jugador FIXME: y sus balas
             _ing = dict(_dict["ingame"])
+
             for key in _ing.keys():
                 self._players_dict[ip][key] = _ing[key]
+
             new = {"ingame": dict(self._players_dict)}
 
             # Control de latencia
             self.__latency_check(ip,
                 float("%.3f" % (_dict.get("l", 0.0))), new)
+
         else:
             # El host manda salir
             new = {
