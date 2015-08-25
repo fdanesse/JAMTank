@@ -32,6 +32,7 @@ class Juego(gobject.GObject):
 
         gobject.GObject.__init__(self)
 
+        self._ip = get_ip()
         self._res = False
         self._escenario = False
         self._win = False
@@ -46,6 +47,7 @@ class Juego(gobject.GObject):
 
         self._jugadores = pygame.sprite.RenderUpdates()
         self._balas = pygame.sprite.RenderUpdates()
+        self._mybalas = pygame.sprite.RenderUpdates()
         self._explosiones = pygame.sprite.RenderUpdates()
 
         self._default_retorno = {"ingame": True}
@@ -66,17 +68,18 @@ class Juego(gobject.GObject):
 
     def __check_disparos_and_balas(self):
         """
+        Actualizar posiciones de balas
         Disparos se convierte en balas rumbo al server
         """
         mybalas = []
         for bala in self._balas.sprites():
-            if bala.ip == self._client.ip:
+            if bala.ip == self._ip:
                 mybalas.append(bala.get_datos())
-        self._data_game_players[self._client.ip]["b"] = mybalas
+        self._data_game_players[self._ip]["b"] = mybalas
 
         if self._disparo:
             self._disparo = False
-            self._data_game_players[self._client.ip]["b"].append(
+            self._data_game_players[self._ip]["b"].append(
                 self._jugador.get_disparo())
             gobject.timeout_add(1000, self.__reactivar_disparos)
 
@@ -94,7 +97,7 @@ class Juego(gobject.GObject):
 
             # Datos de Balas locales
             _dict["ingame"]["b"] = self._data_game_players[
-                self._client.ip].get("b",[])
+                self._ip].get("b",[])
 
             if self._pausa:
                 # Si hay que corregir segun latencia general en el server
@@ -163,38 +166,33 @@ class Juego(gobject.GObject):
 
     def __save_balas_data(self, _dict):
         path = os.path.join(BASE_PATH, "Balas", "bala.png")
+
         for ip in _dict.keys():
             # balas en server
             balas = _dict[ip].get("b", [])
             # sprites de balas actuales
             actuales = []
-            for sprite in self._balas:
+            for sprite in self._balas.sprites():
                 if sprite.ip == ip:
                     actuales.append(sprite)
 
-            if not actuales:
-                # Si no hay balas de este jugador, crear las que vienen
-                for bdict in balas:
-                    self._balas.add(Bala(bdict, path, RES, self._client.ip))
-            else:
-                if len(actuales) < len(balas):
-                    # Agregar las que faltan pero en orden en el que viene en balas
-                    _id = actuales.index(actuales[-1])
-                    for bdict in balas[_id + 1:]:
-                        self._balas.add(Bala(bdict, path, RES, self._client.ip))
+            while len(actuales) < len(balas):
+                # Agregar las que faltan
+                _id = 0
+                if actuales:
+                    _id = actuales.index(actuales[-1]) + 1
+                b = Bala(balas[_id], path, RES, ip)
+                self._balas.add(b)
+                actuales.append(b)
+                # FIXME: audio Disparar
 
-                while len(actuales) > len(balas):
-                    # Quitar las que sobran
-                    a = actuales[0]
-                    for g in a.groups():
-                        g.remove(a)
-                    a.kill()
-
-            # Balas actuales de este jugador
-            actuales = []
-            for sprite in self._balas:
-                if sprite.ip == ip:
-                    actuales.append(sprite)
+            while len(actuales) > len(balas):
+                # Quitar las que sobran
+                a = actuales[0]
+                for g in a.groups():
+                    g.remove(a)
+                a.kill()
+                actuales.remove(a)
 
             # Actualizar posiciones
             for sprite in actuales:
@@ -213,7 +211,7 @@ class Juego(gobject.GObject):
             return False
 
         self.__save_players_data(dict(_dict.get("ingame", {})))
-        self.__save_balas_data(_dict["ingame"])
+        self.__save_balas_data(dict(_dict.get("ingame", {})))
 
         if "l" in _dict.keys():
             self.__set_latency(_dict)
@@ -227,11 +225,11 @@ class Juego(gobject.GObject):
 
         if self._jugador:
             self._jugador.process_events()
-        self._balas.update(self._client.ip)
+        self._balas.update(self._ip)
         # chekear colisiones
-        self.__check_disparos_and_balas()  # Pasar Disparos a balas
-        self.__enviar_datos()  # Recoger y Enviar datos de jugador y balas locales
-        self.__update_data(self.__recibir_datos())  # Recibir datos
+        self.__check_disparos_and_balas()
+        self.__enviar_datos()
+        self.__update_data(self.__recibir_datos())
 
         self._jugadores.draw(self._win)
         self._balas.draw(self._win)
@@ -282,10 +280,9 @@ class Juego(gobject.GObject):
         print "Cargando mapa:", mapa
         imagen = pygame.image.load(mapa)
         self._escenario = pygame.transform.scale(imagen, RES).convert_alpha()
-        ip = get_ip()
-        self._jugador = Jugador(RES, ip, tank, nick)
+        self._jugador = Jugador(RES, self._ip, tank, nick)
         self._jugadores.add(self._jugador)
-        self._data_game_players[ip] = {}
+        self._data_game_players[self._ip] = {}
 
     def pause_player(self):
         if self._jugador:

@@ -162,8 +162,8 @@ class JAMTank(gtk.Window):
         self.__reset()
         if accion == "run":
             new_dict = {
-                #'jugadores': int(_dict.get('enemigos', 1) + 1),
-                'jugadores': int(_dict.get('enemigos', 1)),
+                'jugadores': int(_dict.get('enemigos', 1) + 1),
+                #'jugadores': int(_dict.get('enemigos', 1)),
                 'mapa': str(_dict.get('mapa', '')),
                 'vidas': int(_dict.get('vidas', 5))
                 }
