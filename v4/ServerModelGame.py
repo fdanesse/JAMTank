@@ -253,7 +253,10 @@ class ServerModelGame(gobject.GObject):
                 elif ret == gtk.RESPONSE_CANCEL:
                     self.eventos = []
                     self.juego.reactivar_player()
-            self.juego.update_events(self.eventos)
+            try:
+                self.juego.update_events(self.eventos)
+            except:
+                print "#FIXME: Error:", self.process_key_press
         else:
             if nombre == "Escape":
                 self.emit("error")
@@ -264,7 +267,10 @@ class ServerModelGame(gobject.GObject):
             teclas = ["w", "s", "d", "a", "space", "Escape"]
             if nombre in teclas and nombre in self.eventos:
                 self.eventos.remove(nombre)
-            self.juego.update_events(self.eventos)
+            try:
+                self.juego.update_events(self.eventos)
+            except:
+                print "#FIXME: Error:", self.process_key_release
         else:
             self.eventos = []
 

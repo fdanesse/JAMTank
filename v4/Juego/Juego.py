@@ -11,6 +11,7 @@ import platform
 from Globales import get_ip
 from Jugador import Jugador
 from Bala import Bala
+from Explosion import Explosion
 from Sound import Sound
 
 RES = (800, 600)
@@ -102,8 +103,9 @@ class Juego(gobject.GObject):
                 self._ip].get("b",[])
 
             # Datos de Colisiones
-            _dict["ingame"]["c"] = self._data_game_players[
-                self._ip].get("c", [])
+            col = self._data_game_players[self._ip].get("c", [])
+            if col:
+                _dict["ingame"]["c"] = col
 
             if self._pausa:
                 # Si hay que corregir segun latencia general en el server
@@ -211,19 +213,27 @@ class Juego(gobject.GObject):
                 datos = balas[_id]
                 sprite.set_posicion(centerx=datos["x"], centery=datos["y"])
 
+    def __save_colisiones_data(self, _dict):
+        path = os.path.join(BASE_PATH, "Explosion")
+        for ip in _dict.keys():
+            exp = _dict[ip].get("e", [])
+            for e in exp:
+                self._explosiones.add(Explosion(e["x"], e["y"], path))
+
     def __check_collisions(self):
         """
         Colisiones tienen (ip de tanque tocado x, y), se envian estos datos
         y se quitan las balas de los datos a enviar, pero no se eliminan sus
         sprites hasta confirmación desde el server
         """
-        # desaparece bala que colisiona
         for jugador in self._jugadores.sprites():
             if jugador._ip != self._ip:
                 remover = []
                 for bala in self._data_game_players[self._ip].get("b", []):
                     x, y = bala["x"], bala["y"]
                     if jugador.rect.collidepoint((x, y)):
+                        if not "c" in self._data_game_players[self._ip].keys():
+                            self._data_game_players[self._ip]["c"] = []
                         self._data_game_players[self._ip]["c"].append(
                             {"ip": jugador._ip, "x": x, "y": y})
                         remover.append(
@@ -245,6 +255,7 @@ class Juego(gobject.GObject):
 
         self.__save_players_data(dict(_dict.get("ingame", {})))
         self.__save_balas_data(dict(_dict.get("ingame", {})))
+        self.__save_colisiones_data(dict(_dict.get("ingame", {})))
 
         if "l" in _dict.keys():
             self.__set_latency(_dict)
@@ -255,10 +266,12 @@ class Juego(gobject.GObject):
             gtk.main_iteration()
         self._balas.clear(self._win, self._escenario)
         self._jugadores.clear(self._win, self._escenario)
+        self._explosiones.clear(self._win, self._escenario)
 
         if self._jugador:
             self._jugador.process_events()
         self._balas.update(self._ip)
+        self._explosiones.update()
         self.__check_disparos_and_balas()
         self.__check_collisions()
         self.__enviar_datos()
@@ -266,6 +279,7 @@ class Juego(gobject.GObject):
 
         self._jugadores.draw(self._win)
         self._balas.draw(self._win)
+        self._explosiones.draw(self._win)
 
         self._real_win.blit(pygame.transform.scale(
             self._win, self._res), (0, 0))

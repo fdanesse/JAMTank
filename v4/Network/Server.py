@@ -148,8 +148,20 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
             self._enviar_lat.remove(ip)
             new["l"] = self._max_lat
 
+    def __convert_colisiones(self, ip):
+        # Convertir colisiones en explosiones
+        col = list(self._players_dict[ip].get("c", []))
+        exp = []
+        for c in col:
+            exp.append({"x": c["x"], "y": c["y"]})
+        self._players_dict[ip]["e"] = exp
+        if "c" in self._players_dict[ip].keys():
+            del(self._players_dict[ip]["c"])
+
     def __registrar(self, ip, _dict):
         self._players_dict[ip] = dict(_dict["register"])
+        self._players_dict[ip]["s"] = {"e": 100,
+            "v": self._dict_game["vidas"], "p": 0}
         self._dict_game["todos"] = bool(
             len(self._players_dict.keys()) == self._dict_game["jugadores"])
         if _dict.get("register", False):
@@ -200,6 +212,9 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
 
             for key in _ing.keys():
                 self._players_dict[ip][key] = _ing[key]
+
+            # Convertir colisiones en energia, vidas, puntos, explosiones
+            self.__convert_colisiones(ip)
 
             new = {"ingame": dict(self._players_dict)}
 
