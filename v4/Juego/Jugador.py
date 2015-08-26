@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import gobject
 import pygame
 from math import sin
 from math import cos
@@ -137,6 +138,12 @@ class Jugador(Sprite):
                 angulo=mydict.get("a", 0),
                 centerx=mydict.get("x", 0),
                 centery=mydict.get("y", 0))
+            #status = mydict.get("s", {})  # 's': {'p': 6, 'e': 100, 'v': 5}
+            #if not status.get("v", 0):
+            #    self.pausar()
+            #elif not status.get("e", 0):
+            #    self.pausar()
+            #    gobject.timeout_add(5000, self.reactivar)
         else:
             self.kill()
 
@@ -190,3 +197,4 @@ class Jugador(Sprite):
         self._estado = "activo"
         self.__set_posicion(angulo=0, centerx=self._res[0] / 2,
             centery=self._res[1] / 2)
+        #return False

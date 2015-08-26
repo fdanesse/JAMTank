@@ -222,6 +222,10 @@ class Juego(gobject.GObject):
             self._audio.explosion()
         for e in exp:
             self._explosiones.add(Explosion(e["x"], e["y"], path))
+        # Las explosiones no deben guardarse
+        for ip in self._data_game_players.keys():
+            if "e" in self._data_game_players[ip].keys():
+                del(self._data_game_players[ip]["e"])
 
     def __check_collisions(self):
         """

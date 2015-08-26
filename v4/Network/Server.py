@@ -159,17 +159,18 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
             del(self._players_dict[ip]["c"])
 
         # Convertir colisiones en energia, vidas, puntos,
-        #if col:
-        #    for c in col:
-        #        _ip, x, y = col["ip"], col["x"], col["y"]
-        #        ener = self._players_dict[_ip].get("e", 100)
-        #        ener -= 10
-        #        vida = self._players_dict[_ip].get("v", self._dict_game["vidas"])
-        #        if ener <= 0:
-        #            vida -= 1
-        #        if vida <= 0:
-        #            #Este jugador no puede jugar más
-        #            pass
+        #'s': {'p': 0, 'e': 100, 'v': 5})
+        for c in col:
+            _ip, x, y = c["ip"], c["x"], c["y"]
+            self._players_dict[_ip]["s"]["e"] -= 10
+            self._players_dict[ip]["s"]["p"] += 1
+            if self._players_dict[_ip]["s"]["e"] <= 0:
+                self._players_dict[_ip]["s"]["v"] -= 1
+                self._players_dict[ip]["s"]["p"] += 2
+            if self._players_dict[_ip]["s"]["v"] <= 0:
+                #Este jugador no puede jugar más
+                pass
+        # FIXME: Checkeo de fin del juego
 
     def __registrar(self, ip, _dict):
         self._players_dict[ip] = dict(_dict["register"])
