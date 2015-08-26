@@ -27,7 +27,6 @@ class Sound(gobject.GObject):
         #explosion = os.path.join(BASE_PATH, "Audio", "explosion.ogg")
         #self.sound_explosion = pygame.mixer.Sound(explosion)
 
-
     def disparo(self):
         channel = pygame.mixer.find_channel()
         if channel:

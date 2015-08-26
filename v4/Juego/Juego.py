@@ -101,6 +101,10 @@ class Juego(gobject.GObject):
             _dict["ingame"]["b"] = self._data_game_players[
                 self._ip].get("b",[])
 
+            # Datos de Colisiones
+            _dict["ingame"]["c"] = self._data_game_players[
+                self._ip].get("c", [])
+
             if self._pausa:
                 # Si hay que corregir segun latencia general en el server
                 time.sleep(self._pausa)
@@ -168,7 +172,13 @@ class Juego(gobject.GObject):
 
     def __save_balas_data(self, _dict):
         path = os.path.join(BASE_PATH, "Balas", "bala.png")
-        audio = False
+
+        b = 0
+        for ip in _dict.keys():
+            b += len(_dict[ip].get("b", []))
+        if b > len(self._balas.sprites()):
+            self._audio.disparo()
+
         for ip in _dict.keys():
             # balas en server
             balas = _dict[ip].get("b", [])
@@ -186,7 +196,6 @@ class Juego(gobject.GObject):
                 b = Bala(balas[_id], path, RES, ip)
                 self._balas.add(b)
                 actuales.append(b)
-                audio = True
 
             while len(actuales) > len(balas):
                 # Quitar las que sobran
@@ -201,8 +210,28 @@ class Juego(gobject.GObject):
                 _id = actuales.index(sprite)
                 datos = balas[_id]
                 sprite.set_posicion(centerx=datos["x"], centery=datos["y"])
-            if audio:
-                self._audio.disparo()
+
+    def __check_collisions(self):
+        """
+        Colisiones tienen (ip de tanque tocado x, y), se envian estos datos
+        y se quitan las balas de los datos a enviar, pero no se eliminan sus
+        sprites hasta confirmación desde el server
+        """
+        # desaparece bala que colisiona
+        for jugador in self._jugadores.sprites():
+            if jugador._ip != self._ip:
+                remover = []
+                for bala in self._data_game_players[self._ip].get("b", []):
+                    x, y = bala["x"], bala["y"]
+                    if jugador.rect.collidepoint((x, y)):
+                        self._data_game_players[self._ip]["c"].append(
+                            {"ip": jugador._ip, "x": x, "y": y})
+                        remover.append(
+                            self._data_game_players[self._ip]["b"].index(bala))
+                if remover:
+                    for _id in reversed(remover):
+                        bala = self._data_game_players[self._ip]["b"][_id]
+                        self._data_game_players[self._ip]["b"].remove(bala)
 
     def __update_data(self, _dict):
         if _dict.get("off", False):
@@ -230,8 +259,8 @@ class Juego(gobject.GObject):
         if self._jugador:
             self._jugador.process_events()
         self._balas.update(self._ip)
-        # chekear colisiones
         self.__check_disparos_and_balas()
+        self.__check_collisions()
         self.__enviar_datos()
         self.__update_data(self.__recibir_datos())
 
