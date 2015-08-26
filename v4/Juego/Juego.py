@@ -215,10 +215,13 @@ class Juego(gobject.GObject):
 
     def __save_colisiones_data(self, _dict):
         path = os.path.join(BASE_PATH, "Explosion")
+        exp = []
         for ip in _dict.keys():
-            exp = _dict[ip].get("e", [])
-            for e in exp:
-                self._explosiones.add(Explosion(e["x"], e["y"], path))
+            exp.extend(_dict[ip].get("e", []))
+        if exp:
+            self._audio.explosion()
+        for e in exp:
+            self._explosiones.add(Explosion(e["x"], e["y"], path))
 
     def __check_collisions(self):
         """

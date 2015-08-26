@@ -24,10 +24,16 @@ class Sound(gobject.GObject):
         disparo = os.path.join(BASE_PATH, "Audio", "disparo.ogg")
         self._disparo = pygame.mixer.Sound(disparo)
 
-        #explosion = os.path.join(BASE_PATH, "Audio", "explosion.ogg")
-        #self.sound_explosion = pygame.mixer.Sound(explosion)
+        explosion = os.path.join(BASE_PATH, "Audio", "explosion.ogg")
+        self._explosion = pygame.mixer.Sound(explosion)
 
     def disparo(self):
         channel = pygame.mixer.find_channel()
         if channel:
             channel.play(self._disparo)
+
+    def explosion(self):
+        channel = pygame.mixer.find_channel()
+        if channel:
+            channel.play(self._explosion)
+
