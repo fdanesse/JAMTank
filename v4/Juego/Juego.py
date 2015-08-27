@@ -3,7 +3,6 @@
 
 import os
 import pygame
-import random
 import gobject
 import gtk
 import time
@@ -100,7 +99,7 @@ class Juego(gobject.GObject):
 
             # Datos de Balas locales
             _dict["ingame"]["b"] = self._data_game_players[
-                self._ip].get("b",[])
+                self._ip].get("b", [])
 
             # Datos de Colisiones
             col = self._data_game_players[self._ip].get("c", [])
@@ -171,6 +170,11 @@ class Juego(gobject.GObject):
                 self._jugadores.add(jugador)
             self._data_game_players[key] = new[key]
         self._jugadores.update(new)
+
+        for key in self._data_game_players.keys():
+            if "p" in self._data_game_players[key].keys():
+                if not self._data_game_players[key]["p"]:
+                    del(self._data_game_players[key]["p"])
 
     def __save_balas_data(self, _dict):
         path = os.path.join(BASE_PATH, "Balas", "bala.png")
@@ -323,9 +327,10 @@ class Juego(gobject.GObject):
             self._estado = False
             return False
         if "space" in eventos:
-            if not self._disparo and self._disparos_activos:
-                self._disparo = True
-                self._disparos_activos = False
+            if self._jugador._estado == "activo":
+                if not self._disparo and self._disparos_activos:
+                    self._disparo = True
+                    self._disparos_activos = False
         else:
             if self._jugador:
                 self._jugador.update_events(eventos)

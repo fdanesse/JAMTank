@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import gobject
 import pygame
 from math import sin
 from math import cos
@@ -138,13 +137,16 @@ class Jugador(Sprite):
                 angulo=mydict.get("a", 0),
                 centerx=mydict.get("x", 0),
                 centery=mydict.get("y", 0))
-            #status = mydict.get("s", {})  # 's': {'p': 6, 'e': 100, 'v': 5}
-            #if not status.get("v", 0):
-            #    self.pausar()
-            #elif not status.get("e", 0):
-            #    self.pausar()
-            #    gobject.timeout_add(5000, self.reactivar)
+            if "p" in mydict.keys():
+                if mydict["p"]:
+                    if self._estado != "paused":
+                        self.pausar()
+                else:
+                    if self._estado != "activo":
+                        self.reactivar()
         else:
+            for g in self.groups():
+                g.remove(self)
             self.kill()
 
     def update_events(self, eventos):
@@ -160,7 +162,7 @@ class Jugador(Sprite):
         """
         Solo Jugador Local.
         """
-        if not self._eventos:
+        if not self._eventos or self._estado == "paused":
             return
 
         # girar en movimiento
@@ -197,4 +199,3 @@ class Jugador(Sprite):
         self._estado = "activo"
         self.__set_posicion(angulo=0, centerx=self._res[0] / 2,
             centery=self._res[1] / 2)
-        #return False

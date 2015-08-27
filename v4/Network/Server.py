@@ -110,6 +110,8 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         self._latencias = {}
         self._max_lat = 0.0
         self._enviar_lat = []
+        self._pause_players = {}
+        self._end_players = {}
 
         print "Server ON:", "ip:", host, "Port:", port
         print "\tDatos:"
@@ -159,18 +161,20 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
             del(self._players_dict[ip]["c"])
 
         # Convertir colisiones en energia, vidas, puntos,
-        #'s': {'p': 0, 'e': 100, 'v': 5})
         for c in col:
-            _ip, x, y = c["ip"], c["x"], c["y"]
-            self._players_dict[_ip]["s"]["e"] -= 10
+            jug, x, y = c["ip"], c["x"], c["y"]
+            self._players_dict[jug]["s"]["e"] -= 10
             self._players_dict[ip]["s"]["p"] += 1
-            if self._players_dict[_ip]["s"]["e"] <= 0:
-                self._players_dict[_ip]["s"]["v"] -= 1
+            if self._players_dict[jug]["s"]["e"] <= 0:
+                self._players_dict[jug]["s"]["v"] -= 1
                 self._players_dict[ip]["s"]["p"] += 2
-            if self._players_dict[_ip]["s"]["v"] <= 0:
-                #Este jugador no puede jugar más
-                pass
-        # FIXME: Checkeo de fin del juego
+                self._players_dict[jug]["p"] = True
+                # Este jugador se pausa 178 conexiones
+                self._pause_players[jug] = 178
+            if self._players_dict[jug]["s"]["v"] <= 0:
+                # Este jugador no puede jugar más
+                self._end_players[jug] = jug
+                del(self._pause_players[jug])
 
     def __registrar(self, ip, _dict):
         self._players_dict[ip] = dict(_dict["register"])
@@ -221,6 +225,7 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
 
         new = {"ingame": True, "off": True}
         if self._dict_game["run"]:
+
             # Persistencia de datos de jugador FIXME: y sus balas
             _ing = dict(_dict["ingame"])
 
@@ -230,12 +235,25 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
             # Convertir colisiones en energia, vidas, puntos, explosiones
             self.__convert_colisiones(ip)
 
+            # Jugadores se activan y reactivan cuando pierden vidas y energias
+            if ip in self._pause_players.keys():
+                self._pause_players[ip] -= 1
+                if not self._pause_players[ip]:
+                    self._players_dict[ip]["p"] = False
+                    self._players_dict[ip]["s"]["e"] = 100
+                    del(self._pause_players[ip])
+                else:
+                    self._players_dict[ip]["p"] = True
+            # Este jugador ya no tiene vidas disponibles
+            if ip in self._end_players.keys():
+                self._players_dict[ip]["p"] = True
+            # FIXME: Checkear fin de juego
+
             new = {"ingame": dict(self._players_dict)}
 
             # Control de latencia
             self.__latency_check(ip,
                 float("%.3f" % (_dict.get("l", 0.0))), new)
-
         else:
             # El host manda salir
             new = {
