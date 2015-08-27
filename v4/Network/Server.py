@@ -247,9 +247,16 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
             # Este jugador ya no tiene vidas disponibles
             if ip in self._end_players.keys():
                 self._players_dict[ip]["p"] = True
-            # FIXME: Checkear fin de juego
 
-            new = {"ingame": dict(self._players_dict)}
+            # Checkear fin de juego
+            k1 = len(self._end_players.keys())
+            k2 = len(self._players_dict.keys()) - 1
+            if k1 == k2:
+                new = {
+                    "ingame": dict(self._players_dict),
+                    "off": True}
+            else:
+                new = {"ingame": dict(self._players_dict)}
 
             # Control de latencia
             self.__latency_check(ip,
