@@ -10,10 +10,11 @@ BASE_PATH = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
 class StatusGame(gtk.Window):
 
-    def __init__(self, top, screen_wh):
+    def __init__(self, top, screen_wh, ip):
 
         gtk.Window.__init__(self, gtk.WINDOW_POPUP)
 
+        self._ip = ip
         w, h = screen_wh
         self.set_size_request(w / 4, h)
         self.set_resizable(False)
@@ -25,15 +26,18 @@ class StatusGame(gtk.Window):
         #self.set_keep_above(True)
 
         self._ranking = Ranking()
+        self._framejugador = FrameJugador()
 
         vbox = gtk.VBox()
         vbox.pack_start(self._ranking, False, False, 0)
+        vbox.pack_end(self._framejugador, False, False, 0)
         self.add(vbox)
 
         self.show_all()
 
     def update(self, juego, _dict):
         self._ranking._lista.update(_dict)
+        self._framejugador.update(_dict.get(self._ip))
 
 
 class Ranking(gtk.Frame):
@@ -129,3 +133,32 @@ class Lista(gtk.TreeView):
                 puntos = _dict[ip]["s"]["p"]
                 items.append([ip, pixbuf, path, nick, puntos])
         self.agregar_items(items)
+
+
+class FrameJugador(gtk.Frame):
+
+    def __init__(self):
+
+        gtk.Frame.__init__(self)
+
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        self.set_border_width(4)
+        self.set_label(" Ranking ")
+        event = gtk.EventBox()
+        event.set_border_width(4)
+        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        self._preview = gtk.Image()
+        event.add(self._preview)
+        self.add(event)
+        self.show_all()
+
+    def update(self, _dict):
+        nick = _dict["n"]
+        tanque = _dict["t"]
+        energia = _dict["s"]["e"]
+        vidas = _dict["s"]["v"]
+        if self.get_label() != nick:
+            self.set_label(" %s " % nick)
+            path = os.path.join(BASE_PATH, "Tanques", _dict["t"])
+            pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, 80, -1)
+            self._preview.set_from_pixbuf(pixbuf)

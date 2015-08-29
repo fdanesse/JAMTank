@@ -210,7 +210,8 @@ class JAMTank(gtk.Window):
         self.__kill_connectingplayers()
         xid = self.get_property('window').xid
         self.clientmodel.rungame(xid, self.gameres)
-        self._statusgame = StatusGame(self, self.screen_wh)
+        self._statusgame = StatusGame(self, self.screen_wh,
+            self.clientmodel.juego._ip)
         self.clientmodel.juego.connect("update", self._statusgame.update)
 
     def __accion_connecting_players_server(self, con_players, valor):
@@ -220,7 +221,8 @@ class JAMTank(gtk.Window):
             self.__kill_connectingplayers()
             xid = self.get_property('window').xid
             self.servermodel.rungame(xid, self.gameres)
-            self._statusgame = StatusGame(self, self.screen_wh)
+            self._statusgame = StatusGame(self, self.screen_wh,
+                self.servermodel.juego._ip)
             self.servermodel.juego.connect("update", self._statusgame.update)
         elif valor == "cancelar":
             self.__switch(False, 3)
