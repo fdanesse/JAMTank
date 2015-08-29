@@ -143,12 +143,22 @@ class FrameJugador(gtk.Frame):
 
         self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_border_width(4)
-        self.set_label(" Ranking ")
+        self.set_label(" Jugador ")
+
         event = gtk.EventBox()
         event.set_border_width(4)
         event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+
         self._preview = gtk.Image()
-        event.add(self._preview)
+        self._energia = FrameProgress("Energía:")
+        self._vidas = FrameProgress("Vidas:")
+
+        vbox = gtk.VBox()
+        vbox.pack_start(self._preview, False, False, 0)
+        vbox.pack_start(self._energia, False, False, 0)
+        vbox.pack_start(self._vidas, False, False, 0)
+
+        event.add(vbox)
         self.add(event)
         self.show_all()
 
@@ -162,3 +172,88 @@ class FrameJugador(gtk.Frame):
             path = os.path.join(BASE_PATH, "Tanques", _dict["t"])
             pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, 80, -1)
             self._preview.set_from_pixbuf(pixbuf)
+
+
+class FrameProgress(gtk.Frame):
+
+    def __init__(self, text):
+
+        gtk.Frame.__init__(self)
+
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        self.set_border_width(4)
+        self.set_label(" %s " % text)
+        event = gtk.EventBox()
+        event.set_border_width(4)
+        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        self._progress = Progreso()
+        event.add(self._progress)
+        self.add(event)
+        self.show_all()
+
+
+class Progreso(gtk.EventBox):
+    """
+    Barra de progreso para mostrar energia.
+    """
+
+    def __init__(self):
+
+        gtk.EventBox.__init__(self)
+
+        self.escala = ProgressBar(
+            gtk.Adjustment(0.0, 0.0, 101.0, 0.1, 1.0, 1.0))
+
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        self.valor = 0
+        self.add(self.escala)
+        self.show_all()
+        self.set_size_request(-1, 30)
+        self.set_progress(0)
+
+    def set_progress(self, valor=0):
+        if self.valor != valor:
+            self.valor = valor
+            self.escala.ajuste.set_value(valor)
+            self.escala.queue_draw()
+
+
+class ProgressBar(gtk.HScale):
+
+    def __init__(self, ajuste):
+
+        gtk.HScale.__init__(self)
+
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        self.ajuste = ajuste
+        self.set_digits(0)
+        self.set_draw_value(False)
+        self.borde = 10
+        self.connect("expose-event", self.__do_draw)
+        self.show_all()
+
+    def __do_draw(self, widget, event):
+        x, y, w, h = self.get_allocation()
+        gc = gtk.gdk.Drawable.new_gc(self.window)
+
+        # todo el widget
+        #gc.set_rgb_fg_color(gtk.gdk.Color(255, 255, 255))
+        #self.window.draw_rectangle(gc, True, x, y, w, h)
+
+        # vacio
+        gc.set_rgb_fg_color(gtk.gdk.Color(0, 0, 0))
+        ww = w - 10 * 2
+        xx = x + w / 2 - ww / 2
+        hh = 10
+        yy = y + h / 2 - 10 / 2
+        self.window.draw_rectangle(gc, True, xx, yy, ww, hh)
+
+        # progreso
+        ximage = int(self.ajuste.get_value() * ww / 100)
+        gc.set_rgb_fg_color(gtk.gdk.Color(23000, 41000, 12000))
+        self.window.draw_rectangle(gc, True, xx, yy, ximage, hh)
+
+        # borde de progreso
+        #gc.set_rgb_fg_color(get_colors("window"))
+        #self.window.draw_rectangle(gc, False, xx, yy, ww, hh)
+        return True
