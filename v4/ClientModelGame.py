@@ -126,14 +126,14 @@ class ClientModelGame(gobject.GObject):
             if "Escape" in self.eventos:
                 dialog = DialogoSalir(parent=self._topwin,
                 text="¿Abandonas el Juego?")
-                self.juego.pause_player()
+                self.juego._jugador.pausar()
                 ret = dialog.run()
                 dialog.destroy()
                 if ret == gtk.RESPONSE_ACCEPT:
                     self.eventos = ["Escape"]
                 elif ret == gtk.RESPONSE_CANCEL:
                     self.eventos = []
-                    self.juego.reactivar_player()
+                    self.juego._jugador.reactivar()
             try:
                 self.juego.update_events(self.eventos)
             except:

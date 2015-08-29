@@ -251,7 +251,7 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
             # Checkear fin de juego
             k1 = len(self._end_players.keys())
             k2 = len(self._players_dict.keys()) - 1
-            if k1 == k2:
+            if k1 >= k2:
                 new = {
                     "ingame": dict(self._players_dict),
                     "off": True}

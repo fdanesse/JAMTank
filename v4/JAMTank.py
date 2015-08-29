@@ -15,6 +15,7 @@ from gtkWidgets.StatusGame import StatusGame
 from gtkWidgets.CreateServerMode import CreateServerMode
 from gtkWidgets.ConnectingPlayers import ConnectingPlayers
 from gtkWidgets.CreateClientMode import CreateClientMode
+from gtkWidgets.DialogoEndGame import DialogoEndGame
 import Network
 from ServerModelGame import ServerModelGame
 from ClientModelGame import ClientModelGame
@@ -51,6 +52,7 @@ class JAMTank(gtk.Window):
         self.createservermode = False
         self.createclientmode = False
         self.connectingplayers = False
+        self._statusgame = False
 
         self.connect('key-press-event', self.__key_press_event)
         self.connect('key-release-event', self.__key_release_event)
@@ -196,9 +198,11 @@ class JAMTank(gtk.Window):
             self.__switch(False, 1)
 
     def __end_game(self, modelgame, _dict):
-        print "Juego Terminado:"
-        for item in _dict.items():
-            print "\t", item
+        #self.servermodel.juego.disconnect_by_func(self._statusgame.update)
+        dialog = DialogoEndGame(parent=self, _dict=_dict)
+        dialog.run()
+        dialog.destroy()
+        self._statusgame.destroy()
         self.__switch(False, 1)
 
     def __play_run(self, client_model):
@@ -206,7 +210,8 @@ class JAMTank(gtk.Window):
         self.__kill_connectingplayers()
         xid = self.get_property('window').xid
         self.clientmodel.rungame(xid, self.gameres)
-        #win = StatusGame(self, self.screen_wh)
+        self._statusgame = StatusGame(self, self.screen_wh)
+        self.clientmodel.juego.connect("update", self._statusgame.update)
 
     def __accion_connecting_players_server(self, con_players, valor):
         if valor == "jugar":
@@ -215,7 +220,8 @@ class JAMTank(gtk.Window):
             self.__kill_connectingplayers()
             xid = self.get_property('window').xid
             self.servermodel.rungame(xid, self.gameres)
-            #win = StatusGame(self, self.screen_wh)
+            self._statusgame = StatusGame(self, self.screen_wh)
+            self.servermodel.juego.connect("update", self._statusgame.update)
         elif valor == "cancelar":
             self.__switch(False, 3)
 

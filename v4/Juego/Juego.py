@@ -22,8 +22,8 @@ LAT = 100
 class Juego(gobject.GObject):
 
     __gsignals__ = {
-    #"update": (gobject.SIGNAL_RUN_LAST,
-    #    gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT, )),
+    "update": (gobject.SIGNAL_RUN_LAST,
+        gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT, )),
     #"end": (gobject.SIGNAL_RUN_LAST,
     #    gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT, )),
     "exit": (gobject.SIGNAL_RUN_LAST,
@@ -46,6 +46,7 @@ class Juego(gobject.GObject):
         self._disparo = False
         self._disparos_activos = True
         self._data_game_players = {}
+        self._contador = 0
 
         self._jugadores = pygame.sprite.RenderUpdates()
         self._balas = pygame.sprite.RenderUpdates()
@@ -299,6 +300,11 @@ class Juego(gobject.GObject):
         pygame.event.pump()
         pygame.event.clear()
 
+        if self._contador == 10:
+            self.emit("update", dict(self._data_game_players))
+            self._contador = 0
+        self._contador += 1
+
         if self._estado:
             return True
         else:
@@ -342,14 +348,6 @@ class Juego(gobject.GObject):
         self._jugador = Jugador(RES, self._ip, tank, nick)
         self._jugadores.add(self._jugador)
         self._data_game_players[self._ip] = {}
-
-    def pause_player(self):
-        if self._jugador:
-            self._jugador.pausar()
-
-    def reactivar_player(self):
-        if self._jugador:
-            self._jugador.reactivar()
 
     def config(self, res=(800, 600), client=False, xid=False):
         print "Configurando Juego:"
