@@ -8,6 +8,30 @@ import gtk
 BASE_PATH = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
 
+class DialogoEndGame(gtk.Dialog):
+
+    def __init__(self, parent=None, _dict={}):
+
+        gtk.Dialog.__init__(self, parent=parent,
+        buttons=("Salir", gtk.RESPONSE_CANCEL))
+
+        self.set_decorated(False)
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        self.set_border_width(15)
+
+        self._ranking = Ranking()
+        self.vbox.pack_start(self._ranking, True, True, 5)
+
+        self._ranking._lista.update(_dict)
+        self.vbox.show_all()
+        self.set_sensitive(False)
+        gobject.timeout_add(4000, self.__sensitive)
+
+    def __sensitive(self):
+        self.set_sensitive(True)
+        return False
+
+
 class StatusGame(gtk.Window):
 
     def __init__(self, top, screen_wh, ip, vidas):

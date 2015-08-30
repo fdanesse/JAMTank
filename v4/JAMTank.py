@@ -15,7 +15,7 @@ from gtkWidgets.StatusGame import StatusGame
 from gtkWidgets.CreateServerMode import CreateServerMode
 from gtkWidgets.ConnectingPlayers import ConnectingPlayers
 from gtkWidgets.CreateClientMode import CreateClientMode
-from gtkWidgets.DialogoEndGame import DialogoEndGame
+from gtkWidgets.StatusGame import DialogoEndGame
 import Network
 from ServerModelGame import ServerModelGame
 from ClientModelGame import ClientModelGame
