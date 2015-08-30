@@ -10,7 +10,7 @@ BASE_PATH = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
 class StatusGame(gtk.Window):
 
-    def __init__(self, top, screen_wh, ip):
+    def __init__(self, top, screen_wh, ip, vidas):
 
         gtk.Window.__init__(self, gtk.WINDOW_POPUP)
 
@@ -26,7 +26,7 @@ class StatusGame(gtk.Window):
         #self.set_keep_above(True)
 
         self._ranking = Ranking()
-        self._framejugador = FrameJugador()
+        self._framejugador = FrameJugador(vidas)
 
         vbox = gtk.VBox()
         vbox.pack_start(self._ranking, False, False, 0)
@@ -137,10 +137,11 @@ class Lista(gtk.TreeView):
 
 class FrameJugador(gtk.Frame):
 
-    def __init__(self):
+    def __init__(self, vidas):
 
         gtk.Frame.__init__(self)
 
+        self._max_vidas = vidas
         self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_border_width(4)
         self.set_label(" Jugador ")
@@ -164,14 +165,13 @@ class FrameJugador(gtk.Frame):
 
     def update(self, _dict):
         nick = _dict["n"]
-        tanque = _dict["t"]
-        energia = _dict["s"]["e"]
-        vidas = _dict["s"]["v"]
         if self.get_label() != nick:
             self.set_label(" %s " % nick)
             path = os.path.join(BASE_PATH, "Tanques", _dict["t"])
             pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, 80, -1)
             self._preview.set_from_pixbuf(pixbuf)
+        self._energia.update(100, _dict["s"]["e"])
+        self._vidas.update(self._max_vidas, _dict["s"]["v"])
 
 
 class FrameProgress(gtk.Frame):
@@ -190,6 +190,9 @@ class FrameProgress(gtk.Frame):
         event.add(self._progress)
         self.add(event)
         self.show_all()
+
+    def update(self, _max, val):
+        self._progress.set_progress(100 * val / _max)
 
 
 class Progreso(gtk.EventBox):
