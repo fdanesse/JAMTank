@@ -71,18 +71,18 @@ class JAMTank(gtk.Window):
         self.connect('key-press-event', self.__key_press_event)
         self.connect('key-release-event', self.__key_release_event)
         self.connect("realize", self.__do_realize)
-        self.connect("expose-event", self.__expose)
+        #self.connect("expose-event", self.__expose)
 
         self.show_all()
         print "JAMTank pid:", os.getpid()
         gobject.idle_add(self.__switch, False, 1)
 
-    def __expose(self, widget, context):
-        rect = self.get_allocation()
-        path = os.path.join(BASE, "Mapas", "f1.png")
-        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, rect.width, -1)
-        self.get_property("window").draw_pixbuf(None, pixbuf, 0, 0, 0, 0)
-        return True
+    #def __expose(self, widget, context):
+    #    rect = self.get_allocation()
+    #    path = os.path.join(BASE, "Mapas", "f1.png")
+    #    pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, rect.width, -1)
+    #    self.get_property("window").draw_pixbuf(None, pixbuf, 0, 0, 0, 0)
+    #    return True
 
     def __do_realize(self, widget):
         screen = self.get_screen()
@@ -95,6 +95,13 @@ class JAMTank(gtk.Window):
         print "Geometria:"
         print "\tGame:", self.gameres
         print "\tStatusGame:", (self.screen_wh[0] / 4, self.screen_wh[1])
+
+        path = os.path.join(BASE, "Mapas", "f1.png")
+        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, self.screen_wh[0], -1)
+        pixmap, mask = pixbuf.render_pixmap_and_mask()
+        style = self.style
+        style.bg_pixmap[gtk.STATE_NORMAL] = pixmap
+        self.set_style(style)
 
     def __reset(self):
         self.__kill_client_model()

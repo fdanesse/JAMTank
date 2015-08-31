@@ -19,9 +19,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import os
 import gtk
 import gobject
 from gtkWidgets.SelectWidgets import DialogoSalir
+
+BASE = os.path.dirname(os.path.dirname(__file__))
 
 
 class SelectMode(gtk.Window):
@@ -39,13 +42,45 @@ class SelectMode(gtk.Window):
         self.set_deletable(False)
         self.set_decorated(False)
         self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        self.set_border_width(15)
         self.set_transient_for(top)
 
-        child = IntroWidget()
-        self.add(child)
+        vbox = gtk.VBox()
+        boton = gtk.Button("Jugar Solo")
+        boton.connect("clicked", self.__emit_switch, "solo")
+        vbox.pack_start(boton, False, False, 0)
+        boton.set_sensitive(False)
+
+        boton = gtk.Button("Crear en Red")
+        boton.connect("clicked", self.__emit_switch, "red")
+        vbox.pack_start(boton, False, False, 0)
+
+        boton = gtk.Button("Unirse en Red")
+        boton.connect("clicked", self.__emit_switch, "join")
+        vbox.pack_start(boton, False, False, 0)
+
+        boton = gtk.Button("Creditos")
+        boton.connect("clicked", self.__emit_switch, "creditos")
+        vbox.pack_start(boton, False, False, 0)
+        boton.set_sensitive(False)
+
+        boton = gtk.Button("Salir")
+        boton.connect("clicked", self.__emit_switch, "salir")
+        vbox.pack_start(boton, False, False, 0)
+
+        self.connect("realize", self.__realize)
+
+        self.add(vbox)
         self.show_all()
 
-        child.connect("switch", self.__emit_switch)
+    def __realize(self, win):
+        rect = self.get_allocation()
+        path = os.path.join(BASE, "Iconos", "01.png")
+        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, rect.width, -1)
+        pixmap, mask = pixbuf.render_pixmap_and_mask()
+        style = self.style
+        style.bg_pixmap[gtk.STATE_NORMAL] = pixmap
+        self.set_style(style)
 
     def __emit_switch(self, widget, valor):
         if valor == "salir":
@@ -60,43 +95,3 @@ class SelectMode(gtk.Window):
                 self.show()
         else:
             self.emit("switch", valor)
-
-
-class IntroWidget(gtk.Table):
-
-    __gsignals__ = {
-    "switch": (gobject.SIGNAL_RUN_LAST,
-        gobject.TYPE_NONE, (gobject.TYPE_STRING, ))}
-
-    def __init__(self):
-
-        gtk.Table.__init__(self, rows=7, columns=3, homogeneous=True)
-
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
-
-        boton = gtk.Button("Jugar Solo")
-        boton.connect("clicked", self.__emit_switch, "solo")
-        self.attach(boton, 1, 2, 1, 2)
-        boton.set_sensitive(False)
-
-        boton = gtk.Button("Crear en Red")
-        boton.connect("clicked", self.__emit_switch, "red")
-        self.attach(boton, 1, 2, 2, 3)
-
-        boton = gtk.Button("Unirse en Red")
-        boton.connect("clicked", self.__emit_switch, "join")
-        self.attach(boton, 1, 2, 3, 4)
-
-        boton = gtk.Button("Creditos")
-        boton.connect("clicked", self.__emit_switch, "creditos")
-        self.attach(boton, 1, 2, 4, 5)
-        boton.set_sensitive(False)
-
-        boton = gtk.Button("Salir")
-        boton.connect("clicked", self.__emit_switch, "salir")
-        self.attach(boton, 1, 2, 5, 6)
-
-        self.show_all()
-
-    def __emit_switch(self, widget, valor):
-        self.emit("switch", valor)
