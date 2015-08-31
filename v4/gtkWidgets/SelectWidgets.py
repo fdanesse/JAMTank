@@ -203,7 +203,6 @@ class DialogoSalir(gtk.Dialog):
         "Si", gtk.RESPONSE_ACCEPT))
 
         self.set_decorated(False)
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_border_width(15)
 
         label = gtk.Label(text)

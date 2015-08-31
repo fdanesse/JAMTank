@@ -47,7 +47,6 @@ class JAMTank(gtk.Window):
 
         self.set_title("JAMTank")
         self.set_icon_from_file(os.path.join(BASE, "Iconos", "jamtank.svg"))
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#000000"))
         self.fullscreen()
 
         self.screen_wh = (640, 480)
@@ -71,18 +70,18 @@ class JAMTank(gtk.Window):
         self.connect('key-press-event', self.__key_press_event)
         self.connect('key-release-event', self.__key_release_event)
         self.connect("realize", self.__do_realize)
-        #self.connect("expose-event", self.__expose)
+        self.connect("expose-event", self.__expose)
 
         self.show_all()
         print "JAMTank pid:", os.getpid()
         gobject.idle_add(self.__switch, False, 1)
 
-    #def __expose(self, widget, context):
-    #    rect = self.get_allocation()
-    #    path = os.path.join(BASE, "Mapas", "f1.png")
-    #    pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, rect.width, -1)
-    #    self.get_property("window").draw_pixbuf(None, pixbuf, 0, 0, 0, 0)
-    #    return True
+    def __expose(self, widget, context):
+        rect = self.get_allocation()
+        path = os.path.join(BASE, "Mapas", "f1.png")
+        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, rect.width, -1)
+        self.get_property("window").draw_pixbuf(None, pixbuf, 0, 0, 0, 0)
+        return True
 
     def __do_realize(self, widget):
         screen = self.get_screen()
@@ -96,7 +95,7 @@ class JAMTank(gtk.Window):
         print "\tGame:", self.gameres
         print "\tStatusGame:", (self.screen_wh[0] / 4, self.screen_wh[1])
 
-        path = os.path.join(BASE, "Mapas", "f1.png")
+        path = os.path.join(BASE, "Iconos", "win01.png")
         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, self.screen_wh[0], -1)
         pixmap, mask = pixbuf.render_pixmap_and_mask()
         style = self.style
@@ -109,7 +108,6 @@ class JAMTank(gtk.Window):
         self.__kill_connectingplayers()
         self.__kill_create_mode()
         self.__kill_select_mode()
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#000000"))
 
     def __select_mode(self, widget, valor):
         self.__reset()  # Necesario

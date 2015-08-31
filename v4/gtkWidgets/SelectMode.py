@@ -24,8 +24,6 @@ import gtk
 import gobject
 from gtkWidgets.SelectWidgets import DialogoSalir
 
-BASE = os.path.dirname(os.path.dirname(__file__))
-
 
 class SelectMode(gtk.Window):
 
@@ -41,7 +39,6 @@ class SelectMode(gtk.Window):
         self.set_position(3)
         self.set_deletable(False)
         self.set_decorated(False)
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_border_width(15)
         self.set_transient_for(top)
 
@@ -68,19 +65,8 @@ class SelectMode(gtk.Window):
         boton.connect("clicked", self.__emit_switch, "salir")
         vbox.pack_start(boton, False, False, 0)
 
-        self.connect("realize", self.__realize)
-
         self.add(vbox)
         self.show_all()
-
-    def __realize(self, win):
-        rect = self.get_allocation()
-        path = os.path.join(BASE, "Iconos", "01.png")
-        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, rect.width, -1)
-        pixmap, mask = pixbuf.render_pixmap_and_mask()
-        style = self.style
-        style.bg_pixmap[gtk.STATE_NORMAL] = pixmap
-        self.set_style(style)
 
     def __emit_switch(self, widget, valor):
         if valor == "salir":

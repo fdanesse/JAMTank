@@ -23,7 +23,7 @@ import os
 import gobject
 import gtk
 
-BASE_PATH = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
+BASE = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
 
 class DialogoEndGame(gtk.Dialog):
@@ -34,7 +34,6 @@ class DialogoEndGame(gtk.Dialog):
         buttons=("Salir", gtk.RESPONSE_CANCEL))
 
         self.set_decorated(False)
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_border_width(15)
 
         self._ranking = Ranking()
@@ -62,10 +61,7 @@ class StatusGame(gtk.Window):
         self.set_resizable(False)
         self.move(w / 4 * 3, 0)
         self.set_deletable(False)
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_transient_for(top)
-        #self.set_keep_below(False)
-        #self.set_keep_above(True)
 
         self._ranking = Ranking()
         self._framejugador = FrameJugador(vidas)
@@ -74,7 +70,6 @@ class StatusGame(gtk.Window):
         vbox.pack_start(self._ranking, False, False, 0)
         vbox.pack_end(self._framejugador, False, False, 0)
         self.add(vbox)
-
         self.show_all()
 
     def update(self, juego, _dict):
@@ -88,12 +83,11 @@ class Ranking(gtk.Frame):
 
         gtk.Frame.__init__(self)
 
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_border_width(4)
         self.set_label(" Ranking ")
         event = gtk.EventBox()
         event.set_border_width(4)
-        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.set_property("visible-window", False)
         self._lista = Lista()
         event.add(self._lista)
         self.add(event)
@@ -169,7 +163,7 @@ class Lista(gtk.TreeView):
                 model = self.get_model()
                 model.set_value(_iter, 4, _dict[ip]["s"]["p"])
             else:
-                path = os.path.join(BASE_PATH, "Tanques", _dict[ip]["t"])
+                path = os.path.join(BASE, "Tanques", _dict[ip]["t"])
                 pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, 50, -1)
                 nick = _dict[ip]["n"]
                 puntos = _dict[ip]["s"]["p"]
@@ -184,13 +178,12 @@ class FrameJugador(gtk.Frame):
         gtk.Frame.__init__(self)
 
         self._max_vidas = vidas
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_border_width(4)
         self.set_label(" Jugador ")
 
         event = gtk.EventBox()
         event.set_border_width(4)
-        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.set_property("visible-window", False)
 
         self._preview = gtk.Image()
         self._energia = FrameProgress("Energía:")
@@ -209,7 +202,7 @@ class FrameJugador(gtk.Frame):
         nick = _dict["n"]
         if self.get_label() != nick:
             self.set_label(" %s " % nick)
-            path = os.path.join(BASE_PATH, "Tanques", _dict["t"])
+            path = os.path.join(BASE, "Tanques", _dict["t"])
             pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, 80, -1)
             self._preview.set_from_pixbuf(pixbuf)
         self._energia.update(100, _dict["s"]["e"])
@@ -222,12 +215,11 @@ class FrameProgress(gtk.Frame):
 
         gtk.Frame.__init__(self)
 
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_border_width(4)
         self.set_label(" %s " % text)
         event = gtk.EventBox()
         event.set_border_width(4)
-        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.set_property("visible-window", False)
         self._progress = Progreso()
         event.add(self._progress)
         self.add(event)
@@ -249,7 +241,7 @@ class Progreso(gtk.EventBox):
         self.escala = ProgressBar(
             gtk.Adjustment(0.0, 0.0, 101.0, 0.1, 1.0, 1.0))
 
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        self.set_property("visible-window", False)
         self.valor = 0
         self.add(self.escala)
         self.show_all()
@@ -269,7 +261,6 @@ class ProgressBar(gtk.HScale):
 
         gtk.HScale.__init__(self)
 
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.ajuste = ajuste
         self.set_digits(0)
         self.set_draw_value(False)

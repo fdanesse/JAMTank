@@ -26,7 +26,7 @@ from SelectWidgets import Lista
 from SelectWidgets import OponentesSelectBox
 from Globales import get_ip
 
-IMGPATH = os.path.dirname(os.path.dirname(__file__))
+BASE = os.path.dirname(os.path.dirname(__file__))
 
 
 class CreateServerMode(gtk.Dialog):
@@ -44,7 +44,6 @@ class CreateServerMode(gtk.Dialog):
         self.set_position(3)
         self.set_deletable(False)
         self.set_decorated(False)
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_transient_for(top)
 
         for child in self.vbox.get_children():
@@ -53,6 +52,7 @@ class CreateServerMode(gtk.Dialog):
         create_server = CreateServer()
         create_server.connect("accion", self.__accion)
         self.vbox.pack_start(create_server, True, True, 0)
+
         self.show_all()
 
     def __accion(self, widget, accion, _dict):
@@ -70,7 +70,7 @@ class CreateServer(gtk.EventBox):
 
         gtk.EventBox.__init__(self)
 
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        self.set_property("visible-window", False)
 
         self.game_dict = {
             'server': get_ip(),
@@ -88,7 +88,6 @@ class CreateServer(gtk.EventBox):
         self.oponentes = OponentesSelectBox()
 
         tabla = gtk.Table(columns=5, rows=6, homogeneous=True)
-        tabla.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
 
         self.framemapa = FrameMapa()
         tabla.attach_defaults(self.framemapa, 0, 2, 0, 3)
@@ -98,7 +97,7 @@ class CreateServer(gtk.EventBox):
 
         event = gtk.EventBox()
         event.set_border_width(10)
-        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.set_property("visible-window", False)
         event.add(self.mapaview)
         tabla.attach_defaults(event, 2, 5, 0, 3)
 
@@ -108,7 +107,7 @@ class CreateServer(gtk.EventBox):
         tabla.attach_defaults(self.framenick, 2, 5, 3, 4)
 
         event = gtk.EventBox()
-        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.set_property("visible-window", False)
         event.set_border_width(4)
         event.add(self.oponentes)
         tabla.attach_defaults(event, 3, 5, 4, 5)
@@ -136,7 +135,7 @@ class CreateServer(gtk.EventBox):
 
     def __do_realize(self, widget):
         elementos = []
-        mapas_path = os.path.join(IMGPATH, "Mapas")
+        mapas_path = os.path.join(BASE, "Mapas")
         for arch in sorted(os.listdir(mapas_path)):
             path = os.path.join(mapas_path, arch)
             archivo = os.path.basename(path)
@@ -144,7 +143,7 @@ class CreateServer(gtk.EventBox):
         self.framemapa.lista.limpiar()
         self.framemapa.lista.agregar_items(elementos)
         elementos = []
-        mapas_path = os.path.join(IMGPATH, "Tanques")
+        mapas_path = os.path.join(BASE, "Tanques")
         for arch in sorted(os.listdir(mapas_path)):
             path = os.path.join(mapas_path, arch)
             archivo = os.path.basename(path)
@@ -197,12 +196,11 @@ class FrameMapa(gtk.Frame):
 
         gtk.Frame.__init__(self)
 
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_border_width(4)
         self.set_label(" Selecciona el Mapa: ")
 
         event = gtk.EventBox()
-        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.set_property("visible-window", False)
         event.set_border_width(4)
         self.add(event)
 
@@ -223,7 +221,6 @@ class FrameTanque(gtk.Frame):
 
         gtk.Frame.__init__(self)
 
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_border_width(4)
         self.set_label(" Selecciona tu Tanque: ")
 
@@ -232,7 +229,7 @@ class FrameTanque(gtk.Frame):
 
         event = gtk.EventBox()
         event.set_border_width(4)
-        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.set_property("visible-window", False)
         self.add(event)
 
         scroll = gtk.ScrolledWindow()
@@ -249,13 +246,12 @@ class FrameNick(gtk.Frame):
 
         gtk.Frame.__init__(self)
 
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_border_width(4)
         self.set_label(" Escribe tu Apodo: ")
 
         event = gtk.EventBox()
         event.set_border_width(4)
-        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.set_property("visible-window", False)
         self.add(event)
         self.nick = gtk.Entry()
         self.nick.set_max_length(10)

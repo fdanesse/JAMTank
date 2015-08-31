@@ -26,7 +26,7 @@ import time
 from SelectWidgets import Lista
 from Network.ListenServers import ListenServers
 
-IMGPATH = os.path.dirname(os.path.dirname(__file__))
+BASE = os.path.dirname(os.path.dirname(__file__))
 
 
 class CreateClientMode(gtk.Dialog):
@@ -44,7 +44,6 @@ class CreateClientMode(gtk.Dialog):
         self.set_position(3)
         self.set_deletable(False)
         self.set_decorated(False)
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_transient_for(top)
 
         for child in self.vbox.get_children():
@@ -53,6 +52,7 @@ class CreateClientMode(gtk.Dialog):
         self.create_client = CreateClient()
         self.create_client.connect("accion", self.__accion)
         self.vbox.pack_start(self.create_client, True, True, 0)
+
         self.show_all()
 
         self._servers = {}
@@ -114,7 +114,7 @@ class CreateClient(gtk.EventBox):
 
         gtk.EventBox.__init__(self)
 
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        self.set_property("visible-window", False)
 
         self.player = {}
         self.server = {}
@@ -122,7 +122,6 @@ class CreateClient(gtk.EventBox):
         self.set_border_width(10)
 
         tabla = gtk.Table(columns=5, rows=6, homogeneous=True)
-        tabla.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
 
         self.framejuegos = FrameJuegos()
         tabla.attach_defaults(self.framejuegos, 0, 3, 0, 3)
@@ -164,7 +163,7 @@ class CreateClient(gtk.EventBox):
 
     def __do_realize(self, widget):
         elementos = []
-        mapas_path = os.path.join(IMGPATH, "Tanques")
+        mapas_path = os.path.join(BASE, "Tanques")
         for arch in sorted(os.listdir(mapas_path)):
             path = os.path.join(mapas_path, arch)
             archivo = os.path.basename(path)
@@ -206,7 +205,6 @@ class FrameTanque(gtk.Frame):
 
         gtk.Frame.__init__(self)
 
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_border_width(4)
         self.set_label(" Selecciona tu Tanque: ")
 
@@ -214,7 +212,7 @@ class FrameTanque(gtk.Frame):
 
         event = gtk.EventBox()
         event.set_border_width(4)
-        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.set_property("visible-window", False)
         self.add(event)
 
         self.lista.set_headers_visible(False)
@@ -232,13 +230,12 @@ class FrameNick(gtk.Frame):
 
         gtk.Frame.__init__(self)
 
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_border_width(4)
         self.set_label(" Escribe tu Apodo: ")
 
         event = gtk.EventBox()
         event.set_border_width(4)
-        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.set_property("visible-window", False)
         self.add(event)
         self.nick = gtk.Entry()
         self.nick.set_max_length(10)
@@ -253,7 +250,6 @@ class FrameJuegos(gtk.Frame):
 
         gtk.Frame.__init__(self)
 
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_border_width(4)
         self.set_label(" Juegos Creados: ")
 
@@ -261,7 +257,7 @@ class FrameJuegos(gtk.Frame):
 
         event = gtk.EventBox()
         event.set_border_width(4)
-        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.set_property("visible-window", False)
         self.add(event)
 
         self.lista.set_headers_visible(False)
@@ -384,7 +380,7 @@ class NewLista(gtk.TreeView):
         for key in news:
             _iter = self.__buscar(key)
             if _iter:
-                pixbuf = os.path.join(IMGPATH, "Mapas",
+                pixbuf = os.path.join(BASE, "Mapas",
                     _dict[key].get('mapa', ''))
                 if pixbuf:
                     if os.path.exists(pixbuf):
@@ -397,7 +393,7 @@ class NewLista(gtk.TreeView):
                 model.set_value(_iter, 4, _dict[key].get('vidas', ''))
                 model.set_value(_iter, 5, key)
             else:
-                pixbuf = os.path.join(IMGPATH, "Mapas",
+                pixbuf = os.path.join(BASE, "Mapas",
                     _dict[key].get('mapa', ''))
                 items.append([pixbuf, _dict[key].get('mapa', ''),
                     _dict[key].get('nickh', ''),

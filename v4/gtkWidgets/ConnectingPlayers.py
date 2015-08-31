@@ -23,7 +23,7 @@ import os
 import gtk
 import gobject
 
-ROOTPATH = os.path.dirname(os.path.dirname(__file__))
+BASE = os.path.dirname(os.path.dirname(__file__))
 
 
 class ConnectingPlayers(gtk.Dialog):
@@ -40,7 +40,6 @@ class ConnectingPlayers(gtk.Dialog):
         self.set_position(3)
         self.set_deletable(False)
         self.set_decorated(False)
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_transient_for(top)
 
         for child in self.vbox.get_children():
@@ -64,7 +63,7 @@ class ConnectingPlayers(gtk.Dialog):
             nick, _dict["vidas"])
         self.internal_widget.label.set_text(text)
         rect = self.internal_widget.framemapa.mapaview.get_allocation()
-        path = os.path.join(ROOTPATH, "Mapas", _dict["mapa"])
+        path = os.path.join(BASE, "Mapas", _dict["mapa"])
         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, -1, rect.height)
         self.internal_widget.framemapa.mapaview.set_from_pixbuf(pixbuf)
 
@@ -88,19 +87,17 @@ class InternalWidget(gtk.Frame):
 
         gtk.Frame.__init__(self)
 
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_border_width(15)
         self.set_label(" Esperando Jugadores... ")
 
         event = gtk.EventBox()
-        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.set_property("visible-window", False)
         event.set_border_width(6)
 
         tabla = gtk.Table(columns=4, rows=8, homogeneous=True)
         tabla.set_col_spacing(1, 10)
         tabla.set_col_spacing(2, 5)
         tabla.set_row_spacing(6, 10)
-        tabla.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         tabla.set_border_width(6)
 
         self.label = gtk.Label()
@@ -131,10 +128,9 @@ class FrameJugadores(gtk.Frame):
 
         self.set_label(" Jugadores: ")
         self.set_border_width(4)
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
 
         event = gtk.EventBox()
-        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.set_property("visible-window", False)
         event.set_border_width(4)
         self.jugadores = NewLista()
         self.jugadores.set_headers_visible(False)
@@ -153,13 +149,12 @@ class FrameMapa(gtk.Frame):
         gtk.Frame.__init__(self)
 
         self.set_label(" Mapa: ")
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
         self.set_border_width(4)
 
         self.mapaview = gtk.Image()
         event = gtk.EventBox()
         event.set_border_width(4)
-        event.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffeeaa"))
+        event.set_property("visible-window", False)
         event.add(self.mapaview)
 
         self.add(event)
@@ -245,7 +240,7 @@ class NewLista(gtk.TreeView):
         for item in items:
             pix, nick, ip = item
             if pix:
-                pix = os.path.join(ROOTPATH, "Tanques", pix)
+                pix = os.path.join(BASE, "Tanques", pix)
             _iter = self.__buscar(ip)
             if _iter:
                 if os.path.exists(pix):
