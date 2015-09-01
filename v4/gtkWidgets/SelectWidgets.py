@@ -112,7 +112,8 @@ class Lista(gtk.TreeView):
 
     def __init__(self):
 
-        gtk.TreeView.__init__(self)
+        gtk.TreeView.__init__(self, gtk.ListStore(gtk.gdk.Pixbuf,
+            gobject.TYPE_STRING, gobject.TYPE_STRING))
 
         self.set_property("rules-hint", True)
         self.set_headers_clickable(True)
@@ -120,12 +121,7 @@ class Lista(gtk.TreeView):
 
         self.permitir_select = True
         self.valor_select = None
-
-        self.modelo = gtk.ListStore(gtk.gdk.Pixbuf, gobject.TYPE_STRING,
-            gobject.TYPE_STRING)
-
         self.__setear_columnas()
-        self.set_model(self.modelo)
 
         self.get_selection().connect('changed', self.__selecciones)
         self.show_all()
@@ -134,10 +130,10 @@ class Lista(gtk.TreeView):
         if not self.permitir_select:
             return True
         model, pathlist = seleccion.get_selected_rows()
-        iter = model.get_iter(pathlist[0])
-        valor = model.get_value(iter, 2)
+        _iter = model.get_iter(pathlist[0])
+        valor = model.get_value(_iter, 2)
         self.valor_select = valor
-        self.scroll_to_cell(model.get_path(iter))
+        self.scroll_to_cell(model.get_path(_iter))
         self.emit('nueva-seleccion', self.valor_select)
         return True
 
@@ -174,7 +170,7 @@ class Lista(gtk.TreeView):
         texto = texto.split('.')[0]
         icono = os.path.join(path)
         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(icono, 50, -1)
-        self.modelo.append([pixbuf, texto, path])
+        self.get_model().append([pixbuf, texto, path])
 
         elementos.remove(elementos[0])
         gobject.idle_add(self.__ejecutar_agregar_elemento, elementos)
@@ -182,7 +178,7 @@ class Lista(gtk.TreeView):
 
     def limpiar(self):
         self.permitir_select = False
-        self.modelo.clear()
+        self.get_model().clear()
         self.permitir_select = True
 
     def agregar_items(self, elementos):
@@ -191,7 +187,7 @@ class Lista(gtk.TreeView):
         gobject.idle_add(self.__ejecutar_agregar_elemento, elementos)
 
     def seleccionar_primero(self, widget=None):
-        self.get_selection().select_path(0)
+        self.get_selection().select_iter(self.get_model().get_iter_first())
 
 
 class DialogoSalir(gtk.Dialog):

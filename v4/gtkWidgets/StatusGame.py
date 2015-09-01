@@ -156,19 +156,22 @@ class Lista(gtk.TreeView):
         gobject.idle_add(self.__ejecutar_agregar_elemento, elementos)
 
     def update(self, _dict):
-        items = []
-        for ip in _dict.keys():
-            _iter = self.__buscar(ip)
-            if _iter:
-                model = self.get_model()
-                model.set_value(_iter, 4, _dict[ip]["s"]["p"])
-            else:
-                path = os.path.join(BASE, "Tanques", _dict[ip]["t"])
-                pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, 50, -1)
-                nick = _dict[ip]["n"]
-                puntos = _dict[ip]["s"]["p"]
-                items.append([ip, pixbuf, path, nick, puntos])
-        self.agregar_items(items)
+        try:
+            items = []
+            for ip in _dict.keys():
+                _iter = self.__buscar(ip)
+                if _iter:
+                    model = self.get_model()
+                    model.set_value(_iter, 4, _dict[ip]["s"]["p"])
+                else:
+                    nick = _dict[ip]["n"]
+                    puntos = _dict[ip]["s"]["p"]
+                    path = os.path.join(BASE, "Tanques", _dict[ip]["t"])
+                    pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, 50, -1)
+                    items.append([ip, pixbuf, path, nick, puntos])
+            self.agregar_items(items)
+        except:
+            print "ERROR:", self.update, _dict
 
 
 class FrameJugador(gtk.Frame):
@@ -199,14 +202,17 @@ class FrameJugador(gtk.Frame):
         self.show_all()
 
     def update(self, _dict):
-        nick = _dict["n"]
-        if self.get_label() != nick:
-            self.set_label(" %s " % nick)
-            path = os.path.join(BASE, "Tanques", _dict["t"])
-            pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, 80, -1)
-            self._preview.set_from_pixbuf(pixbuf)
-        self._energia.update(100, _dict["s"]["e"])
-        self._vidas.update(self._max_vidas, _dict["s"]["v"])
+        try:
+            nick = _dict["n"]
+            if self.get_label() != nick:
+                self.set_label(" %s " % nick)
+                path = os.path.join(BASE, "Tanques", _dict["t"])
+                pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, 80, -1)
+                self._preview.set_from_pixbuf(pixbuf)
+            self._energia.update(100, _dict["s"]["e"])
+            self._vidas.update(self._max_vidas, _dict["s"]["v"])
+        except:
+            print "ERROR:", self.update, _dict
 
 
 class FrameProgress(gtk.Frame):

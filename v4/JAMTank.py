@@ -265,7 +265,6 @@ class JAMTank(gtk.Window):
         self.__switch(False, 1)
 
     def __play_run(self, client_model):
-        self.__play_music_game()
         self.clientmodel.new_handler_registro(False)
         self.__kill_connectingplayers()
         xid = self.get_property('window').xid
@@ -274,10 +273,10 @@ class JAMTank(gtk.Window):
         self._statusgame = StatusGame(self, self.screen_wh,
             self.clientmodel.juego._ip, vidas)
         self.clientmodel.juego.connect("update", self._statusgame.update)
+        self.__play_music_game()
 
     def __accion_connecting_players_server(self, con_players, valor):
         if valor == "jugar":
-            self.__play_music_game()
             self.servermodel.new_handler_anuncio(False)
             self.servermodel.new_handler_registro(False)
             self.__kill_connectingplayers()
@@ -287,6 +286,7 @@ class JAMTank(gtk.Window):
             self._statusgame = StatusGame(self, self.screen_wh,
                 self.servermodel.juego._ip, vidas)
             self.servermodel.juego.connect("update", self._statusgame.update)
+            self.__play_music_game()
         elif valor == "cancelar":
             self.__switch(False, 3)
 
