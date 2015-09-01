@@ -33,7 +33,6 @@ from Sound import Sound
 
 RES = (800, 600)
 BASE_PATH = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
-OLPC = bool('olpc' in platform.platform())
 LAT = 100
 
 

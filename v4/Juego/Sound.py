@@ -33,11 +33,7 @@ class Sound(gobject.GObject):
         gobject.GObject.__init__(self)
 
         pygame.mixer.init(44100, -16, 2, 2048)
-        pygame.mixer.music.set_volume(1.0)
-        #path = os.path.dirname(BASE_PATH)
-        #sound = os.path.join(path, "Audio", "Juego.ogg")
-        #self.sound_juego = pygame.mixer.Sound(sound)
-        #self.sound_juego.play(-1)
+        pygame.mixer.music.set_volume(0.1)
 
         disparo = os.path.join(BASE_PATH, "Audio", "disparo.ogg")
         self._disparo = pygame.mixer.Sound(disparo)

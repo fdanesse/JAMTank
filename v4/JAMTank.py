@@ -104,15 +104,23 @@ class JAMTank(gtk.Window):
         style.bg_pixmap[gtk.STATE_NORMAL] = pixmap
         self.set_style(style)
 
-        self.__play_intro()
+        self.__play_music_intro()
 
-    def __play_intro(self, widget=False):
+    def __play_music_intro(self, widget=False):
         self.__stop_player()
         self._player = Player()
         self._player.load(os.path.join(BASE, "Audio", "musica01.ogg"))
         self._player.play()
         self._player.set_volumen(1.0)
-        self._player.connect("endfile", self.__play_intro)
+        self._player.connect("endfile", self.__play_music_intro)
+
+    def __play_music_game(self, widget=False):
+        self.__stop_player()
+        self._player = Player()
+        self._player.load(os.path.join(BASE, "Audio", "musica02.ogg"))
+        self._player.play()
+        self._player.set_volumen(1.0)
+        self._player.connect("endfile", self.__play_music_game)
 
     def __stop_player(self):
         if self._player:
@@ -246,7 +254,7 @@ class JAMTank(gtk.Window):
 
     def __end_game(self, modelgame, _dict):
         #self.servermodel.juego.disconnect_by_func(self._statusgame.update)
-        self.__play_intro()
+        self.__play_music_intro()
         dialog = DialogoEndGame(parent=self, _dict=_dict)
         dialog.run()
         dialog.destroy()
@@ -254,7 +262,7 @@ class JAMTank(gtk.Window):
         self.__switch(False, 1)
 
     def __play_run(self, client_model):
-        self.__stop_player()
+        self.__play_music_game()
         self.clientmodel.new_handler_registro(False)
         self.__kill_connectingplayers()
         xid = self.get_property('window').xid
@@ -266,7 +274,7 @@ class JAMTank(gtk.Window):
 
     def __accion_connecting_players_server(self, con_players, valor):
         if valor == "jugar":
-            self.__stop_player()
+            self.__play_music_game()
             self.servermodel.new_handler_anuncio(False)
             self.servermodel.new_handler_registro(False)
             self.__kill_connectingplayers()
