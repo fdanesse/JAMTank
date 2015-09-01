@@ -30,6 +30,7 @@ from gtkWidgets.CreateServerMode import CreateServerMode
 from gtkWidgets.ConnectingPlayers import ConnectingPlayers
 from gtkWidgets.CreateClientMode import CreateClientMode
 from gtkWidgets.StatusGame import DialogoEndGame
+from gtkWidgets.Credits import Credits
 import Network
 from ServerModelGame import ServerModelGame
 from ClientModelGame import ClientModelGame
@@ -177,8 +178,10 @@ class JAMTank(gtk.Window):
                 self.__accion_create_client)
             self.handlers['createclientmode'].append(_id)
         elif valor == 5:
-            # Creditos
-            pass
+            dialog = Credits(self)
+            dialog.run()
+            dialog.destroy()
+            self.__switch(False, 1)
 
     def __accion_create_client(self, mode_client, accion,
         server_dict, player_dict):

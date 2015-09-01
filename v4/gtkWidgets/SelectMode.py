@@ -59,7 +59,6 @@ class SelectMode(gtk.Window):
         boton = gtk.Button("Creditos")
         boton.connect("clicked", self.__emit_switch, "creditos")
         vbox.pack_start(boton, False, False, 0)
-        boton.set_sensitive(False)
 
         boton = gtk.Button("Salir")
         boton.connect("clicked", self.__emit_switch, "salir")
