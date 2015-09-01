@@ -33,10 +33,11 @@ from gtkWidgets.StatusGame import DialogoEndGame
 import Network
 from ServerModelGame import ServerModelGame
 from ClientModelGame import ClientModelGame
+from Player.Player import Player
 
 gobject.threads_init()
 
-BASE = os.path.dirname(__file__)
+BASE = os.path.dirname(os.path.realpath(__file__))
 
 
 class JAMTank(gtk.Window):
@@ -66,6 +67,7 @@ class JAMTank(gtk.Window):
         self.createclientmode = False
         self.connectingplayers = False
         self._statusgame = False
+        self._player = False
 
         self.connect('key-press-event', self.__key_press_event)
         self.connect('key-release-event', self.__key_release_event)
@@ -102,7 +104,24 @@ class JAMTank(gtk.Window):
         style.bg_pixmap[gtk.STATE_NORMAL] = pixmap
         self.set_style(style)
 
+        self.__play_intro()
+
+    def __play_intro(self, widget=False):
+        self.__stop_player()
+        self._player = Player()
+        self._player.load(os.path.join(BASE, "Audio", "musica01.ogg"))
+        self._player.play()
+        self._player.set_volumen(1.0)
+        self._player.connect("endfile", self.__play_intro)
+
+    def __stop_player(self):
+        if self._player:
+            self._player.stop()
+            del(self._player)
+            self._player = False
+
     def __reset(self):
+        self.__expose(False, False)
         self.__kill_client_model()
         self.__kill_server_model()
         self.__kill_connectingplayers()
@@ -120,6 +139,7 @@ class JAMTank(gtk.Window):
         elif valor == "creditos":
             self.__switch(False, 5)
         elif valor == "salir":
+            self.__stop_player()
             self.destroy()
 
     def __switch(self, widget, valor):
@@ -226,6 +246,7 @@ class JAMTank(gtk.Window):
 
     def __end_game(self, modelgame, _dict):
         #self.servermodel.juego.disconnect_by_func(self._statusgame.update)
+        self.__play_intro()
         dialog = DialogoEndGame(parent=self, _dict=_dict)
         dialog.run()
         dialog.destroy()
@@ -233,6 +254,7 @@ class JAMTank(gtk.Window):
         self.__switch(False, 1)
 
     def __play_run(self, client_model):
+        self.__stop_player()
         self.clientmodel.new_handler_registro(False)
         self.__kill_connectingplayers()
         xid = self.get_property('window').xid
@@ -244,6 +266,7 @@ class JAMTank(gtk.Window):
 
     def __accion_connecting_players_server(self, con_players, valor):
         if valor == "jugar":
+            self.__stop_player()
             self.servermodel.new_handler_anuncio(False)
             self.servermodel.new_handler_registro(False)
             self.__kill_connectingplayers()
