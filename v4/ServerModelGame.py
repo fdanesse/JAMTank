@@ -108,7 +108,7 @@ class ServerModelGame(gobject.GObject):
                 if not self.publicar:
                     self.new_handler_anuncio(True)
         else:
-            print "FIXME: Host no aceptado como jugador."
+            print "Cliente Host Rechazado:", _dict
             self.emit("error")
         return bool(self.registro)
 
@@ -165,7 +165,7 @@ class ServerModelGame(gobject.GObject):
                 print "\t\t", item
             return True
         else:
-            print "Cliente del Host rechazado por el Servidor"
+            print "Cliente Host Rechazado:", _dict
             return False
 
     def __kill_server(self):
@@ -223,7 +223,7 @@ class ServerModelGame(gobject.GObject):
         if self.__client_run():
             return True
         else:
-            print "FIXME: El Cliente del host falla en el registro"
+            print "ERROR: Cliente del host falla en el registro"
             self.__kill_client()
             self.__kill_server()
             self.emit("error")
@@ -233,8 +233,8 @@ class ServerModelGame(gobject.GObject):
         self.new_handler_anuncio(False)
         self.new_handler_registro(False)
 
-        # FIXME: Cuidado, no llamar a esta funcion si no se esta en fase de
-        # registro de los jugadores. Si hay un juego corriendo todo cae.
+        # Cuidado, no llamar a esta funcion si no se esta en fase de
+        # registro. Si hay un juego corriendo todo cae.
         if self.client:
             time.sleep(0.5)
             new = {"ingame": True, "off": True}
@@ -274,7 +274,7 @@ class ServerModelGame(gobject.GObject):
             try:
                 self.juego.update_events(self.eventos)
             except:
-                print "#FIXME: Error:", self.process_key_press
+                print "Error:", self.process_key_press
         else:
             if nombre == "Escape":
                 self.emit("error")
@@ -288,7 +288,7 @@ class ServerModelGame(gobject.GObject):
             try:
                 self.juego.update_events(self.eventos)
             except:
-                print "#FIXME: Error:", self.process_key_release
+                print "Error:", self.process_key_release
         else:
             self.eventos = []
 

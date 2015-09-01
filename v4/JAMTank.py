@@ -99,7 +99,8 @@ class JAMTank(gtk.Window):
         print "\tStatusGame:", (self.screen_wh[0] / 4, self.screen_wh[1])
 
         path = os.path.join(BASE, "Iconos", "win01.png")
-        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, self.screen_wh[0], -1)
+        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path,
+            self.screen_wh[0], -1)
         pixmap, mask = pixbuf.render_pixmap_and_mask()
         style = self.style
         style.bg_pixmap[gtk.STATE_NORMAL] = pixmap
@@ -214,7 +215,7 @@ class JAMTank(gtk.Window):
                 self.handlers['clientmodel'].append(_id)
                 self.clientmodel.new_handler_registro(True)
             else:
-                print "FIXME:", self.__accion_create_client
+                print "ERROR:", self.__accion_create_client
         elif accion == "salir":
             self.__switch(False, 1)
 
@@ -251,7 +252,7 @@ class JAMTank(gtk.Window):
                 self.handlers['servermodel'].append(_id)
                 self.servermodel.new_handler_registro(True)
             else:
-                print "FIXME:", self.__accion_create_server
+                print "ERROR:", self.__accion_create_server
         elif accion == "salir":
             self.__switch(False, 1)
 

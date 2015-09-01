@@ -71,7 +71,7 @@ class ClientModelGame(gobject.GObject):
             if _dict["game"].get("run", False):
                 self.emit("play-run")
         else:
-            print "FIXME: Cliente no aceptado como jugador."
+            print "Cliente no Host Rechazado:", _dict
             self.emit("error")
         return bool(self.registro)
 
@@ -92,7 +92,7 @@ class ClientModelGame(gobject.GObject):
                 print "\t\t", item
             return True
         else:
-            print "Cliente no Host rechazado por el Servidor"
+            print "Cliente no Host Rechazado:", _dict
             return False
 
     def __kill_client(self):
@@ -155,7 +155,7 @@ class ClientModelGame(gobject.GObject):
             try:
                 self.juego.update_events(self.eventos)
             except:
-                print "#FIXME: Error:", self.process_key_press
+                print "Error:", self.process_key_press
         else:
             if nombre == "Escape":
                 self.emit("error")
@@ -169,7 +169,7 @@ class ClientModelGame(gobject.GObject):
             try:
                 self.juego.update_events(self.eventos)
             except:
-                print "#FIXME: Error:", self.process_key_release
+                print "Error:", self.process_key_release
         else:
             self.eventos = []
 
