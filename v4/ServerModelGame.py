@@ -31,7 +31,7 @@ from gtkWidgets.SelectWidgets import DialogoSalir
 from Network.Server import Server
 from Network.Server import RequestHandler
 from Network.Client import Client
-from Juego.Juego import Juego
+from MultiplayerGame.Juego import Juego
 
 BASE_PATH = os.path.realpath(os.path.dirname(__file__))
 

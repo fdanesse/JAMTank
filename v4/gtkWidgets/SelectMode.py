@@ -46,7 +46,6 @@ class SelectMode(gtk.Window):
         boton = gtk.Button("Jugar Solo")
         boton.connect("clicked", self.__emit_switch, "solo")
         vbox.pack_start(boton, False, False, 0)
-        boton.set_sensitive(False)
 
         boton = gtk.Button("Crear en Red")
         boton.connect("clicked", self.__emit_switch, "red")

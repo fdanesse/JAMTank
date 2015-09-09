@@ -34,6 +34,7 @@ from gtkWidgets.Credits import Credits
 import Network
 from ServerModelGame import ServerModelGame
 from ClientModelGame import ClientModelGame
+from SingleModelGame import SingleModelGame
 from Player.Player import Player
 
 gobject.threads_init()
@@ -64,6 +65,7 @@ class JAMTank(gtk.Window):
         self.selectmode = False
         self.servermodel = False
         self.clientmodel = False
+        self.singlemode = False
         self.createservermode = False
         self.createclientmode = False
         self.connectingplayers = False
@@ -161,7 +163,18 @@ class JAMTank(gtk.Window):
             self.handlers['selectmode'].append(_id)
         elif valor == 2:
             # Jugar Solo
-            pass
+            self.singlemode = SingleModelGame(self)
+            #_id = self.singlemode.connect("close", self.__switch, 1)
+            #self.handlers['singlemode'].append(_id)
+            #_id = self.singlemode.connect("accion",
+            #    self.__accion_create_server)
+            #self.handlers['singlemode'].append(_id)
+            xid = self.get_property('window').xid
+            self.singlemode.rungame(xid, self.gameres)
+            #self._statusgame = StatusGame(self, self.screen_wh,
+            #    self.clientmodel.juego._ip, vidas)
+            #self.singlemode.juego.connect("update", self._statusgame.update)
+            #self.__play_music_game()
         elif valor == 3:
             # Crear Juego en Red
             self.createservermode = CreateServerMode(self)
@@ -332,6 +345,8 @@ class JAMTank(gtk.Window):
             self.servermodel.process_key_press(event)
         elif self.clientmodel:
             self.clientmodel.process_key_press(event)
+        elif self.singlemode:
+            self.singlemode.process_key_press(event)
         return False
 
     def __key_release_event(self, widget, event):
@@ -339,6 +354,8 @@ class JAMTank(gtk.Window):
             self.servermodel.process_key_release(event)
         elif self.clientmodel:
             self.clientmodel.process_key_release(event)
+        elif self.singlemode:
+            self.singlemode.process_key_release(event)
         return False
 
     def __kill_create_mode(self):
