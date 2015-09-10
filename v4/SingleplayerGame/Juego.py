@@ -32,7 +32,6 @@ from Sound import Sound
 
 RES = (800, 600)
 BASE_PATH = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
-LAT = 100
 
 
 class Juego(gobject.GObject):
@@ -89,152 +88,6 @@ class Juego(gobject.GObject):
                 self._jugador.get_disparo())
             gobject.timeout_add(1000, self.__reactivar_disparos)
 
-    def __enviar_datos(self):
-        if self._client:
-            # Datos de posicion del jugador local
-            _dict = {"ingame": self._jugador.get_datos()}
-
-            if not self._promedio:
-                # Calcula latencia y la envia luego de las primeras LAT pasadas
-                promedio = self.__check_latency()
-                if promedio:
-                    print "Cliente Enviando Latencia local:", promedio
-                    _dict["l"] = promedio
-
-            # Datos de Balas locales
-            _dict["ingame"]["b"] = self._data_game_players[
-                self._ip].get("b", [])
-
-            # Datos de Colisiones
-            col = self._data_game_players[self._ip].get("c", [])
-            if col:
-                _dict["ingame"]["c"] = col
-
-            if self._pausa:
-                # Si hay que corregir segun latencia general en el server
-                time.sleep(self._pausa)
-
-            self._client.enviar(_dict)
-
-    def __recibir_datos(self):
-        self._default_retorno = self._client.recibir(
-            dict(self._default_retorno))
-        return self._default_retorno
-
-    def __save_players_data(self, new):
-        """
-        Persistencia de datos de jugadores y balas.
-        """
-        ips = self._data_game_players.keys()
-        for key in new.keys():
-            if not key in ips:
-                tanque = os.path.join(BASE_PATH, "Tanques", new[key]["t"])
-                jugador = Jugador(RES, key, tanque, new[key]["n"])
-                self._jugadores.add(jugador)
-            self._data_game_players[key] = new[key]
-        self._jugadores.update(new)
-
-        for key in self._data_game_players.keys():
-            if "p" in self._data_game_players[key].keys():
-                if not self._data_game_players[key]["p"]:
-                    del(self._data_game_players[key]["p"])
-
-    def __save_balas_data(self, _dict):
-        path = os.path.join(BASE_PATH, "Balas", "bala.png")
-
-        b = 0
-        for ip in _dict.keys():
-            b += len(_dict[ip].get("b", []))
-        if b > len(self._balas.sprites()):
-            self._audio.disparo()
-
-        for ip in _dict.keys():
-            # balas en server
-            balas = _dict[ip].get("b", [])
-            # sprites de balas actuales
-            actuales = []
-            for sprite in self._balas.sprites():
-                if sprite.ip == ip:
-                    actuales.append(sprite)
-
-            while len(actuales) < len(balas):
-                # Agregar las que faltan
-                _id = 0
-                if actuales:
-                    _id = actuales.index(actuales[-1]) + 1
-                b = Bala(balas[_id], path, RES, ip)
-                self._balas.add(b)
-                actuales.append(b)
-
-            while len(actuales) > len(balas):
-                # Quitar las que sobran
-                a = actuales[0]
-                for g in a.groups():
-                    g.remove(a)
-                a.kill()
-                actuales.remove(a)
-
-            # Actualizar posiciones
-            for sprite in actuales:
-                _id = actuales.index(sprite)
-                datos = balas[_id]
-                sprite.set_posicion(centerx=datos["x"], centery=datos["y"])
-
-    def __save_colisiones_data(self, _dict):
-        path = os.path.join(BASE_PATH, "Explosion")
-        exp = []
-        for ip in _dict.keys():
-            exp.extend(_dict[ip].get("e", []))
-        if exp:
-            self._audio.explosion()
-        for e in exp:
-            self._explosiones.add(Explosion(e["x"], e["y"], path))
-        # Las explosiones no deben guardarse
-        for ip in self._data_game_players.keys():
-            if "e" in self._data_game_players[ip].keys():
-                del(self._data_game_players[ip]["e"])
-
-    def __check_collisions(self):
-        """
-        Colisiones tienen (ip de tanque tocado x, y), se envian estos datos
-        y se quitan las balas de los datos a enviar, pero no se eliminan sus
-        sprites hasta confirmación desde el server
-        """
-        for jugador in self._jugadores.sprites():
-            if jugador._ip != self._ip:
-                remover = []
-                for bala in self._data_game_players[self._ip].get("b", []):
-                    x, y = bala["x"], bala["y"]
-                    if jugador.rect.collidepoint((x, y)):
-                        if not "c" in self._data_game_players[self._ip].keys():
-                            self._data_game_players[self._ip]["c"] = []
-                        self._data_game_players[self._ip]["c"].append(
-                            {"ip": jugador._ip, "x": x, "y": y})
-                        remover.append(
-                            self._data_game_players[self._ip]["b"].index(bala))
-                if remover:
-                    for _id in reversed(remover):
-                        bala = self._data_game_players[self._ip]["b"][_id]
-                        self._data_game_players[self._ip]["b"].remove(bala)
-
-    def __update_data(self, _dict):
-        if _dict.get("off", False):
-            # Recibe salir desde el server
-            self._estado = False
-            del(_dict["off"])
-
-        if not _dict.get("ingame"):
-            print "Error al leer ingame en el juego", _dict
-            return False
-
-        self.__save_players_data(dict(_dict.get("ingame", {})))
-        self.__save_balas_data(dict(_dict.get("ingame", {})))
-        self.__save_colisiones_data(dict(_dict.get("ingame", {})))
-
-        if "l" in _dict.keys():
-            self.__set_latency(_dict)
-        self.__latency_recalc()
-
     def __run(self):
         while gtk.events_pending():
             gtk.main_iteration()
@@ -288,9 +141,6 @@ class Juego(gobject.GObject):
             self._while = gobject.timeout_add(3, self.__run)
 
     def update_events(self, eventos):
-        if not self._promedio:
-            # Las primeras LAT pasadas son solo para calcular latencia.
-            return False
         if "Escape" in eventos:
             self._estado = False
             return False
