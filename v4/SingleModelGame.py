@@ -24,15 +24,20 @@ import gobject
 import gtk
 import time
 from gtkWidgets.SelectWidgets import DialogoSalir
-#from SingleplayerGame.Juego import Juego
+from SingleplayerGame.Juego import Juego
 
 BASE_PATH = os.path.realpath(os.path.dirname(__file__))
-
+DICT = {
+    0: {
+        "mapa": "f1.png",
+        "tanque": "t1.png",
+        "enemigos": ["t2.png", "t2.png"]}
+    }
 
 class SingleModelGame(gobject.GObject):
 
-    __gsignals__ = {
-    "error": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, []),}
+    #__gsignals__ = {
+    #"error": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, []),
     #"players": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
     #    (gobject.TYPE_PYOBJECT, )),
     #"play-run": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, []),
@@ -78,7 +83,8 @@ class SingleModelGame(gobject.GObject):
                 print "Error:", self.process_key_press
         else:
             if nombre == "Escape":
-                self.emit("error")
+                #self.emit("error")
+                pass
 
     def process_key_release(self, event):
         if self.juego:
@@ -94,15 +100,13 @@ class SingleModelGame(gobject.GObject):
             self.eventos = []
 
     def rungame(self, xid, res):
-        # Debe comenzar a correr en menos de 1.5 segundos
-        #mapa = os.path.join(BASE_PATH, "Mapas", self._dict.get("mapa", ""))
-        #self.juego = Juego()
-        #self.juego.connect("exit", self.__exit_game)
-        #self.juego.config(res=res, client=self.client, xid=xid)
-        #tanque = os.path.join(BASE_PATH, "Tanques", self._tank)
-        #self.juego.load(mapa, tanque, self._nick)
-        #self.juego.run()
-        pass
+        self.juego = Juego()
+        self.juego.connect("exit", self.__exit_game)
+        self.juego.config(res=res, xid=xid)
+        mapa = os.path.join(BASE_PATH, "Mapas", DICT[0]["mapa"])
+        tanque = os.path.join(BASE_PATH, "Tanques", DICT[0]["tanque"])
+        self.juego.load(mapa, tanque)
+        self.juego.run()
 
     def __exit_game(self, game, _dict):
         if self.juego:
@@ -110,4 +114,4 @@ class SingleModelGame(gobject.GObject):
             del(self.juego)
             self.juego = False
             time.sleep(0.5)
-        self.emit("end-game", _dict)
+        #self.emit("end-game", _dict)
