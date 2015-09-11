@@ -116,7 +116,7 @@ class Juego(gobject.GObject):
         pygame.event.clear()
 
         if self._contador == 10:
-            #self.emit("update", dict(self._data_game_players))
+            self.emit("update", {})
             self._contador = 0
         self._contador += 1
 
@@ -124,7 +124,7 @@ class Juego(gobject.GObject):
             return True
         else:
             pygame.quit()
-            #self.emit("exit", self._data_game_players)
+            self.emit("exit", {})
             return False
 
     def run(self, reset=True):
@@ -157,9 +157,8 @@ class Juego(gobject.GObject):
         print "Cargando mapa:", mapa
         imagen = pygame.image.load(mapa)
         self._escenario = pygame.transform.scale(imagen, RES).convert_alpha()
-        #self._jugador = Jugador(RES, tank)
-        #self._jugadores.add(self._jugador)
-        #self._data_game_players[self._ip] = {}
+        self._jugador = Jugador(RES, tank)
+        self._jugadores.add(self._jugador)
 
     def config(self, res=(800, 600), xid=False):
         print "Configurando Juego:"

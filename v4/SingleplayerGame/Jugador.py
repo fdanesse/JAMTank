@@ -33,15 +33,13 @@ INDICE_ROTACION = 5
 
 class Jugador(Sprite):
 
-    def __init__(self, res, ip, tank, nick):
+    def __init__(self, res, tank):
 
         Sprite.__init__(self)
 
         self._estado = "activo"
         self._res = res
         self._imagen_path = tank
-        self._nick = nick
-        self._ip = ip
         self._eventos = []
 
         imagen = pygame.image.load(self._imagen_path)

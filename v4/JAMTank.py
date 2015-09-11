@@ -61,6 +61,7 @@ class JAMTank(gtk.Window):
             'servermodel': [],
             'clientmodel': [],
             'connectingplayers': [],
+            'singlemode': [],
             }
         self.selectmode = False
         self.servermodel = False
@@ -166,9 +167,10 @@ class JAMTank(gtk.Window):
             self.singlemode = SingleModelGame(self)
             xid = self.get_property('window').xid
             self.singlemode.rungame(xid, self.gameres)
-            #self._statusgame = StatusGame(self, self.screen_wh,
-            #    self.clientmodel.juego._ip, vidas)
+            self._statusgame = StatusGame(self, self.screen_wh, "", 5)
             #self.singlemode.juego.connect("update", self._statusgame.update)
+            _id = self.singlemode.connect("end-game", self.__end_game)
+            self.handlers['singlemode'].append(_id)
             self.__play_music_game()
         elif valor == 3:
             # Crear Juego en Red
