@@ -72,21 +72,17 @@ class Juego(gobject.GObject):
         return False
 
     def __check_disparos_and_balas(self):
-        """
-        Actualizar posiciones de balas
-        Disparos se convierte en balas rumbo al server
-        """
-        mybalas = []
-        for bala in self._balas.sprites():
-            if bala.ip == self._ip:
-                mybalas.append(bala.get_datos())
-        self._data_game_players[self._ip]["b"] = mybalas
+        #mybalas = []
+        #for bala in self._balas.sprites():
+        #    if bala.ip == self._ip:
+        #        mybalas.append(bala.get_datos())
+        #self._data_game_players[self._ip]["b"] = mybalas
 
         if self._disparo:
             self._disparo = False
-            self._data_game_players[self._ip]["b"].append(
-                self._jugador.get_disparo())
-            gobject.timeout_add(1000, self.__reactivar_disparos)
+            #self._data_game_players[self._ip]["b"].append(
+            #    self._jugador.get_disparo())
+            #gobject.timeout_add(1000, self.__reactivar_disparos)
 
     def __run(self):
         while gtk.events_pending():
@@ -95,14 +91,12 @@ class Juego(gobject.GObject):
         self._jugadores.clear(self._win, self._escenario)
         self._explosiones.clear(self._win, self._escenario)
 
-        if self._jugador:
-            self._jugador.process_events()
-        #self._balas.update(self._ip)
-        #self._explosiones.update()
-        #self.__check_disparos_and_balas()
+        self._jugadores.update()
+        self._balas.update()
+        self._explosiones.update()
+
+        self.__check_disparos_and_balas()
         #self.__check_collisions()
-        #self.__enviar_datos()
-        #self.__update_data(self.__recibir_datos())
 
         self._jugadores.draw(self._win)
         self._balas.draw(self._win)

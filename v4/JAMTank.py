@@ -169,6 +169,8 @@ class JAMTank(gtk.Window):
             self.singlemode.rungame(xid, self.gameres)
             self._statusgame = StatusGame(self, self.screen_wh, "", 5)
             #self.singlemode.juego.connect("update", self._statusgame.update)
+            _id = self.singlemode.connect("error", self.__switch, 1)
+            self.handlers['singlemode'].append(_id)
             _id = self.singlemode.connect("end-game", self.__end_game)
             self.handlers['singlemode'].append(_id)
             self.__play_music_game()

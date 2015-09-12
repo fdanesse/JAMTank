@@ -54,26 +54,26 @@ class Jugador(Sprite):
         self.centery = self._res[1] / 2
         self._dx, self._dy = self.__get_vector(self._angulo)
 
-        self._temp_angulo = 0
-        self._temp_x = self._res[0] / 2
-        self._temp_y = self._res[1] / 2
-
     def __derecha(self):
-        self._temp_angulo += int(0.7 * INDICE_ROTACION)
-        if self._temp_angulo > 360:
-            self._temp_angulo = 360 - self._temp_angulo
+        self._angulo += int(0.7 * INDICE_ROTACION)
+        if self._angulo > 360:
+            self._angulo = 360 - self._angulo
+        self.image = pygame.transform.rotate(
+            self._imagen_original, -self._angulo)
 
     def __izquierda(self):
-        self._temp_angulo -= int(0.7 * INDICE_ROTACION)
-        if self._temp_angulo < 0:
-            self._temp_angulo = 360 + self._temp_angulo
+        self._angulo -= int(0.7 * INDICE_ROTACION)
+        if self._angulo < 0:
+            self._angulo = 360 + self._angulo
+        self.image = pygame.transform.rotate(
+            self._imagen_original, -self._angulo)
 
     def __adelante(self):
-        self._dx, self._dy = self.__get_vector(self._temp_angulo)
+        self._dx, self._dy = self.__get_vector(self._angulo)
         self.__calcular_nueva_posicion()
 
     def __atras(self):
-        x, y = self.__get_vector(self._temp_angulo)
+        x, y = self.__get_vector(self._angulo)
         self._dx = x * -1
         self._dy = y * -1
         self.__calcular_nueva_posicion()
@@ -99,71 +99,10 @@ class Jugador(Sprite):
         ancho = range(25, self._res[0] - 25)
         alto = range(25, self._res[1] - 25)
         if x in ancho and y in alto:
-            self._temp_x += self._dx
-            self._temp_y += self._dy
-            self._temp_x = int(self._temp_x)
-            self._temp_y = int(self._temp_y)
-
-    def __set_posicion(self, angulo=0, centerx=0, centery=0):
-        """
-        Actualiza los datos según lo recibido desde el server.
-        """
-        self._temp_angulo = angulo
-        self._temp_x = centerx
-        self._temp_y = centery
-
-        self._angulo = angulo
-        self.centerx = centerx
-        self.centery = centery
-
-        self.rect.centerx = self.centerx
-        self.rect.centery = self.centery
-
-        self.image = pygame.transform.rotate(
-            self._imagen_original, -self._angulo)
-
-    def get_disparo(self):
-        """
-        Solo Jugador Local.
-        """
-        _dict = {
-            "a": int(self._temp_angulo),
-            "x": int(self._temp_x),
-            "y": int(self._temp_y),
-            }
-        return _dict
-
-    def get_datos(self):
-        """
-        Solo Jugador Local.
-        """
-        _dict = {
-            "a": int(self._temp_angulo),
-            "x": int(self._temp_x),
-            "y": int(self._temp_y),
-            "n": self._nick,
-            "t": os.path.basename(self._imagen_path)  # tanque
-            }
-        return _dict
-
-    def update(self, _dict):
-        mydict = _dict.get(self._ip, False)
-        if mydict:
-            self.__set_posicion(
-                angulo=mydict.get("a", 0),
-                centerx=mydict.get("x", 0),
-                centery=mydict.get("y", 0))
-            if "p" in mydict.keys():
-                if mydict["p"]:
-                    if self._estado != "paused":
-                        self.pausar()
-                else:
-                    if self._estado != "activo":
-                        self.reactivar()
-        else:
-            for g in self.groups():
-                g.remove(self)
-            self.kill()
+            self.centerx = int(self.centerx + self._dx)
+            self.centery = int(self.centery + self._dy)
+            self.rect.centerx = self.centerx
+            self.rect.centery = self.centery
 
     def update_events(self, eventos):
         """
@@ -174,7 +113,7 @@ class Jugador(Sprite):
         elif self._estado == "paused":
             self._eventos = []
 
-    def process_events(self):
+    def update(self):
         """
         Solo Jugador Local.
         """
@@ -207,11 +146,11 @@ class Jugador(Sprite):
         elif "a" in self._eventos:
             self.__izquierda()
 
-    def pausar(self):
-        self._estado = "paused"
-        self.__set_posicion(angulo=0, centerx=-200, centery=-200)
+#    def pausar(self):
+#        self._estado = "paused"
+#        self.__set_posicion(angulo=0, centerx=-200, centery=-200)
 
-    def reactivar(self):
-        self._estado = "activo"
-        self.__set_posicion(angulo=0, centerx=self._res[0] / 2,
-            centery=self._res[1] / 2)
+#    def reactivar(self):
+#        self._estado = "activo"
+#        self.__set_posicion(angulo=0, centerx=self._res[0] / 2,
+#            centery=self._res[1] / 2)

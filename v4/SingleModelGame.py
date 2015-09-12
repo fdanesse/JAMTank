@@ -37,10 +37,7 @@ DICT = {
 class SingleModelGame(gobject.GObject):
 
     __gsignals__ = {
-    #"error": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, []),
-    #"players": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
-    #    (gobject.TYPE_PYOBJECT, )),
-    #"play-run": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, []),
+    "error": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, []),
     "end-game": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
         (gobject.TYPE_PYOBJECT, ))}
 
@@ -69,22 +66,21 @@ class SingleModelGame(gobject.GObject):
             if "Escape" in self.eventos:
                 dialog = DialogoSalir(parent=self._topwin,
                 text="¿Abandonas el Juego?")
-                self.juego._jugador.pausar()
+                #self.juego._jugador.pausar()
                 ret = dialog.run()
                 dialog.destroy()
                 if ret == gtk.RESPONSE_ACCEPT:
                     self.eventos = ["Escape"]
                 elif ret == gtk.RESPONSE_CANCEL:
                     self.eventos = []
-                    self.juego._jugador.reactivar()
+                    #self.juego._jugador.reactivar()
             try:
                 self.juego.update_events(self.eventos)
             except:
                 print "Error:", self.process_key_press
         else:
             if nombre == "Escape":
-                #self.emit("error")
-                pass
+                self.emit("error")
 
     def process_key_release(self, event):
         if self.juego:
