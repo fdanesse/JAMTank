@@ -30,9 +30,22 @@ BASE_PATH = os.path.realpath(os.path.dirname(__file__))
 DICT = {
     0: {
         "mapa": "f1.png",
-        "tanque": "t1.png",
-        "enemigos": ["t2.png", "t2.png"]}
+        "tanque": "t5.png",
+        "enemigos": ["t2.png", "t2.png"]},
+    1: {
+        "mapa": "f2.png",
+        "tanque": "t5.png",
+        "enemigos": ["t3.png", "t3.png", "t3.png", "t3.png"]}
     }
+
+def get_data_game(index):
+    mapa = os.path.join(BASE_PATH, "Mapas", DICT[index]["mapa"])
+    tanque = os.path.join(BASE_PATH, "Tanques", DICT[index]["tanque"])
+    enemigos = []
+    for enemigo in DICT[index]["enemigos"]:
+        enemigos.append(os.path.join(BASE_PATH, "Tanques", enemigo))
+    return (mapa, tanque, enemigos)
+
 
 class SingleModelGame(gobject.GObject):
 
@@ -46,6 +59,7 @@ class SingleModelGame(gobject.GObject):
         gobject.GObject.__init__(self)
 
         self._topwin = topwin
+        self.index = 0
         self.juego = False
         self.eventos = []
 
@@ -99,9 +113,8 @@ class SingleModelGame(gobject.GObject):
         self.juego = Juego()
         self.juego.connect("exit", self.__exit_game)
         self.juego.config(res=res, xid=xid)
-        mapa = os.path.join(BASE_PATH, "Mapas", DICT[0]["mapa"])
-        tanque = os.path.join(BASE_PATH, "Tanques", DICT[0]["tanque"])
-        self.juego.load(mapa, tanque)
+        mapa, tanque, enem = get_data_game(self.index)
+        self.juego.load(mapa, tanque, enem)
         self.juego.run()
 
     def __exit_game(self, game, _dict):

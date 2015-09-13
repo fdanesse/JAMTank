@@ -71,18 +71,19 @@ class Juego(gobject.GObject):
         self._disparos_activos = True
         return False
 
-    def __check_disparos_and_balas(self):
-        #mybalas = []
-        #for bala in self._balas.sprites():
-        #    if bala.ip == self._ip:
-        #        mybalas.append(bala.get_datos())
-        #self._data_game_players[self._ip]["b"] = mybalas
+    def __disparar(self, _id):
+        self._audio.disparo()
+        path = os.path.join(BASE_PATH, "Balas", "bala.png")
+        _dict = self._jugador.get_disparo()
+        b = Bala(_dict, path, RES, _id)
+        self._balas.add(b)
+        self._jugador._dict["disparos"] += 1
 
+    def __check_disparos(self):
         if self._disparo:
             self._disparo = False
-            #self._data_game_players[self._ip]["b"].append(
-            #    self._jugador.get_disparo())
-            #gobject.timeout_add(1000, self.__reactivar_disparos)
+            self.__disparar(self._jugador._dict.get("id"))
+            gobject.timeout_add(1000, self.__reactivar_disparos)
 
     def __run(self):
         while gtk.events_pending():
@@ -95,7 +96,7 @@ class Juego(gobject.GObject):
         self._balas.update()
         self._explosiones.update()
 
-        self.__check_disparos_and_balas()
+        self.__check_disparos()
         #self.__check_collisions()
 
         self._jugadores.draw(self._win)
@@ -147,12 +148,14 @@ class Juego(gobject.GObject):
             if self._jugador:
                 self._jugador.update_events(eventos)
 
-    def load(self, mapa, tank):
+    def load(self, mapa, tank, enemigos):
         print "Cargando mapa:", mapa
         imagen = pygame.image.load(mapa)
         self._escenario = pygame.transform.scale(imagen, RES).convert_alpha()
-        self._jugador = Jugador(RES, tank)
+        self._jugador = Jugador(RES, tank, 0)
         self._jugadores.add(self._jugador)
+        #for enem in enemigos:
+        #    self._jugadores.add(Jugador(RES, enem))
 
     def config(self, res=(800, 600), xid=False):
         print "Configurando Juego:"

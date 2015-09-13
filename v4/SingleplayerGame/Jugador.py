@@ -27,16 +27,25 @@ from math import radians
 
 from pygame.sprite import Sprite
 
-VELOCIDAD = 10
+VELOCIDAD = 5
 INDICE_ROTACION = 5
 
 
 class Jugador(Sprite):
 
-    def __init__(self, res, tank):
+    def __init__(self, res, tank, _id):
 
         Sprite.__init__(self)
 
+        self._dict = {
+            "id": _id,
+            "disparos": 0,
+            "aciertos": 0,
+            "muertes": 0,
+            "puntos": 0,
+            "nergia": 100,
+            "vidas": 1,
+            }
         self._estado = "activo"
         self._res = res
         self._imagen_path = tank
@@ -52,6 +61,8 @@ class Jugador(Sprite):
         self._angulo = 0
         self.centerx = self._res[0] / 2
         self.centery = self._res[1] / 2
+        self.rect.centerx = self.centerx
+        self.rect.centery = self.centery
         self._dx, self._dy = self.__get_vector(self._angulo)
 
     def __derecha(self):
@@ -145,6 +156,14 @@ class Jugador(Sprite):
             self.__derecha()
         elif "a" in self._eventos:
             self.__izquierda()
+
+    def get_disparo(self):
+        _dict = {
+            "a": int(self._angulo),
+            "x": int(self.rect.centerx),
+            "y": int(self.rect.centery),
+            }
+        return _dict
 
 #    def pausar(self):
 #        self._estado = "paused"
