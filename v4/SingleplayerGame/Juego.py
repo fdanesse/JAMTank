@@ -26,6 +26,7 @@ import gtk
 import time
 import platform
 from Jugador import Jugador
+from Enemigo import Enemigo
 from Bala import Bala
 from Explosion import Explosion
 from Sound import Sound
@@ -85,6 +86,36 @@ class Juego(gobject.GObject):
             self.__disparar(self._jugador._dict.get("id"))
             gobject.timeout_add(1000, self.__reactivar_disparos)
 
+    def __explosion(self, explosiones):
+        if explosiones:
+            path = os.path.join(BASE_PATH, "Explosion")
+            self._audio.explosion()
+            for e in explosiones:
+                x, y = e
+                self._explosiones.add(Explosion(x, y, path))
+
+    def __check_collisions(self):
+        explosiones = []
+        for bala in self._balas.sprites():
+            x, y = bala.rect.centerx, bala.rect.centery
+            for jugador in self._jugadores.sprites():
+                if jugador._dict.get("id") != bala._id:
+                    if jugador.rect.collidepoint((x, y)):
+                        #self._jugadores.tocado(dispara=bala._id,
+                        #    tocado=jugador._dict.get("id"))
+                        '''
+                        "aciertos": 0,
+                        "muertes": 0,
+                        "puntos": 0,
+                        "nergia": 100,
+                        "vidas": 1,
+                        '''
+                        for g in bala.groups():
+                            g.remove(bala)
+                        bala.kill()
+                        explosiones.append((x, y))
+        self.__explosion(explosiones)
+
     def __run(self):
         while gtk.events_pending():
             gtk.main_iteration()
@@ -97,7 +128,7 @@ class Juego(gobject.GObject):
         self._explosiones.update()
 
         self.__check_disparos()
-        #self.__check_collisions()
+        self.__check_collisions()
 
         self._jugadores.draw(self._win)
         self._balas.draw(self._win)
@@ -154,8 +185,8 @@ class Juego(gobject.GObject):
         self._escenario = pygame.transform.scale(imagen, RES).convert_alpha()
         self._jugador = Jugador(RES, tank, 0)
         self._jugadores.add(self._jugador)
-        #for enem in enemigos:
-        #    self._jugadores.add(Jugador(RES, enem))
+        for enem in enemigos:
+            self._jugadores.add(Enemigo(RES, enem, enemigos.index(enem) + 1))
 
     def config(self, res=(800, 600), xid=False):
         print "Configurando Juego:"

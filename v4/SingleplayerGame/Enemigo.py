@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#   Jugador.py por:
+#   Enemigo.py por:
 #   Flavio Danesse <fdanesse@gmail.com>
 #   Uruguay
 
@@ -30,7 +30,7 @@ VELOCIDAD = 5
 INDICE_ROTACION = 5
 
 
-class Jugador(Sprite):
+class Enemigo(Sprite):
 
     def __init__(self, res, tank, _id):
 
@@ -64,6 +64,7 @@ class Jugador(Sprite):
         self.rect.centery = self.centery
         self._dx, self._dy = self.__get_vector(self._angulo)
 
+    '''
     def __derecha(self):
         self._angulo += int(0.7 * INDICE_ROTACION)
         if self._angulo > 360:
@@ -87,6 +88,7 @@ class Jugador(Sprite):
         self._dx = x * -1
         self._dy = y * -1
         self.__calcular_nueva_posicion()
+    '''
 
     def __get_vector(self, angulo):
         """
@@ -113,16 +115,7 @@ class Jugador(Sprite):
             self.centery = int(self.centery + self._dy)
             self.rect.centerx = self.centerx
             self.rect.centery = self.centery
-
-    def update_events(self, eventos):
-        """
-        Solo Jugador Local.
-        """
-        if self._estado == "activo":
-            self._eventos = list(eventos)
-        elif self._estado == "paused":
-            self._eventos = []
-
+    '''
     def update(self):
         """
         Solo Jugador Local.
@@ -155,6 +148,7 @@ class Jugador(Sprite):
             self.__derecha()
         elif "a" in self._eventos:
             self.__izquierda()
+    '''
 
     def get_disparo(self):
         _dict = {
@@ -164,14 +158,14 @@ class Jugador(Sprite):
             }
         return _dict
 
-    def pausar(self):
-        self._estado = "paused"
-        #self.__set_posicion(angulo=0, centerx=-200, centery=-200)
+    #def pausar(self):
+    #    self._estado = "paused"
+    #    self.__set_posicion(angulo=0, centerx=-200, centery=-200)
 
-    def reactivar(self):
-        self._estado = "activo"
-        #self.__set_posicion(angulo=0, centerx=self._res[0] / 2,
-        #    centery=self._res[1] / 2)
+    #def reactivar(self):
+    #    self._estado = "activo"
+    #    self.__set_posicion(angulo=0, centerx=self._res[0] / 2,
+    #        centery=self._res[1] / 2)
 
     def tocado(self, dispara, tocado):
         if dispara == tocado:

@@ -38,6 +38,7 @@ DICT = {
         "enemigos": ["t3.png", "t3.png", "t3.png", "t3.png"]}
     }
 
+
 def get_data_game(index):
     mapa = os.path.join(BASE_PATH, "Mapas", DICT[index]["mapa"])
     tanque = os.path.join(BASE_PATH, "Tanques", DICT[index]["tanque"])
@@ -80,14 +81,14 @@ class SingleModelGame(gobject.GObject):
             if "Escape" in self.eventos:
                 dialog = DialogoSalir(parent=self._topwin,
                 text="¿Abandonas el Juego?")
-                #self.juego._jugador.pausar()
+                self.juego._jugador.pausar()
                 ret = dialog.run()
                 dialog.destroy()
                 if ret == gtk.RESPONSE_ACCEPT:
                     self.eventos = ["Escape"]
                 elif ret == gtk.RESPONSE_CANCEL:
                     self.eventos = []
-                    #self.juego._jugador.reactivar()
+                    self.juego._jugador.reactivar()
             try:
                 self.juego.update_events(self.eventos)
             except:
