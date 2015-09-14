@@ -23,6 +23,8 @@ import pygame
 from math import sin
 from math import cos
 from math import radians
+import random
+random.seed()
 
 from pygame.sprite import Sprite
 
@@ -49,11 +51,13 @@ class Enemigo(Sprite):
         self.image = self._imagen_original.copy()
         self.rect = self.image.get_rect()
 
-        self._angulo = 0
-        self.centerx = self._res[0] / 2
-        self.centery = self._res[1] / 2
+        self._angulo = random.randrange(0, 360, 1)
+        self.centerx = random.randrange(50, self._res[0] - 50, 1)
+        self.centery = random.randrange(50, self._res[1] - 50, 1)
         self.rect.centerx = self.centerx
         self.rect.centery = self.centery
+        self.image = pygame.transform.rotate(
+            self._imagen_original, -self._angulo)
         self._dx, self._dy = self.__get_vector(self._angulo)
 
     '''

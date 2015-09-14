@@ -108,22 +108,33 @@ class Juego(gobject.GObject):
         for bala in self._balas.sprites():
             x, y = bala.rect.centerx, bala.rect.centery
             for jugador in self._jugadores.sprites():
-                if jugador._id != bala._id:
-                    # Colisiones jugador <> balas
+                jid = jugador._id
+                bid = bala._id
+                if jid != bid:
+                    # Colisiones jugadores <> balas
                     if jugador.rect.collidepoint((x, y)):
-                        self._data_game_players[jugador._id]["energia"] -= 10
-                        self._data_game_players[bala._id]["aciertos"] += 1
-                        self._data_game_players[bala._id]["puntos"] += 1
-                        if self._data_game_players[jugador._id]["energia"] <= 0:
-                            self._data_game_players[jugador._id]["vidas"] -= 1
-                            self._data_game_players[bala._id]["puntos"] += 10
-                            if self._data_game_players[jugador._id]["vidas"] <= 0:
+                        self._data_game_players[jid]["energia"] -= 10
+                        self._data_game_players[bid]["aciertos"] += 1
+                        self._data_game_players[bid]["puntos"] += 1
+                        if self._data_game_players[jid]["energia"] <= 0:
+                            self._data_game_players[jid]["vidas"] -= 1
+                            self._data_game_players[bid]["puntos"] += 10
+                            if self._data_game_players[jid]["vidas"] <= 0:
                                 jugador.pausar()
                         for g in bala.groups():
                             g.remove(bala)
                         bala.kill()
                         explosiones.append((x, y))
         self.__explosion(explosiones)
+
+    def __check_vidas(self):
+        _id = self._jugador._id
+        estados = []
+        for j in self._jugadores.sprites():
+            if j._id != _id:
+                estados.append(bool(self._data_game_players[j._id]["vidas"]))
+        if self._data_game_players[_id]["vidas"] <= 0 or (not True in estados):
+            self._estado = False
 
     def __run(self):
         while gtk.events_pending():
@@ -154,6 +165,8 @@ class Juego(gobject.GObject):
             self.emit("update", {})
             self._contador = 0
         self._contador += 1
+
+        self.__check_vidas()
 
         if self._estado:
             return True
@@ -196,10 +209,11 @@ class Juego(gobject.GObject):
         self._jugador = Jugador(RES, tank, _id)
         self._jugadores.add(self._jugador)
         self._data_game_players[_id] = dict(MODEL)
+        _id = 1
         for enem in enemigos:
-            _id = enemigos.index(enem) + 1
             self._jugadores.add(Enemigo(RES, enem, _id))
             self._data_game_players[_id] = dict(MODEL)
+            _id += 1
 
     def config(self, res=(800, 600), xid=False):
         print "Configurando Juego:"
