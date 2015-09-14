@@ -23,15 +23,16 @@ import gobject
 import os
 import sys
 import gtk
-
-from gtkWidgets.SelectMode import SelectMode
+import Network
+from gtkWidgets.SingleStatusGame import SingleStatusGame
+from gtkWidgets.SingleStatusGame import SingleDialogoEndGame
 from gtkWidgets.StatusGame import StatusGame
+from gtkWidgets.StatusGame import DialogoEndGame
+from gtkWidgets.SelectMode import SelectMode
 from gtkWidgets.CreateServerMode import CreateServerMode
 from gtkWidgets.ConnectingPlayers import ConnectingPlayers
 from gtkWidgets.CreateClientMode import CreateClientMode
-from gtkWidgets.StatusGame import DialogoEndGame
 from gtkWidgets.Credits import Credits
-import Network
 from ServerModelGame import ServerModelGame
 from ClientModelGame import ClientModelGame
 from SingleModelGame import SingleModelGame
@@ -167,11 +168,11 @@ class JAMTank(gtk.Window):
             self.singlemode = SingleModelGame(self)
             xid = self.get_property('window').xid
             self.singlemode.rungame(xid, self.gameres)
-            self._statusgame = StatusGame(self, self.screen_wh, "", 5)
-            #self.singlemode.juego.connect("update", self._statusgame.update)
+            self._statusgame = SingleStatusGame(self, self.screen_wh)
+            self.singlemode.juego.connect("update", self._statusgame.update)
             _id = self.singlemode.connect("error", self.__switch, 1)
             self.handlers['singlemode'].append(_id)
-            _id = self.singlemode.connect("end-game", self.__end_game)
+            _id = self.singlemode.connect("end-game", self.__end_single_game)
             self.handlers['singlemode'].append(_id)
             self.__play_music_game()
         elif valor == 3:
@@ -272,6 +273,15 @@ class JAMTank(gtk.Window):
         #self.servermodel.juego.disconnect_by_func(self._statusgame.update)
         self.__play_music_intro()
         dialog = DialogoEndGame(parent=self, _dict=_dict)
+        dialog.run()
+        dialog.destroy()
+        self._statusgame.destroy()
+        self.__switch(False, 1)
+
+    def __end_single_game(self, modelgame, _dict):
+        #self.servermodel.juego.disconnect_by_func(self._statusgame.update)
+        self.__play_music_intro()
+        dialog = SingleDialogoEndGame(parent=self, _dict=_dict)
         dialog.run()
         dialog.destroy()
         self._statusgame.destroy()

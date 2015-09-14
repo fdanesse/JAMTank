@@ -162,7 +162,7 @@ class Juego(gobject.GObject):
         pygame.event.clear()
 
         if self._contador == 10:
-            self.emit("update", {})
+            self.emit("update", self._data_game_players)
             self._contador = 0
         self._contador += 1
 
@@ -172,7 +172,7 @@ class Juego(gobject.GObject):
             return True
         else:
             pygame.quit()
-            self.emit("exit", {})
+            self.emit("exit", self._data_game_players)
             return False
 
     def run(self, reset=True):
