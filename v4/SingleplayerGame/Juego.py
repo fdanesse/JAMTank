@@ -31,6 +31,13 @@ from Bala import Bala
 from Explosion import Explosion
 from Sound import Sound
 
+MODEL = {
+    "disparos": 0,
+    "aciertos": 0,
+    "puntos": 0,
+    "energia": 100,
+    "vidas": 1,
+    }
 RES = (800, 600)
 BASE_PATH = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
@@ -58,6 +65,7 @@ class Juego(gobject.GObject):
         self._disparo = False
         self._disparos_activos = True
         self._contador = 0
+        self._data_game_players = {}
 
         self._jugadores = pygame.sprite.RenderUpdates()
         self._balas = pygame.sprite.RenderUpdates()
@@ -72,18 +80,19 @@ class Juego(gobject.GObject):
         self._disparos_activos = True
         return False
 
-    def __disparar(self, _id):
+    def __disparar(self, jugador):
         self._audio.disparo()
+        _id = self._jugador._id
         path = os.path.join(BASE_PATH, "Balas", "bala.png")
-        _dict = self._jugador.get_disparo()
+        _dict = jugador.get_disparo()
         b = Bala(_dict, path, RES, _id)
         self._balas.add(b)
-        self._jugador._dict["disparos"] += 1
+        self._data_game_players[_id]["disparos"] += 1
 
     def __check_disparos(self):
         if self._disparo:
             self._disparo = False
-            self.__disparar(self._jugador._dict.get("id"))
+            self.__disparar(self._jugador)
             gobject.timeout_add(1000, self.__reactivar_disparos)
 
     def __explosion(self, explosiones):
@@ -99,17 +108,17 @@ class Juego(gobject.GObject):
         for bala in self._balas.sprites():
             x, y = bala.rect.centerx, bala.rect.centery
             for jugador in self._jugadores.sprites():
-                if jugador._dict.get("id") != bala._id:
+                if jugador._id != bala._id:
+                    # Colisiones jugador <> balas
                     if jugador.rect.collidepoint((x, y)):
-                        #self._jugadores.tocado(dispara=bala._id,
-                        #    tocado=jugador._dict.get("id"))
-                        '''
-                        "aciertos": 0,
-                        "muertes": 0,
-                        "puntos": 0,
-                        "nergia": 100,
-                        "vidas": 1,
-                        '''
+                        self._data_game_players[jugador._id]["energia"] -= 10
+                        self._data_game_players[bala._id]["aciertos"] += 1
+                        self._data_game_players[bala._id]["puntos"] += 1
+                        if self._data_game_players[jugador._id]["energia"] <= 0:
+                            self._data_game_players[jugador._id]["vidas"] -= 1
+                            self._data_game_players[bala._id]["puntos"] += 10
+                            if self._data_game_players[jugador._id]["vidas"] <= 0:
+                                jugador.pausar()
                         for g in bala.groups():
                             g.remove(bala)
                         bala.kill()
@@ -183,10 +192,14 @@ class Juego(gobject.GObject):
         print "Cargando mapa:", mapa
         imagen = pygame.image.load(mapa)
         self._escenario = pygame.transform.scale(imagen, RES).convert_alpha()
-        self._jugador = Jugador(RES, tank, 0)
+        _id = 0
+        self._jugador = Jugador(RES, tank, _id)
         self._jugadores.add(self._jugador)
+        self._data_game_players[_id] = dict(MODEL)
         for enem in enemigos:
-            self._jugadores.add(Enemigo(RES, enem, enemigos.index(enem) + 1))
+            _id = enemigos.index(enem) + 1
+            self._jugadores.add(Enemigo(RES, enem, _id))
+            self._data_game_players[_id] = dict(MODEL)
 
     def config(self, res=(800, 600), xid=False):
         print "Configurando Juego:"

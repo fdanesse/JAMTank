@@ -36,15 +36,7 @@ class Jugador(Sprite):
 
         Sprite.__init__(self)
 
-        self._dict = {
-            "id": _id,
-            "disparos": 0,
-            "aciertos": 0,
-            "muertes": 0,
-            "puntos": 0,
-            "nergia": 100,
-            "vidas": 1,
-            }
+        self._id = _id
         self._estado = "activo"
         self._res = res
         self._imagen_path = tank
@@ -166,13 +158,16 @@ class Jugador(Sprite):
 
     def pausar(self):
         self._estado = "paused"
-        #self.__set_posicion(angulo=0, centerx=-200, centery=-200)
+        self.rect.centerx = -200
+        self.rect.centery = -200
+        self._angulo = 0
+        self.image = pygame.transform.rotate(
+            self._imagen_original, -self._angulo)
 
     def reactivar(self):
         self._estado = "activo"
-        #self.__set_posicion(angulo=0, centerx=self._res[0] / 2,
-        #    centery=self._res[1] / 2)
-
-    def tocado(self, dispara, tocado):
-        if dispara == tocado:
-            print "MAL"
+        self.rect.centerx = self._res[0] / 2
+        self.rect.centery = self._res[1] / 2
+        self._angulo = 0
+        self.image = pygame.transform.rotate(
+            self._imagen_original, -self._angulo)
