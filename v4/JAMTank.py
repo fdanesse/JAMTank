@@ -26,8 +26,8 @@ import gtk
 import Network
 from gtkWidgets.SingleStatusGame import SingleStatusGame
 from gtkWidgets.SingleStatusGame import SingleDialogoEndGame
-from gtkWidgets.StatusGame import StatusGame
-from gtkWidgets.StatusGame import DialogoEndGame
+from gtkWidgets.MultiStatusGame import MultiStatusGame
+from gtkWidgets.MultiStatusGame import MultiDialogoEndGame
 from gtkWidgets.SelectMode import SelectMode
 from gtkWidgets.CreateServerMode import CreateServerMode
 from gtkWidgets.ConnectingPlayers import ConnectingPlayers
@@ -73,6 +73,8 @@ class JAMTank(gtk.Window):
         self.connectingplayers = False
         self._statusgame = False
         self._player = False
+        self._music_vol = 0.2
+        self._efect_vol = 0.2
 
         self.connect('key-press-event', self.__key_press_event)
         self.connect('key-release-event', self.__key_release_event)
@@ -112,12 +114,20 @@ class JAMTank(gtk.Window):
 
         self.__play_music_intro()
 
+    def __set_volumen(self, widget, valor, text, model):
+        if text == "musica":
+            self._music_vol = valor
+            self._player.set_volumen(self._music_vol)
+        elif text == "efectos":
+            self._efect_vol = valor
+            model.juego._audio.set_volumen(self._efect_vol)
+
     def __play_music_intro(self, widget=False):
         self.__stop_player()
         self._player = Player()
         self._player.load(os.path.join(BASE, "Audio", "musica01.ogg"))
         self._player.play()
-        self._player.set_volumen(1.0)
+        self._player.set_volumen(self._music_vol)
         self._player.connect("endfile", self.__play_music_intro)
 
     def __play_music_game(self, widget=False):
@@ -125,7 +135,7 @@ class JAMTank(gtk.Window):
         self._player = Player()
         self._player.load(os.path.join(BASE, "Audio", "musica02.ogg"))
         self._player.play()
-        self._player.set_volumen(1.0)
+        self._player.set_volumen(self._music_vol)
         self._player.connect("endfile", self.__play_music_game)
 
     def __stop_player(self):
@@ -168,7 +178,10 @@ class JAMTank(gtk.Window):
             self.singlemode = SingleModelGame(self)
             xid = self.get_property('window').xid
             self.singlemode.rungame(xid, self.gameres)
+            self.singlemode.juego._audio.set_volumen(self._efect_vol)
             self._statusgame = SingleStatusGame(self, self.screen_wh)
+            self._statusgame.connect("volumen",
+                self.__set_volumen, self.singlemode)
             self.singlemode.juego.connect("update", self._statusgame.update)
             _id = self.singlemode.connect("error", self.__switch, 1)
             self.handlers['singlemode'].append(_id)
@@ -272,7 +285,7 @@ class JAMTank(gtk.Window):
     def __end_game(self, modelgame, _dict):
         #self.servermodel.juego.disconnect_by_func(self._statusgame.update)
         self.__play_music_intro()
-        dialog = DialogoEndGame(parent=self, _dict=_dict)
+        dialog = MultiDialogoEndGame(parent=self, _dict=_dict)
         dialog.run()
         dialog.destroy()
         self._statusgame.destroy()
@@ -292,9 +305,12 @@ class JAMTank(gtk.Window):
         self.__kill_connectingplayers()
         xid = self.get_property('window').xid
         self.clientmodel.rungame(xid, self.gameres)
+        self.clientmodel.juego._audio.set_volumen(self._efect_vol)
         vidas = int(int(self.clientmodel._dict["vidas"]))
-        self._statusgame = StatusGame(self, self.screen_wh,
+        self._statusgame = MultiStatusGame(self, self.screen_wh,
             self.clientmodel.juego._ip, vidas)
+        self._statusgame.connect("volumen",
+            self.__set_volumen, self.clientmodel)
         self.clientmodel.juego.connect("update", self._statusgame.update)
         self.__play_music_game()
 
@@ -305,9 +321,12 @@ class JAMTank(gtk.Window):
             self.__kill_connectingplayers()
             xid = self.get_property('window').xid
             self.servermodel.rungame(xid, self.gameres)
+            self.servermodel.juego._audio.set_volumen(self._efect_vol)
             vidas = int(int(self.servermodel._dict["vidas"]))
-            self._statusgame = StatusGame(self, self.screen_wh,
+            self._statusgame = MultiStatusGame(self, self.screen_wh,
                 self.servermodel.juego._ip, vidas)
+            self._statusgame.connect("volumen",
+                self.__set_volumen, self.servermodel)
             self.servermodel.juego.connect("update", self._statusgame.update)
             self.__play_music_game()
         elif valor == "cancelar":

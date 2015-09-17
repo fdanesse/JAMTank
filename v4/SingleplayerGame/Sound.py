@@ -37,9 +37,11 @@ class Sound(gobject.GObject):
 
         disparo = os.path.join(BASE_PATH, "Audio", "disparo.ogg")
         self._disparo = pygame.mixer.Sound(disparo)
+        self._disparo.set_volume(0.1)
 
         explosion = os.path.join(BASE_PATH, "Audio", "explosion.ogg")
         self._explosion = pygame.mixer.Sound(explosion)
+        self._explosion.set_volume(0.1)
 
     def disparo(self):
         channel = pygame.mixer.find_channel()
@@ -50,3 +52,7 @@ class Sound(gobject.GObject):
         channel = pygame.mixer.find_channel()
         if channel:
             channel.play(self._explosion)
+
+    def set_volumen(self, valor):
+        self._disparo.set_volume(valor)
+        self._explosion.set_volume(valor)

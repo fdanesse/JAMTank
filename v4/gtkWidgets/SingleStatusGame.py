@@ -50,6 +50,10 @@ class SingleDialogoEndGame(gtk.Dialog):
 
 class SingleStatusGame(gtk.Window):
 
+    __gsignals__ = {
+    "volumen": (gobject.SIGNAL_RUN_LAST,
+        gobject.TYPE_NONE, (gobject.TYPE_FLOAT, gobject.TYPE_STRING))}
+
     def __init__(self, top, screen_wh):
 
         gtk.Window.__init__(self, gtk.WINDOW_POPUP)
@@ -61,12 +65,19 @@ class SingleStatusGame(gtk.Window):
         self.set_deletable(False)
         self.set_transient_for(top)
 
+        self._volumenes = FrameVolumen()
         self._framejugador = FrameJugador()
 
         vbox = gtk.VBox()
         vbox.pack_end(self._framejugador, False, False, 0)
+        vbox.pack_end(self._volumenes, False, False, 0)
         self.add(vbox)
         self.show_all()
+
+        self._volumenes.connect("volumen", self.__emit_volumen)
+
+    def __emit_volumen(self, widget, valor, text):
+        self.emit("volumen", valor, text)
 
     def update(self, juego, _dict):
         new = _dict.get(0, {})
@@ -102,7 +113,7 @@ class Ranking(gtk.Frame):
         vbox.pack_start(hbox, False, False, 0)
 
         hbox = gtk.HBox()
-        self._porcenta = gtk.Label("Efectividad = %s" % 0)
+        self._porcenta = gtk.Label("Efectividad = %s %s" % (0, "%"))
         hbox.pack_start(self._porcenta, False, False, 0)
         vbox.pack_start(hbox, False, False, 0)
 
@@ -116,8 +127,53 @@ class Ranking(gtk.Frame):
         self._puntos.set_text("Puntos = %s" % _dict.get("puntos", 0))
         self._disparos.set_text("Disparos = %s" % _dict.get("disparos", 0))
         self._aciertos.set_text("Aciertos = %s" % _dict.get("aciertos", 0))
-        self._porcenta.set_text("Efectividad = %s" % (
-            _dict.get("aciertos", 0) * 100 / _dict.get("disparos", 0)))
+        try:
+            self._porcenta.set_text("Efectividad = %s %s" % (
+                _dict.get("aciertos", 0) * 100 / _dict.get("disparos", 0), "%"))
+        except:
+            pass
+
+
+class FrameVolumen(gtk.Frame):
+
+    __gsignals__ = {
+    "volumen": (gobject.SIGNAL_RUN_LAST,
+        gobject.TYPE_NONE, (gobject.TYPE_FLOAT, gobject.TYPE_STRING))}
+
+    def __init__(self):
+
+        gtk.Frame.__init__(self)
+
+        self.set_border_width(4)
+        self.set_label(" Volumen ")
+
+        event = gtk.EventBox()
+        event.set_border_width(4)
+        event.set_property("visible-window", False)
+
+        self._musica = ControlVolumen()
+        self._efectos = ControlVolumen()
+
+        vbox = gtk.HBox()
+        frame = gtk.Frame()
+        frame.set_label(" Música ")
+        frame.add(self._musica)
+        vbox.pack_start(frame, False, False, 0)
+
+        frame = gtk.Frame()
+        frame.set_label(" Efectos ")
+        frame.add(self._efectos)
+        vbox.pack_start(frame, False, False, 0)
+
+        event.add(vbox)
+        self.add(event)
+        self.show_all()
+
+        self._musica.connect("volumen", self.__emit_volumen, "musica")
+        self._efectos.connect("volumen", self.__emit_volumen, "efectos")
+
+    def __emit_volumen(self, widget, valor, text):
+        self.emit("volumen", valor, text)
 
 
 class FrameJugador(gtk.Frame):
@@ -234,3 +290,22 @@ class ProgressBar(gtk.HScale):
         gc.set_rgb_fg_color(gtk.gdk.Color(23000, 41000, 12000))
         self.window.draw_rectangle(gc, True, xx, yy, ximage, hh)
         return True
+
+
+class ControlVolumen(gtk.VolumeButton):
+
+    __gsignals__ = {
+    "volumen": (gobject.SIGNAL_RUN_LAST,
+        gobject.TYPE_NONE, (gobject.TYPE_FLOAT, ))}
+
+    def __init__(self):
+
+        gtk.VolumeButton.__init__(self)
+
+        self.connect("value-changed", self.__value_changed)
+        self.show_all()
+
+        self.set_value(0.1)
+
+    def __value_changed(self, widget, valor):
+        self.emit('volumen', valor)

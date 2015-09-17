@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#   StatusGame.py por:
+#   MultiStatusGame.py por:
 #   Flavio Danesse <fdanesse@gmail.com>
 #   Uruguay
 
@@ -26,7 +26,7 @@ import gtk
 BASE = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
 
-class DialogoEndGame(gtk.Dialog):
+class MultiDialogoEndGame(gtk.Dialog):
 
     def __init__(self, parent=None, _dict={}):
 
@@ -49,7 +49,11 @@ class DialogoEndGame(gtk.Dialog):
         return False
 
 
-class StatusGame(gtk.Window):
+class MultiStatusGame(gtk.Window):
+
+    __gsignals__ = {
+    "volumen": (gobject.SIGNAL_RUN_LAST,
+        gobject.TYPE_NONE, (gobject.TYPE_FLOAT, gobject.TYPE_STRING))}
 
     def __init__(self, top, screen_wh, ip, vidas):
 
@@ -64,13 +68,20 @@ class StatusGame(gtk.Window):
         self.set_transient_for(top)
 
         self._ranking = Ranking()
+        self._volumenes = FrameVolumen()
         self._framejugador = FrameJugador(vidas)
 
         vbox = gtk.VBox()
         vbox.pack_start(self._ranking, False, False, 0)
         vbox.pack_end(self._framejugador, False, False, 0)
+        vbox.pack_end(self._volumenes, False, False, 0)
         self.add(vbox)
         self.show_all()
+
+        self._volumenes.connect("volumen", self.__emit_volumen)
+
+    def __emit_volumen(self, widget, valor, text):
+        self.emit("volumen", valor, text)
 
     def update(self, juego, _dict):
         self._ranking._lista.update(_dict)
@@ -172,6 +183,48 @@ class Lista(gtk.TreeView):
             self.agregar_items(items)
         except:
             print "ERROR:", self.update, _dict
+
+
+class FrameVolumen(gtk.Frame):
+
+    __gsignals__ = {
+    "volumen": (gobject.SIGNAL_RUN_LAST,
+        gobject.TYPE_NONE, (gobject.TYPE_FLOAT, gobject.TYPE_STRING))}
+
+    def __init__(self):
+
+        gtk.Frame.__init__(self)
+
+        self.set_border_width(4)
+        self.set_label(" Volumen ")
+
+        event = gtk.EventBox()
+        event.set_border_width(4)
+        event.set_property("visible-window", False)
+
+        self._musica = ControlVolumen()
+        self._efectos = ControlVolumen()
+
+        vbox = gtk.HBox()
+        frame = gtk.Frame()
+        frame.set_label(" Música ")
+        frame.add(self._musica)
+        vbox.pack_start(frame, False, False, 0)
+
+        frame = gtk.Frame()
+        frame.set_label(" Efectos ")
+        frame.add(self._efectos)
+        vbox.pack_start(frame, False, False, 0)
+
+        event.add(vbox)
+        self.add(event)
+        self.show_all()
+
+        self._musica.connect("volumen", self.__emit_volumen, "musica")
+        self._efectos.connect("volumen", self.__emit_volumen, "efectos")
+
+    def __emit_volumen(self, widget, valor, text):
+        self.emit("volumen", valor, text)
 
 
 class FrameJugador(gtk.Frame):
@@ -299,3 +352,22 @@ class ProgressBar(gtk.HScale):
         #gc.set_rgb_fg_color(get_colors("window"))
         #self.window.draw_rectangle(gc, False, xx, yy, ww, hh)
         return True
+
+
+class ControlVolumen(gtk.VolumeButton):
+
+    __gsignals__ = {
+    "volumen": (gobject.SIGNAL_RUN_LAST,
+        gobject.TYPE_NONE, (gobject.TYPE_FLOAT, ))}
+
+    def __init__(self):
+
+        gtk.VolumeButton.__init__(self)
+
+        self.connect("value-changed", self.__value_changed)
+        self.show_all()
+
+        self.set_value(0.1)
+
+    def __value_changed(self, widget, valor):
+        self.emit('volumen', valor)

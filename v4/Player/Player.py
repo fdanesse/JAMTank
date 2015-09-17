@@ -87,4 +87,4 @@ class Player(gobject.GObject):
         return False
 
     def set_volumen(self, volumen):
-        self.player.set_property('volume', volumen / 10)
+        self.player.set_property('volume', volumen)
