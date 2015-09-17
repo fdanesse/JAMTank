@@ -69,10 +69,15 @@ class SingleStatusGame(gtk.Window):
 
         self._volumenes = FrameVolumen()
         self._framejugador = FrameJugador()
+        image = gtk.Image()
+        path = os.path.join(BASE, "Iconos", "teclas.svg")
+        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, w / 4 - 50, -1)
+        image.set_from_pixbuf(pixbuf)
 
         vbox = gtk.VBox()
         vbox.pack_end(self._volumenes, False, False, 0)
         vbox.pack_start(self._framejugador, False, False, 0)
+        vbox.pack_start(image, True, True, 0)
         self.add(vbox)
         self.show_all()
 
