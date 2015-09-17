@@ -244,7 +244,7 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         new = {"ingame": True, "off": True}
         if self._dict_game["run"]:
 
-            # Persistencia de datos de jugador FIXME: y sus balas
+            # Persistencia de datos de jugador y sus balas
             _ing = dict(_dict["ingame"])
 
             for key in _ing.keys():

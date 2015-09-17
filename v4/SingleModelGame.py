@@ -114,6 +114,8 @@ class SingleModelGame(gobject.GObject):
         self.juego = Juego()
         self.juego.connect("exit", self.__exit_game)
         self.juego.config(res=res, xid=xid)
+        if not self.index in DICT.keys():
+            self.index = 0
         mapa, tanque, enem = get_data_game(self.index)
         self.juego.load(mapa, tanque, enem)
         self.juego.run()

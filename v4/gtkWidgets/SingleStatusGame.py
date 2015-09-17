@@ -30,7 +30,7 @@ BASE = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
 class SingleDialogoEndGame(gtk.Dialog):
 
-    def __init__(self, parent=None, _dict={}):
+    def __init__(self, parent, _dict1, _dict2):
 
         gtk.Dialog.__init__(self, parent=parent,
         buttons=("Salir", gtk.RESPONSE_CANCEL))
@@ -38,8 +38,10 @@ class SingleDialogoEndGame(gtk.Dialog):
         self.set_decorated(False)
         self.set_border_width(15)
 
-        self._ranking = Ranking(_dict.get(0, {}))
-        self.vbox.pack_start(self._ranking, True, True, 5)
+        self._ranking1 = Ranking(_dict1, "En este Nivel")
+        self._ranking2 = Ranking(_dict2, "Suma de Niveles")
+        self.vbox.pack_start(self._ranking1, True, True, 5)
+        self.vbox.pack_start(self._ranking2, True, True, 5)
 
         self.vbox.show_all()
         self.set_sensitive(False)
@@ -94,11 +96,12 @@ class SingleStatusGame(gtk.Window):
 
 class Ranking(gtk.Frame):
 
-    def __init__(self, _dict):
+    def __init__(self, _dict, text):
 
         gtk.Frame.__init__(self)
 
         self.set_border_width(4)
+        self.set_label(" %s: " % text)
         event = gtk.EventBox()
         event.set_border_width(4)
         event.set_property("visible-window", False)
@@ -155,7 +158,7 @@ class FrameJugador(gtk.Frame):
 
         self._preview = gtk.Image()
         self._pixbuf = False
-        self._ranking = Ranking({})
+        self._ranking = Ranking({}, "Puntajes")
         self._energia = FrameProgress("Energía:")
 
         vbox = gtk.VBox()

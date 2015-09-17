@@ -41,7 +41,11 @@ from Player.Player import Player
 gobject.threads_init()
 
 BASE = os.path.dirname(os.path.realpath(__file__))
-
+DICT = {
+    "puntos": 0,
+    "disparos": 0,
+    "aciertos": 0,
+    }
 
 class JAMTank(gtk.Window):
 
@@ -56,13 +60,13 @@ class JAMTank(gtk.Window):
         self.screen_wh = (640, 480)
         self.gameres = (640, 480)
         self.handlers = {
-            'selectmode': [],
-            'createservermode': [],
-            'createclientmode': [],
-            'servermodel': [],
-            'clientmodel': [],
-            'connectingplayers': [],
-            'singlemode': [],
+            "selectmode": [],
+            "createservermode": [],
+            "createclientmode": [],
+            "servermodel": [],
+            "clientmodel": [],
+            "connectingplayers": [],
+            "singlemode": [],
             }
         self.selectmode = False
         self.servermodel = False
@@ -76,8 +80,8 @@ class JAMTank(gtk.Window):
         self._music_vol = 0.2
         self._efect_vol = 0.2
 
-        self.connect('key-press-event', self.__key_press_event)
-        self.connect('key-release-event', self.__key_release_event)
+        self.connect("key-press-event", self.__key_press_event)
+        self.connect("key-release-event", self.__key_release_event)
         self.connect("realize", self.__do_realize)
         self.connect("expose-event", self.__expose)
 
@@ -96,8 +100,8 @@ class JAMTank(gtk.Window):
         screen = self.get_screen()
         self.screen_wh = (screen.get_width(), screen.get_height())
         self.gameres = (self.screen_wh[0] / 4 * 3, self.screen_wh[1])
-        xid = self.get_property('window').xid
-        #os.putenv('SDL_WINDOWID', str(xid))
+        xid = self.get_property("window").xid
+        #os.putenv("SDL_WINDOWID", str(xid))
         print "Resolución del Monitor:", self.screen_wh
         print "id de la ventana:", xid
         print "Geometria:"
@@ -172,11 +176,16 @@ class JAMTank(gtk.Window):
             # Selección de tipo de juego
             self.selectmode = SelectMode(self)
             _id = self.selectmode.connect("switch", self.__select_mode)
-            self.handlers['selectmode'].append(_id)
+            self.handlers["selectmode"].append(_id)
         elif valor == 2:
             # Jugar Solo
+            DICT = {
+                "puntos": 0,
+                "disparos": 0,
+                "aciertos": 0,
+                }
             self.singlemode = SingleModelGame(self)
-            xid = self.get_property('window').xid
+            xid = self.get_property("window").xid
             self.singlemode.rungame(xid, self.gameres)
             self.singlemode.juego._audio.set_volumen(self._efect_vol)
             self._statusgame = SingleStatusGame(self, self.screen_wh)
@@ -184,26 +193,26 @@ class JAMTank(gtk.Window):
                 self.__set_volumen, self.singlemode)
             self.singlemode.juego.connect("update", self._statusgame.update)
             _id = self.singlemode.connect("error", self.__switch, 1)
-            self.handlers['singlemode'].append(_id)
+            self.handlers["singlemode"].append(_id)
             _id = self.singlemode.connect("end-game", self.__end_single_game)
-            self.handlers['singlemode'].append(_id)
+            self.handlers["singlemode"].append(_id)
             self.__play_music_game()
         elif valor == 3:
             # Crear Juego en Red
             self.createservermode = CreateServerMode(self)
             _id = self.createservermode.connect("close", self.__switch, 1)
-            self.handlers['createservermode'].append(_id)
+            self.handlers["createservermode"].append(_id)
             _id = self.createservermode.connect("accion",
                 self.__accion_create_server)
-            self.handlers['createservermode'].append(_id)
+            self.handlers["createservermode"].append(_id)
         elif valor == 4:
             # Unirse a Juego en Red
             self.createclientmode = CreateClientMode(self)
             _id = self.createclientmode.connect("close", self.__switch, 1)
-            self.handlers['createclientmode'].append(_id)
+            self.handlers["createclientmode"].append(_id)
             _id = self.createclientmode.connect("accion",
                 self.__accion_create_client)
-            self.handlers['createclientmode'].append(_id)
+            self.handlers["createclientmode"].append(_id)
         elif valor == 5:
             dialog = Credits(self)
             dialog.run()
@@ -214,31 +223,31 @@ class JAMTank(gtk.Window):
         server_dict, player_dict):
         self.__reset()
         if accion == "run":
-            host = server_dict.get('ip', 'localhost')
-            nickh = server_dict.get('nick', 'JAMTank')
-            del(server_dict['ip'])
-            del(server_dict['nick'])
+            host = server_dict.get("ip", "localhost")
+            nickh = server_dict.get("nick", "JAMTank")
+            del(server_dict["ip"])
+            del(server_dict["nick"])
             self.clientmodel = ClientModelGame(self, host, server_dict,
-                player_dict.get('nick', 'JAMTank'),
-                player_dict.get('tanque', ''))
+                player_dict.get("nick", "JAMTank"),
+                player_dict.get("tanque", ""))
             _id = self.clientmodel.connect("error", self.__switch, 4)
-            self.handlers['clientmodel'].append(_id)
-            _id = self.clientmodel.connect("end-game", self.__end_game)
-            self.handlers['clientmodel'].append(_id)
+            self.handlers["clientmodel"].append(_id)
+            _id = self.clientmodel.connect("end-game", self.__end_multi_game)
+            self.handlers["clientmodel"].append(_id)
             if self.clientmodel.client_run():
                 self.connectingplayers = ConnectingPlayers(
                     self, nickh, server_dict)
                 self.connectingplayers.internal_widget.jugar.hide()
                 _id = self.connectingplayers.connect("close", self.__switch, 4)
-                self.handlers['connectingplayers'].append(_id)
+                self.handlers["connectingplayers"].append(_id)
                 _id = self.connectingplayers.connect("accion",
                     self.__accion_connecting_players_client)
-                self.handlers['connectingplayers'].append(_id)
+                self.handlers["connectingplayers"].append(_id)
                 _id = self.clientmodel.connect("players",
                     self.connectingplayers.update_playeres)
-                self.handlers['clientmodel'].append(_id)
+                self.handlers["clientmodel"].append(_id)
                 _id = self.clientmodel.connect("play-run", self.__play_run)
-                self.handlers['clientmodel'].append(_id)
+                self.handlers["clientmodel"].append(_id)
                 self.clientmodel.new_handler_registro(True)
             else:
                 print "ERROR:", self.__accion_create_client
@@ -249,40 +258,40 @@ class JAMTank(gtk.Window):
         self.__reset()
         if accion == "run":
             new_dict = {
-                'jugadores': int(_dict.get('enemigos', 1) + 1),
-                #'jugadores': int(_dict.get('enemigos', 1)),
-                'mapa': str(_dict.get('mapa', '')),
-                'vidas': int(_dict.get('vidas', 5))
+                "jugadores": int(_dict.get("enemigos", 1) + 1),
+                #"jugadores": int(_dict.get("enemigos", 1)),
+                "mapa": str(_dict.get("mapa", "")),
+                "vidas": int(_dict.get("vidas", 5))
                 }
             self.servermodel = ServerModelGame(self,
-                _dict.get('server', 'localhost'),
-                new_dict, _dict.get('nick', 'JAMTank'),
-                _dict.get('tanque', ''))
+                _dict.get("server", "localhost"),
+                new_dict, _dict.get("nick", "JAMTank"),
+                _dict.get("tanque", ""))
             _id = self.servermodel.connect("error", self.__switch, 3)
-            self.handlers['servermodel'].append(_id)
-            _id = self.servermodel.connect("end-game", self.__end_game)
-            self.handlers['servermodel'].append(_id)
+            self.handlers["servermodel"].append(_id)
+            _id = self.servermodel.connect("end-game", self.__end_multi_game)
+            self.handlers["servermodel"].append(_id)
             if self.servermodel.server_run():
                 self.connectingplayers = ConnectingPlayers(self,
-                    _dict.get('nick', 'JAMTank'), new_dict)
+                    _dict.get("nick", "JAMTank"), new_dict)
                 _id = self.connectingplayers.connect("close", self.__switch, 3)
-                self.handlers['connectingplayers'].append(_id)
+                self.handlers["connectingplayers"].append(_id)
                 _id = self.connectingplayers.connect("accion",
                     self.__accion_connecting_players_server)
-                self.handlers['connectingplayers'].append(_id)
+                self.handlers["connectingplayers"].append(_id)
                 _id = self.servermodel.connect("players",
                     self.connectingplayers.update_playeres)
-                self.handlers['servermodel'].append(_id)
+                self.handlers["servermodel"].append(_id)
                 _id = self.servermodel.connect("play-enabled",
                     self.connectingplayers.play_enabled)
-                self.handlers['servermodel'].append(_id)
+                self.handlers["servermodel"].append(_id)
                 self.servermodel.new_handler_registro(True)
             else:
                 print "ERROR:", self.__accion_create_server
         elif accion == "salir":
             self.__switch(False, 1)
 
-    def __end_game(self, modelgame, _dict):
+    def __end_multi_game(self, modelgame, _dict):
         #self.servermodel.juego.disconnect_by_func(self._statusgame.update)
         self.__play_music_intro()
         dialog = MultiDialogoEndGame(parent=self, _dict=_dict)
@@ -292,18 +301,37 @@ class JAMTank(gtk.Window):
         self.__switch(False, 1)
 
     def __end_single_game(self, modelgame, _dict):
-        #self.servermodel.juego.disconnect_by_func(self._statusgame.update)
-        self.__play_music_intro()
-        dialog = SingleDialogoEndGame(parent=self, _dict=_dict)
+        DICT["puntos"] += _dict[0].get("puntos", 0)
+        DICT["disparos"] += _dict[0].get("disparos", 0)
+        DICT["aciertos"] += _dict[0].get("aciertos", 0)
+        dialog = SingleDialogoEndGame(self, _dict[0], dict(DICT))
         dialog.run()
         dialog.destroy()
-        self._statusgame.destroy()
-        self.__switch(False, 1)
+        keys = sorted(_dict.keys())
+        keys = keys[1:]
+        vidas = False
+        for k in keys:
+            vidas = bool(_dict[k].get("vidas", 0))
+            if vidas:
+                break
+        if _dict[0].get("vidas", 0) and not vidas:
+            # Siguiente Nivel
+            self.singlemode.index += 1
+            xid = self.get_property("window").xid
+            self.singlemode.rungame(xid, self.gameres)
+            self._statusgame.connect("volumen",
+                self.__set_volumen, self.singlemode)
+            self.singlemode.juego.connect("update", self._statusgame.update)
+        else:
+            # game over
+            self.__play_music_intro()
+            self._statusgame.destroy()
+            self.__switch(False, 1)
 
     def __play_run(self, client_model):
         self.clientmodel.new_handler_registro(False)
         self.__kill_connectingplayers()
-        xid = self.get_property('window').xid
+        xid = self.get_property("window").xid
         self.clientmodel.rungame(xid, self.gameres)
         self.clientmodel.juego._audio.set_volumen(self._efect_vol)
         vidas = int(int(self.clientmodel._dict["vidas"]))
@@ -319,7 +347,7 @@ class JAMTank(gtk.Window):
             self.servermodel.new_handler_anuncio(False)
             self.servermodel.new_handler_registro(False)
             self.__kill_connectingplayers()
-            xid = self.get_property('window').xid
+            xid = self.get_property("window").xid
             self.servermodel.rungame(xid, self.gameres)
             self.servermodel.juego._audio.set_volumen(self._efect_vol)
             vidas = int(int(self.servermodel._dict["vidas"]))
@@ -339,32 +367,32 @@ class JAMTank(gtk.Window):
     def __kill_client_model(self):
         if self.clientmodel:
             self.clientmodel.close_all_and_exit()
-            for h in self.handlers.get('clientmodel', []):
+            for h in self.handlers.get("clientmodel", []):
                 if self.clientmodel.handler_is_connected(h):
                     self.clientmodel.handler_disconnect(h)
-            for h in self.handlers.get('clientmodel', []):
+            for h in self.handlers.get("clientmodel", []):
                 del(h)
             try:
                 self.clientmodel.destroy()
             except:
                 pass
-        self.handlers['clientmodel'] = []
+        self.handlers["clientmodel"] = []
         del(self.clientmodel)
         self.clientmodel = False
 
     def __kill_server_model(self):
         if self.servermodel:
             self.servermodel.close_all_and_exit()
-            for h in self.handlers.get('servermodel', []):
+            for h in self.handlers.get("servermodel", []):
                 if self.servermodel.handler_is_connected(h):
                     self.servermodel.handler_disconnect(h)
-            for h in self.handlers.get('servermodel', []):
+            for h in self.handlers.get("servermodel", []):
                 del(h)
             try:
                 self.servermodel.destroy()
             except:
                 pass
-        self.handlers['servermodel'] = []
+        self.handlers["servermodel"] = []
         del(self.servermodel)
         self.servermodel = False
 
@@ -388,60 +416,60 @@ class JAMTank(gtk.Window):
 
     def __kill_create_mode(self):
         if self.createclientmode:
-            for h in self.handlers.get('createclientmode', []):
+            for h in self.handlers.get("createclientmode", []):
                 if self.createclientmode.handler_is_connected(h):
                     self.createclientmode.handler_disconnect(h)
-            for h in self.handlers.get('createclientmode', []):
+            for h in self.handlers.get("createclientmode", []):
                 del(h)
             self.createclientmode.kill_all()
             try:
                 self.createclientmode.destroy()
             except:
                 pass
-        self.handlers['createclientmode'] = []
+        self.handlers["createclientmode"] = []
         del(self.createclientmode)
         self.createclientmode = False
         if self.createservermode:
-            for h in self.handlers.get('createservermode', []):
+            for h in self.handlers.get("createservermode", []):
                 if self.createservermode.handler_is_connected(h):
                     self.createservermode.handler_disconnect(h)
-            for h in self.handlers.get('createservermode', []):
+            for h in self.handlers.get("createservermode", []):
                 del(h)
             try:
                 self.createservermode.destroy()
             except:
                 pass
-        self.handlers['createservermode'] = []
+        self.handlers["createservermode"] = []
         del(self.createservermode)
         self.createservermode = False
 
     def __kill_select_mode(self):
         if self.selectmode:
-            for h in self.handlers.get('selectmode', []):
+            for h in self.handlers.get("selectmode", []):
                 if self.selectmode.handler_is_connected(h):
                     self.selectmode.handler_disconnect(h)
-            for h in self.handlers.get('selectmode', []):
+            for h in self.handlers.get("selectmode", []):
                 del(h)
             try:
                 self.selectmode.destroy()
             except:
                 pass
-        self.handlers['clientmodel'] = []
+        self.handlers["clientmodel"] = []
         del(self.selectmode)
         self.selectmode = False
 
     def __kill_connectingplayers(self):
         if self.connectingplayers:
-            for h in self.handlers.get('connectingplayers', []):
+            for h in self.handlers.get("connectingplayers", []):
                 if self.connectingplayers.handler_is_connected(h):
                     self.connectingplayers.handler_disconnect(h)
-            for h in self.handlers.get('connectingplayers', []):
+            for h in self.handlers.get("connectingplayers", []):
                 del(h)
             try:
                 self.connectingplayers.destroy()
             except:
                 pass
-        self.handlers['clientmodel'] = []
+        self.handlers["clientmodel"] = []
         del(self.connectingplayers)
         self.connectingplayers = False
 
