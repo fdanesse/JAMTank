@@ -28,11 +28,11 @@ from SingleplayerGame.Juego import Juego
 
 BASE_PATH = os.path.realpath(os.path.dirname(__file__))
 DICT = {
-    0: {
+    1: {
         "mapa": "f1.png",
         "tanque": "t5.png",
         "enemigos": ["t2.png", "t2.png"]},
-    1: {
+    2: {
         "mapa": "f2.png",
         "tanque": "t5.png",
         "enemigos": ["t3.png", "t3.png", "t3.png", "t3.png"]}
@@ -115,7 +115,7 @@ class SingleModelGame(gobject.GObject):
         self.juego.connect("exit", self.__exit_game)
         self.juego.config(res=res, xid=xid)
         if not self.index in DICT.keys():
-            self.index = 0
+            self.index = 1
         mapa, tanque, enem = get_data_game(self.index)
         self.juego.load(mapa, tanque, enem)
         self.juego.run()

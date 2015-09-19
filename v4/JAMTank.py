@@ -191,6 +191,7 @@ class JAMTank(gtk.Window):
             self._statusgame = SingleStatusGame(self, self.screen_wh)
             self._statusgame.connect("volumen",
                 self.__set_volumen, self.singlemode)
+            self._statusgame.set_nivel(self.singlemode.index)
             self.singlemode.juego.connect("update", self._statusgame.update)
             _id = self.singlemode.connect("error", self.__switch, 1)
             self.handlers["singlemode"].append(_id)
@@ -304,9 +305,6 @@ class JAMTank(gtk.Window):
         DICT["puntos"] += _dict[0].get("puntos", 0)
         DICT["disparos"] += _dict[0].get("disparos", 0)
         DICT["aciertos"] += _dict[0].get("aciertos", 0)
-        dialog = SingleDialogoEndGame(self, _dict[0], dict(DICT))
-        dialog.run()
-        dialog.destroy()
         keys = sorted(_dict.keys())
         keys = keys[1:]
         vidas = False
@@ -315,14 +313,24 @@ class JAMTank(gtk.Window):
             if vidas:
                 break
         if _dict[0].get("vidas", 0) and not vidas:
+            dialog = SingleDialogoEndGame(self,
+                "Completado Nivel %s" % self.singlemode.index,
+                _dict[0], dict(DICT))
+            dialog.run()
+            dialog.destroy()
             # Siguiente Nivel
             self.singlemode.index += 1
             xid = self.get_property("window").xid
             self.singlemode.rungame(xid, self.gameres)
+            self._statusgame.set_nivel(self.singlemode.index)
             self._statusgame.connect("volumen",
                 self.__set_volumen, self.singlemode)
             self.singlemode.juego.connect("update", self._statusgame.update)
         else:
+            dialog = SingleDialogoEndGame(self,
+                "Game Over", _dict[0], dict(DICT))
+            dialog.run()
+            dialog.destroy()
             # game over
             self.__play_music_intro()
             self._statusgame.destroy()

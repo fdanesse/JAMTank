@@ -30,16 +30,22 @@ BASE = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
 class SingleDialogoEndGame(gtk.Dialog):
 
-    def __init__(self, parent, _dict1, _dict2):
+    def __init__(self, parent, text, _dict1, _dict2):
 
-        gtk.Dialog.__init__(self, parent=parent,
-        buttons=("Salir", gtk.RESPONSE_CANCEL))
+        btns = ("Salir", gtk.RESPONSE_CANCEL)
+        if "Game Over" in text:
+            btns = ("Salir", gtk.RESPONSE_CANCEL)
+        else:
+            btns = ("Continuar", gtk.RESPONSE_CANCEL)
+
+        gtk.Dialog.__init__(self, parent=parent, buttons=btns)
 
         self.set_decorated(False)
         self.set_border_width(15)
 
         self._ranking1 = Ranking(_dict1, "En este Nivel")
         self._ranking2 = Ranking(_dict2, "Suma de Niveles")
+        self.vbox.pack_start(gtk.Label(text), True, True, 5)
         self.vbox.pack_start(self._ranking1, True, True, 5)
         self.vbox.pack_start(self._ranking2, True, True, 5)
 
@@ -69,6 +75,7 @@ class SingleStatusGame(gtk.Window):
         self.set_deletable(False)
         self.set_transient_for(top)
 
+        self._label_nivel = gtk.Label()
         self._volumenes = FrameVolumen()
         self._framejugador = FrameJugador()
         image = gtk.Image()
@@ -78,6 +85,7 @@ class SingleStatusGame(gtk.Window):
 
         vbox = gtk.VBox()
         vbox.pack_end(self._volumenes, False, False, 0)
+        vbox.pack_start(self._label_nivel, False, False, 0)
         vbox.pack_start(self._framejugador, False, False, 0)
         vbox.pack_start(image, True, True, 0)
         self.add(vbox)
@@ -87,6 +95,9 @@ class SingleStatusGame(gtk.Window):
 
     def __emit_volumen(self, widget, valor, text):
         self.emit("volumen", valor, text)
+
+    def set_nivel(self, nivel):
+        self._label_nivel.set_text("Nivel %s" % nivel)
 
     def update(self, juego, _dict):
         new = _dict.get(0, {})
