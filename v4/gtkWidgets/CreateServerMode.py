@@ -24,7 +24,10 @@ import gtk
 import gobject
 from SelectWidgets import Lista
 from SelectWidgets import OponentesSelectBox
+from SelectWidgets import FrameNick
+from SelectWidgets import FrameTanque
 from Globales import get_ip
+from Globales import set_font
 
 BASE = os.path.dirname(os.path.dirname(__file__))
 
@@ -113,10 +116,12 @@ class CreateServer(gtk.EventBox):
         tabla.attach_defaults(event, 3, 5, 4, 5)
 
         button = gtk.Button("Cancelar")
+        set_font(button.get_children()[0], "subtitulo1")
         tabla.attach_defaults(button, 0, 1, 5, 6)
         button.connect("clicked", self.__accion, "salir")
 
         self.jugar = gtk.Button("Crear")
+        set_font(self.jugar.get_children()[0], "subtitulo1")
         self.jugar.set_sensitive(False)
         self.jugar.connect("clicked", self.__accion, "run")
         tabla.attach_defaults(self.jugar, 4, 5, 5, 6)
@@ -211,50 +216,8 @@ class FrameMapa(gtk.Frame):
         scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         scroll.add(self.lista)
         event.add(scroll)
-
+        self.connect("realize", self.__realize)
         self.show_all()
 
-
-class FrameTanque(gtk.Frame):
-
-    def __init__(self):
-
-        gtk.Frame.__init__(self)
-
-        self.set_border_width(4)
-        self.set_label(" Selecciona tu Tanque: ")
-
-        self.lista = Lista()
-        self.lista.set_headers_visible(False)
-
-        event = gtk.EventBox()
-        event.set_border_width(4)
-        event.set_property("visible-window", False)
-        self.add(event)
-
-        scroll = gtk.ScrolledWindow()
-        scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
-        scroll.add(self.lista)
-        event.add(scroll)
-
-        self.show_all()
-
-
-class FrameNick(gtk.Frame):
-
-    def __init__(self):
-
-        gtk.Frame.__init__(self)
-
-        self.set_border_width(4)
-        self.set_label(" Escribe tu Apodo: ")
-
-        event = gtk.EventBox()
-        event.set_border_width(4)
-        event.set_property("visible-window", False)
-        self.add(event)
-        self.nick = gtk.Entry()
-        self.nick.set_max_length(10)
-        event.add(self.nick)
-
-        self.show_all()
+    def __realize(self, widget):
+        set_font(self, "subtitulo1")

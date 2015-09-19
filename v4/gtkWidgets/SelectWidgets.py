@@ -42,6 +42,7 @@ class OponentesSelectBox(gtk.VBox):
 
         hbox = gtk.HBox()
         oponentes = gtk.Label("Oponentes")
+        set_font(oponentes, "text")
         spin = NumBox(range(1, 10))
         spin.connect("valor", self.__emit_valor, "oponentes")
         hbox.pack_start(spin, False, False, 5)
@@ -50,6 +51,7 @@ class OponentesSelectBox(gtk.VBox):
 
         hbox = gtk.HBox()
         limite = gtk.Label("Vidas")
+        set_font(limite, "text")
         spin = NumBox(range(5, 51))
         spin.connect("valor", self.__emit_valor, "vidas")
         hbox.pack_start(spin, False, False, 5)
@@ -79,9 +81,12 @@ class NumBox(gtk.HBox):
         self.valor = min(self.rango)
 
         menos = gtk.Button("-")
+        set_font(menos.get_children()[0], "subtitulo1")
         menos.connect("clicked", self.__change)
         self.label = gtk.Label("0")
+        set_font(self.label, "text")
         mas = gtk.Button("+")
+        set_font(mas.get_children()[0], "subtitulo1")
         mas.connect("clicked", self.__change)
 
         self.pack_start(menos, False, False, 5)
@@ -103,6 +108,58 @@ class NumBox(gtk.HBox):
                 self.valor += 1
         self.emit("valor", self.valor)
         self.label.set_text(str(self.valor))
+
+
+class FrameNick(gtk.Frame):
+
+    def __init__(self):
+
+        gtk.Frame.__init__(self)
+
+        self.set_border_width(4)
+        self.set_label(" Escribe tu Apodo: ")
+
+        event = gtk.EventBox()
+        event.set_border_width(4)
+        event.set_property("visible-window", False)
+        self.add(event)
+        self.nick = gtk.Entry()
+        set_font(self.nick, "text")
+        self.nick.set_max_length(15)
+        event.add(self.nick)
+        self.connect("realize", self.__realize)
+        self.show_all()
+
+    def __realize(self, widget):
+        set_font(self, "subtitulo1")
+
+
+class FrameTanque(gtk.Frame):
+
+    def __init__(self):
+
+        gtk.Frame.__init__(self)
+
+        self.set_border_width(4)
+        self.set_label(" Selecciona tu Tanque: ")
+
+        self.lista = Lista()
+        self.lista.set_headers_visible(False)
+
+        event = gtk.EventBox()
+        event.set_border_width(4)
+        event.set_property("visible-window", False)
+        self.add(event)
+
+        scroll = gtk.ScrolledWindow()
+        scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+        scroll.add(self.lista)
+        event.add(scroll)
+        self.connect("realize", self.__realize)
+        self.show_all()
+
+    def __realize(self, widget):
+        set_font(self, "subtitulo1")
 
 
 class Lista(gtk.TreeView):

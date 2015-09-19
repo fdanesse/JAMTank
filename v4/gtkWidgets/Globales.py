@@ -42,26 +42,18 @@ def set_font(widget, tipo):
     if tipo == "titulo":
         fontdesc = pango.FontDescription("Monospace 20")
         stype = pango.AttrWeight(pango.WEIGHT_ULTRABOLD, 0, -1)
-        attrlist.insert(fg_color)
-        attrlist.insert(stype)
     elif tipo == "subtitulo1":
         fontdesc = pango.FontDescription("Monospace 16")
-        stype = pango.AttrWeight(pango.WEIGHT_BOLD, 0, -1)
-        attrlist.insert(fg_color)
-        attrlist.insert(stype)
     elif tipo == "subtitulo2":
         fontdesc = pango.FontDescription("Monospace 14")
-        stype = pango.AttrWeight(pango.WEIGHT_BOLD, 0, -1)
-        attrlist.insert(fg_color)
-        attrlist.insert(stype)
     else:
         fg_color = pango.AttrForeground(0, 27756, 0, 0, -1)
-        attrlist.insert(fg_color)
-        attrlist.insert(stype)
     widget.modify_font(fontdesc)
-    try:
-        # label
+    attrlist.insert(fg_color)
+    attrlist.insert(stype)
+    if "Label" in str(type(widget)):
         widget.set_attributes(attrlist)
-    except:
-        # frame
+    elif "Frame" in str(type(widget)):
         widget.get_label_widget().set_attributes(attrlist)
+    elif "Entry" in str(type(widget)):
+        widget.get_layout().set_attributes(attrlist)
