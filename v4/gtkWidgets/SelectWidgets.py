@@ -23,6 +23,7 @@
 import os
 import gtk
 import gobject
+from Globales import set_font
 
 
 class OponentesSelectBox(gtk.VBox):
@@ -202,6 +203,7 @@ class DialogoSalir(gtk.Dialog):
         self.set_border_width(15)
 
         label = gtk.Label(text)
+        set_font(label, "subtitulo1")
         label.show()
 
         self.vbox.pack_start(label, True, True, 5)

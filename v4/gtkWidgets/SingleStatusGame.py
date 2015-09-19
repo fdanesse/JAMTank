@@ -24,6 +24,7 @@ import gobject
 import gtk
 from WidgetsGenerales import FrameVolumen
 from WidgetsGenerales import FrameProgress
+from Globales import set_font
 
 BASE = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
@@ -45,7 +46,9 @@ class SingleDialogoEndGame(gtk.Dialog):
 
         self._ranking1 = Ranking(_dict1, "En este Nivel")
         self._ranking2 = Ranking(_dict2, "Suma de Niveles")
-        self.vbox.pack_start(gtk.Label(text), True, True, 5)
+        label = gtk.Label(text)
+        set_font(label, "titulo")
+        self.vbox.pack_start(label, True, True, 5)
         self.vbox.pack_start(self._ranking1, True, True, 5)
         self.vbox.pack_start(self._ranking2, True, True, 5)
 
@@ -76,6 +79,8 @@ class SingleStatusGame(gtk.Window):
         self.set_transient_for(top)
 
         self._label_nivel = gtk.Label()
+        set_font(self._label_nivel, "titulo")
+
         self._volumenes = FrameVolumen()
         self._framejugador = FrameJugador()
         image = gtk.Image()
@@ -97,7 +102,8 @@ class SingleStatusGame(gtk.Window):
         self.emit("volumen", valor, text)
 
     def set_nivel(self, nivel):
-        self._label_nivel.set_text("Nivel %s" % nivel)
+        text = "Nivel %i" % nivel
+        self._label_nivel.set_text(text)
 
     def update(self, juego, _dict):
         new = _dict.get(0, {})
@@ -120,29 +126,37 @@ class Ranking(gtk.Frame):
 
         hbox = gtk.HBox()
         self._puntos = gtk.Label("Puntos = %s" % 0)
+        set_font(self._puntos, "text")
         hbox.pack_start(self._puntos, False, False, 0)
         vbox.pack_start(hbox, False, False, 0)
 
         hbox = gtk.HBox()
         self._disparos = gtk.Label("Disparos = %s" % 0)
+        set_font(self._disparos, "text")
         hbox.pack_start(self._disparos, False, False, 0)
         vbox.pack_start(hbox, False, False, 0)
 
         hbox = gtk.HBox()
         self._aciertos = gtk.Label("Aciertos = %s" % 0)
+        set_font(self._aciertos, "text")
         hbox.pack_start(self._aciertos, False, False, 0)
         vbox.pack_start(hbox, False, False, 0)
 
         hbox = gtk.HBox()
         self._porcenta = gtk.Label("Efectividad = %s %s" % (0, "%"))
+        set_font(self._porcenta, "text")
         hbox.pack_start(self._porcenta, False, False, 0)
         vbox.pack_start(hbox, False, False, 0)
 
         event.add(vbox)
         self.add(event)
+        self.connect("realize", self.__realize)
         self.show_all()
         if _dict:
             self.update(_dict)
+
+    def __realize(self, widget):
+        set_font(self, "subtitulo1")
 
     def update(self, _dict):
         self._puntos.set_text("Puntos = %s" % _dict.get("puntos", 0))

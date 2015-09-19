@@ -22,6 +22,7 @@
 import os
 import gobject
 import gtk
+from Globales import set_font
 
 BASE = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
@@ -48,21 +49,30 @@ class FrameVolumen(gtk.Frame):
 
         vbox = gtk.HBox()
         frame = gtk.Frame()
+        frame.connect("realize", self.__frame_realize)
         frame.set_label(" Música ")
         frame.add(self._musica)
         vbox.pack_end(frame, False, False, 0)
 
         frame = gtk.Frame()
+        frame.connect("realize", self.__frame_realize)
         frame.set_label(" Efectos ")
         frame.add(self._efectos)
         vbox.pack_end(frame, False, False, 0)
 
         event.add(vbox)
         self.add(event)
+        self.connect("realize", self.__realize)
         self.show_all()
 
         self._musica.connect("volumen", self.__emit_volumen, "musica")
         self._efectos.connect("volumen", self.__emit_volumen, "efectos")
+
+    def __realize(self, widget):
+        set_font(widget, "subtitulo1")
+
+    def __frame_realize(self, widget):
+        set_font(widget, "subtitulo2")
 
     def __emit_volumen(self, widget, valor, text):
         self.emit("volumen", valor, text)
@@ -82,7 +92,11 @@ class FrameProgress(gtk.Frame):
         self._progress = Progreso()
         event.add(self._progress)
         self.add(event)
+        self.connect("realize", self.__realize)
         self.show_all()
+
+    def __realize(self, widget):
+        set_font(self, "subtitulo1")
 
     def update(self, _max, val):
         self._progress.set_progress(100 * val / _max)

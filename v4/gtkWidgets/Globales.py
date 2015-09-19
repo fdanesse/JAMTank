@@ -20,6 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import socket
+import pango
 
 
 def get_ip():
@@ -31,3 +32,36 @@ def get_ip():
     except:
         pass
     return ip
+
+
+def set_font(widget, tipo):
+    attrlist = pango.AttrList()
+    fg_color = pango.AttrForeground(0, 0, 0, 0, -1)
+    stype = pango.AttrWeight(pango.WEIGHT_BOLD, 0, -1)
+    fontdesc = pango.FontDescription("Monospace 12")
+    if tipo == "titulo":
+        fontdesc = pango.FontDescription("Monospace 20")
+        stype = pango.AttrWeight(pango.WEIGHT_ULTRABOLD, 0, -1)
+        attrlist.insert(fg_color)
+        attrlist.insert(stype)
+    elif tipo == "subtitulo1":
+        fontdesc = pango.FontDescription("Monospace 16")
+        stype = pango.AttrWeight(pango.WEIGHT_BOLD, 0, -1)
+        attrlist.insert(fg_color)
+        attrlist.insert(stype)
+    elif tipo == "subtitulo2":
+        fontdesc = pango.FontDescription("Monospace 14")
+        stype = pango.AttrWeight(pango.WEIGHT_BOLD, 0, -1)
+        attrlist.insert(fg_color)
+        attrlist.insert(stype)
+    else:
+        fg_color = pango.AttrForeground(0, 27756, 0, 0, -1)
+        attrlist.insert(fg_color)
+        attrlist.insert(stype)
+    widget.modify_font(fontdesc)
+    try:
+        # label
+        widget.set_attributes(attrlist)
+    except:
+        # frame
+        widget.get_label_widget().set_attributes(attrlist)
