@@ -23,20 +23,34 @@ import os
 import gobject
 import gtk
 import time
+import random
+random.seed()
 from gtkWidgets.SelectWidgets import DialogoSalir
 from SingleplayerGame.Juego import Juego
 
 BASE_PATH = os.path.realpath(os.path.dirname(__file__))
-DICT = {
-    1: {
-        "mapa": "f1.png",
-        "tanque": "t5.png",
-        "enemigos": ["t2.png", "t2.png"]},
-    2: {
-        "mapa": "f2.png",
-        "tanque": "t5.png",
-        "enemigos": ["t3.png", "t3.png", "t3.png", "t3.png"]}
-    }
+
+
+def make_dict():
+    DICT = {}
+    path = os.path.join(BASE_PATH, "Mapas")
+    mapas = reversed(sorted(os.listdir(path)))
+    tanques = os.listdir(os.path.join(BASE_PATH, "Tanques"))
+    tanques.remove("t5.png")
+    _id = 0
+    for m in mapas:
+        _id += 1
+        DICT[_id] = {}
+        DICT[_id]["mapa"] = m
+        DICT[_id]["tanque"] = "t5.png"
+        ene = []
+        for x in range(int(_id * 1.7)):
+            ene.append(random.choice(tanques))
+        DICT[_id]["enemigos"] = ene
+    return DICT
+
+
+DICT = make_dict()
 
 
 def get_data_game(index):
