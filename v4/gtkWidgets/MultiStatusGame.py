@@ -24,6 +24,7 @@ import gobject
 import gtk
 from WidgetsGenerales import FrameVolumen
 from WidgetsGenerales import FrameProgress
+from Globales import set_font
 
 BASE = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
@@ -109,7 +110,11 @@ class Ranking(gtk.Frame):
         self._lista = Lista()
         event.add(self._lista)
         self.add(event)
+        self.connect("realize", self.__realize)
         self.show_all()
+
+    def __realize(self, widget):
+        set_font(self, "subtitulo1")
 
 
 class Lista(gtk.TreeView):
@@ -217,7 +222,11 @@ class FrameJugador(gtk.Frame):
 
         event.add(vbox)
         self.add(event)
+        self.connect("realize", self.__realize)
         self.show_all()
+
+    def __realize(self, widget):
+        set_font(self, "subtitulo1")
 
     def update(self, _dict):
         try:
