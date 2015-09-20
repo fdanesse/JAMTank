@@ -47,6 +47,7 @@ DICT = {
     "aciertos": 0,
     }
 
+
 class JAMTank(gtk.Window):
 
     def __init__(self):
@@ -179,11 +180,6 @@ class JAMTank(gtk.Window):
             self.handlers["selectmode"].append(_id)
         elif valor == 2:
             # Jugar Solo
-            DICT = {
-                "puntos": 0,
-                "disparos": 0,
-                "aciertos": 0,
-                }
             self.singlemode = SingleModelGame(self)
             xid = self.get_property("window").xid
             self.singlemode.rungame(xid, self.gameres)

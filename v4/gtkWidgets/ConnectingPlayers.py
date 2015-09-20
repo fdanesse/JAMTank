@@ -102,7 +102,7 @@ class InternalWidget(gtk.Frame):
         tabla.set_border_width(6)
 
         self.label = gtk.Label()
-        set_font(self.label, "subtitulo1")
+        set_font(self.label, "subtitulo1", typewidget="Label")
         tabla.attach_defaults(self.label, 0, 4, 0, 1)
 
         self.framejugadores = FrameJugadores()
@@ -112,9 +112,11 @@ class InternalWidget(gtk.Frame):
         tabla.attach_defaults(self.framemapa, 2, 4, 1, 7)
 
         self.cancelar = gtk.Button("Cancelar")
-        set_font(self.cancelar.get_children()[0], "subtitulo1")
+        set_font(self.cancelar.get_children()[0],
+            "subtitulo1", typewidget="Label")
         self.jugar = gtk.Button("Jugar")
-        set_font(self.jugar.get_children()[0], "subtitulo1")
+        set_font(self.jugar.get_children()[0],
+            "subtitulo1", typewidget="Label")
         self.jugar.set_sensitive(False)
         tabla.attach_defaults(self.cancelar, 2, 3, 7, 8)
         tabla.attach_defaults(self.jugar, 3, 4, 7, 8)
@@ -125,7 +127,7 @@ class InternalWidget(gtk.Frame):
         self.show_all()
 
     def __realize(self, widget):
-        set_font(widget, "titulo")
+        set_font(widget, "titulo", typewidget="Frame")
 
 
 class FrameJugadores(gtk.Frame):
@@ -151,7 +153,7 @@ class FrameJugadores(gtk.Frame):
         self.show_all()
 
     def __realize(self, widget):
-        set_font(self, "subtitulo1")
+        set_font(self, "subtitulo1", typewidget="Frame")
 
 
 class FrameMapa(gtk.Frame):
@@ -174,7 +176,7 @@ class FrameMapa(gtk.Frame):
         self.show_all()
 
     def __realize(self, widget):
-        set_font(self, "subtitulo1")
+        set_font(self, "subtitulo1", typewidget="Frame")
 
 
 class NewLista(gtk.TreeView):

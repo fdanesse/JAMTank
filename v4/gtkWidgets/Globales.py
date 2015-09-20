@@ -34,7 +34,7 @@ def get_ip():
     return ip
 
 
-def set_font(widget, tipo):
+def set_font(widget, tipo, typewidget=""):
     attrlist = pango.AttrList()
     fg_color = pango.AttrForeground(0, 0, 0, 0, -1)
     stype = pango.AttrWeight(pango.WEIGHT_BOLD, 0, -1)
@@ -51,9 +51,11 @@ def set_font(widget, tipo):
     widget.modify_font(fontdesc)
     attrlist.insert(fg_color)
     attrlist.insert(stype)
-    if "Label" in str(type(widget)):
+    if "Label" in str(type(widget)) or "Label" in typewidget:
         widget.set_attributes(attrlist)
-    elif "Frame" in str(type(widget)):
+    elif "Frame" in str(type(widget)) or "Frame" in typewidget:
         widget.get_label_widget().set_attributes(attrlist)
-    elif "Entry" in str(type(widget)):
+    elif "Entry" in str(type(widget)) or "Entry" in typewidget:
         widget.get_layout().set_attributes(attrlist)
+    else:
+        print str(type(widget))

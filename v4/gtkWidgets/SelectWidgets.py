@@ -42,7 +42,7 @@ class OponentesSelectBox(gtk.VBox):
 
         hbox = gtk.HBox()
         oponentes = gtk.Label("Oponentes")
-        set_font(oponentes, "text")
+        set_font(oponentes, "text", typewidget="Label")
         spin = NumBox(range(1, 10))
         spin.connect("valor", self.__emit_valor, "oponentes")
         hbox.pack_start(spin, False, False, 5)
@@ -51,7 +51,7 @@ class OponentesSelectBox(gtk.VBox):
 
         hbox = gtk.HBox()
         limite = gtk.Label("Vidas")
-        set_font(limite, "text")
+        set_font(limite, "text", typewidget="Label")
         spin = NumBox(range(5, 51))
         spin.connect("valor", self.__emit_valor, "vidas")
         hbox.pack_start(spin, False, False, 5)
@@ -81,12 +81,12 @@ class NumBox(gtk.HBox):
         self.valor = min(self.rango)
 
         menos = gtk.Button("-")
-        set_font(menos.get_children()[0], "subtitulo1")
+        set_font(menos.get_children()[0], "subtitulo1", typewidget="Label")
         menos.connect("clicked", self.__change)
         self.label = gtk.Label("0")
-        set_font(self.label, "text")
+        set_font(self.label, "text", typewidget="Label")
         mas = gtk.Button("+")
-        set_font(mas.get_children()[0], "subtitulo1")
+        set_font(mas.get_children()[0], "subtitulo1", typewidget="Label")
         mas.connect("clicked", self.__change)
 
         self.pack_start(menos, False, False, 5)
@@ -124,14 +124,14 @@ class FrameNick(gtk.Frame):
         event.set_property("visible-window", False)
         self.add(event)
         self.nick = gtk.Entry()
-        set_font(self.nick, "text")
+        set_font(self.nick, "text", typewidget="Entry")
         self.nick.set_max_length(15)
         event.add(self.nick)
         self.connect("realize", self.__realize)
         self.show_all()
 
     def __realize(self, widget):
-        set_font(self, "subtitulo1")
+        set_font(self, "subtitulo1", typewidget="Frame")
 
 
 class FrameTanque(gtk.Frame):
@@ -159,7 +159,7 @@ class FrameTanque(gtk.Frame):
         self.show_all()
 
     def __realize(self, widget):
-        set_font(self, "subtitulo1")
+        set_font(self, "subtitulo1", typewidget="Frame")
 
 
 class Lista(gtk.TreeView):
@@ -246,21 +246,3 @@ class Lista(gtk.TreeView):
 
     def seleccionar_primero(self, widget=None):
         self.get_selection().select_iter(self.get_model().get_iter_first())
-
-
-class DialogoSalir(gtk.Dialog):
-
-    def __init__(self, parent=None, text=""):
-
-        gtk.Dialog.__init__(self, parent=parent,
-        buttons=("No", gtk.RESPONSE_CANCEL,
-        "Si", gtk.RESPONSE_ACCEPT))
-
-        self.set_decorated(False)
-        self.set_border_width(15)
-
-        label = gtk.Label(text)
-        set_font(label, "subtitulo1")
-        label.show()
-
-        self.vbox.pack_start(label, True, True, 5)

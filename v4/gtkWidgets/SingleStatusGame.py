@@ -47,7 +47,7 @@ class SingleDialogoEndGame(gtk.Dialog):
         self._ranking1 = Ranking(_dict1, "En este Nivel")
         self._ranking2 = Ranking(_dict2, "Suma de Niveles")
         label = gtk.Label(text)
-        set_font(label, "titulo")
+        set_font(label, "titulo", typewidget="Label")
         self.vbox.pack_start(label, True, True, 5)
         self.vbox.pack_start(self._ranking1, True, True, 5)
         self.vbox.pack_start(self._ranking2, True, True, 5)
@@ -55,6 +55,8 @@ class SingleDialogoEndGame(gtk.Dialog):
         self.vbox.show_all()
         self.set_sensitive(False)
         gobject.timeout_add(4000, self.__sensitive)
+        button = self.get_widget_for_response(gtk.RESPONSE_CANCEL)
+        set_font(button.get_children()[0], "subtitulo2", typewidget="Label")
 
     def __sensitive(self):
         self.set_sensitive(True)
@@ -79,7 +81,7 @@ class SingleStatusGame(gtk.Window):
         self.set_transient_for(top)
 
         self._label_nivel = gtk.Label()
-        set_font(self._label_nivel, "titulo")
+        set_font(self._label_nivel, "titulo", typewidget="Label")
 
         self._volumenes = FrameVolumen()
         self._framejugador = FrameJugador()
@@ -126,25 +128,25 @@ class Ranking(gtk.Frame):
 
         hbox = gtk.HBox()
         self._puntos = gtk.Label("Puntos = %s" % 0)
-        set_font(self._puntos, "text")
+        set_font(self._puntos, "text", typewidget="Label")
         hbox.pack_start(self._puntos, False, False, 0)
         vbox.pack_start(hbox, False, False, 0)
 
         hbox = gtk.HBox()
         self._disparos = gtk.Label("Disparos = %s" % 0)
-        set_font(self._disparos, "text")
+        set_font(self._disparos, "text", typewidget="Label")
         hbox.pack_start(self._disparos, False, False, 0)
         vbox.pack_start(hbox, False, False, 0)
 
         hbox = gtk.HBox()
         self._aciertos = gtk.Label("Aciertos = %s" % 0)
-        set_font(self._aciertos, "text")
+        set_font(self._aciertos, "text", typewidget="Label")
         hbox.pack_start(self._aciertos, False, False, 0)
         vbox.pack_start(hbox, False, False, 0)
 
         hbox = gtk.HBox()
         self._porcenta = gtk.Label("Efectividad = %s %s" % (0, "%"))
-        set_font(self._porcenta, "text")
+        set_font(self._porcenta, "text", typewidget="Label")
         hbox.pack_start(self._porcenta, False, False, 0)
         vbox.pack_start(hbox, False, False, 0)
 
@@ -156,7 +158,7 @@ class Ranking(gtk.Frame):
             self.update(_dict)
 
     def __realize(self, widget):
-        set_font(self, "subtitulo1")
+        set_font(self, "subtitulo1", typewidget="Frame")
 
     def update(self, _dict):
         self._puntos.set_text("Puntos = %s" % _dict.get("puntos", 0))

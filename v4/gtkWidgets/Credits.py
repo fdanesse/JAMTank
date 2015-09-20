@@ -21,6 +21,7 @@
 
 import os
 import gtk
+from Globales import set_font
 
 BASE = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
@@ -41,3 +42,5 @@ class Credits(gtk.Dialog):
 
         self.vbox.pack_start(imagen, True, True, 0)
         self.vbox.show_all()
+        button = self.get_widget_for_response(gtk.RESPONSE_ACCEPT)
+        set_font(button.get_children()[0], "subtitulo2", typewidget="Label")

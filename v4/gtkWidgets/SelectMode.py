@@ -19,11 +19,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import os
 import gtk
 import gobject
 from Globales import set_font
-from gtkWidgets.SelectWidgets import DialogoSalir
+from gtkWidgets.WidgetsGenerales import DialogoSalir
 
 
 class SelectMode(gtk.Window):
@@ -45,27 +44,27 @@ class SelectMode(gtk.Window):
 
         vbox = gtk.VBox()
         boton = gtk.Button("Jugar Solo")
-        set_font(boton.get_children()[0], "subtitulo1")
+        set_font(boton.get_children()[0], "subtitulo2", typewidget="Label")
         boton.connect("clicked", self.__emit_switch, "solo")
         vbox.pack_start(boton, False, False, 0)
 
         boton = gtk.Button("Crear en Red")
-        set_font(boton.get_children()[0], "subtitulo1")
+        set_font(boton.get_children()[0], "subtitulo2", typewidget="Label")
         boton.connect("clicked", self.__emit_switch, "red")
         vbox.pack_start(boton, False, False, 0)
 
         boton = gtk.Button(" Unirse en Red ")
-        set_font(boton.get_children()[0], "subtitulo1")
+        set_font(boton.get_children()[0], "subtitulo2", typewidget="Label")
         boton.connect("clicked", self.__emit_switch, "join")
         vbox.pack_start(boton, False, False, 0)
 
         boton = gtk.Button("Creditos")
-        set_font(boton.get_children()[0], "subtitulo1")
+        set_font(boton.get_children()[0], "subtitulo2", typewidget="Label")
         boton.connect("clicked", self.__emit_switch, "creditos")
         vbox.pack_start(boton, False, False, 0)
 
         boton = gtk.Button("Salir")
-        set_font(boton.get_children()[0], "subtitulo1")
+        set_font(boton.get_children()[0], "subtitulo2", typewidget="Label")
         boton.connect("clicked", self.__emit_switch, "salir")
         vbox.pack_start(boton, False, False, 0)
 

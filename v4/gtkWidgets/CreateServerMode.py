@@ -116,12 +116,13 @@ class CreateServer(gtk.EventBox):
         tabla.attach_defaults(event, 3, 5, 4, 5)
 
         button = gtk.Button("Cancelar")
-        set_font(button.get_children()[0], "subtitulo1")
+        set_font(button.get_children()[0], "subtitulo1", typewidget="Label")
         tabla.attach_defaults(button, 0, 1, 5, 6)
         button.connect("clicked", self.__accion, "salir")
 
         self.jugar = gtk.Button("Crear")
-        set_font(self.jugar.get_children()[0], "subtitulo1")
+        set_font(self.jugar.get_children()[0],
+            "subtitulo1", typewidget="Label")
         self.jugar.set_sensitive(False)
         self.jugar.connect("clicked", self.__accion, "run")
         tabla.attach_defaults(self.jugar, 4, 5, 5, 6)
@@ -220,4 +221,4 @@ class FrameMapa(gtk.Frame):
         self.show_all()
 
     def __realize(self, widget):
-        set_font(self, "subtitulo1")
+        set_font(self, "subtitulo1", typewidget="Frame")

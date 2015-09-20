@@ -114,7 +114,7 @@ class Ranking(gtk.Frame):
         self.show_all()
 
     def __realize(self, widget):
-        set_font(self, "subtitulo1")
+        set_font(self, "subtitulo1", typewidget="Frame")
 
 
 class Lista(gtk.TreeView):
@@ -226,7 +226,7 @@ class FrameJugador(gtk.Frame):
         self.show_all()
 
     def __realize(self, widget):
-        set_font(self, "subtitulo1")
+        set_font(self, "subtitulo1", typewidget="Frame")
 
     def update(self, _dict):
         try:

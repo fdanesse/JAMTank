@@ -23,7 +23,7 @@ import os
 import gobject
 import gtk
 import time
-from gtkWidgets.SelectWidgets import DialogoSalir
+from gtkWidgets.WidgetsGenerales import DialogoSalir
 from Network.Client import Client
 from MultiplayerGame.Juego import Juego
 

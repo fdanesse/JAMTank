@@ -27,7 +27,7 @@ import threading
 import ctypes
 import cPickle as pickle
 import gtk
-from gtkWidgets.SelectWidgets import DialogoSalir
+from gtkWidgets.WidgetsGenerales import DialogoSalir
 from Network.Server import Server
 from Network.Server import RequestHandler
 from Network.Client import Client

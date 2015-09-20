@@ -69,10 +69,10 @@ class FrameVolumen(gtk.Frame):
         self._efectos.connect("volumen", self.__emit_volumen, "efectos")
 
     def __realize(self, widget):
-        set_font(widget, "subtitulo1")
+        set_font(widget, "subtitulo1", typewidget="Frame")
 
     def __frame_realize(self, widget):
-        set_font(widget, "subtitulo2")
+        set_font(widget, "subtitulo2", typewidget="Frame")
 
     def __emit_volumen(self, widget, valor, text):
         self.emit("volumen", valor, text)
@@ -96,7 +96,7 @@ class FrameProgress(gtk.Frame):
         self.show_all()
 
     def __realize(self, widget):
-        set_font(self, "subtitulo1")
+        set_font(self, "subtitulo1", typewidget="Frame")
 
     def update(self, _max, val):
         self._progress.set_progress(100 * val / _max)
@@ -185,3 +185,25 @@ class ControlVolumen(gtk.VolumeButton):
 
     def __value_changed(self, widget, valor):
         self.emit('volumen', valor)
+
+
+class DialogoSalir(gtk.Dialog):
+
+    def __init__(self, parent=None, text=""):
+
+        gtk.Dialog.__init__(self, parent=parent,
+        buttons=("No", gtk.RESPONSE_CANCEL,
+        "Si", gtk.RESPONSE_ACCEPT))
+
+        self.set_decorated(False)
+        self.set_border_width(15)
+
+        label = gtk.Label(text)
+        set_font(label, "subtitulo2", typewidget="Label")
+        label.show()
+
+        self.vbox.pack_start(label, True, True, 5)
+        button = self.get_widget_for_response(gtk.RESPONSE_ACCEPT)
+        set_font(button.get_children()[0], "subtitulo2", typewidget="Label")
+        button = self.get_widget_for_response(gtk.RESPONSE_CANCEL)
+        set_font(button.get_children()[0], "subtitulo2", typewidget="Label")

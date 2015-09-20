@@ -25,7 +25,7 @@ import gtk
 import time
 import random
 random.seed()
-from gtkWidgets.SelectWidgets import DialogoSalir
+from gtkWidgets.WidgetsGenerales import DialogoSalir
 from SingleplayerGame.Juego import Juego
 
 BASE_PATH = os.path.realpath(os.path.dirname(__file__))
