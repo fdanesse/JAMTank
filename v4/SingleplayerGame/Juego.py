@@ -76,7 +76,7 @@ class Juego(gobject.GObject):
 
     def __disparar(self, jugador):
         self._audio.disparo()
-        _id = self._jugador._id
+        _id = jugador._id
         path = os.path.join(BASE_PATH, "Balas", "bala.png")
         _dict = jugador.get_disparo()
         b = Bala(_dict, path, RES, _id)
@@ -183,6 +183,15 @@ class Juego(gobject.GObject):
             if self._jugador:
                 self._jugador.update_events(eventos)
 
+    def pausar(self):
+        for jugador in self._jugadores.sprites():
+            jugador.pausar()
+
+    def reactivar(self):
+        for jugador in self._jugadores.sprites():
+            if self._data_game_players[jugador._id]["vidas"]:
+                jugador.reactivar()
+
     def load(self, mapa, tank, enemigos):
         print "Cargando mapa:", mapa
         imagen = pygame.image.load(mapa)
@@ -194,7 +203,9 @@ class Juego(gobject.GObject):
         self._data_game_players[_id] = dict(MODEL)
         _id = 1
         for enem in enemigos:
-            self._jugadores.add(Enemigo(RES, enem, _id))
+            enemigo = Enemigo(RES, enem, _id)
+            enemigo.connect("disparo", self.__disparar)
+            self._jugadores.add(enemigo)
             self._data_game_players[_id] = dict(MODEL)
             _id += 1
 

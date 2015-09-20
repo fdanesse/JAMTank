@@ -168,7 +168,7 @@ class Ranking(gtk.Frame):
             self._porcenta.set_text("Efectividad = %s %s" % (
                 _dict.get("aciertos", 0) * 100 / _dict.get("disparos", 0), "%"))
         except:
-            pass
+            self._porcenta.set_text("Efectividad = 0 %s" % ("%"))
 
 
 class FrameJugador(gtk.Frame):

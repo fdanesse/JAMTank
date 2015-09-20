@@ -113,6 +113,10 @@ class Jugador(gobject.GObject, Sprite):
             self.rect.centerx = self.centerx
             self.rect.centery = self.centery
 
+    def __reactivar_disparos(self):
+        self._disparos_activos = True
+        return False
+
     def update_events(self, eventos):
         """
         Solo Jugador Local.
@@ -159,10 +163,6 @@ class Jugador(gobject.GObject, Sprite):
             self._disparos_activos = False
             self.emit("disparo")
             gobject.timeout_add(1000, self.__reactivar_disparos)
-
-    def __reactivar_disparos(self):
-        self._disparos_activos = True
-        return False
 
     def get_disparo(self):
         _dict = {

@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import gobject
 import pygame
 from math import sin
 from math import cos
@@ -32,10 +33,15 @@ VELOCIDAD = 5
 INDICE_ROTACION = 5
 
 
-class Enemigo(Sprite):
+class Enemigo(gobject.GObject, Sprite):
+
+    __gsignals__ = {
+    "disparo": (gobject.SIGNAL_RUN_LAST,
+        gobject.TYPE_NONE, [])}
 
     def __init__(self, res, tank, _id):
 
+        gobject.GObject.__init__(self)
         Sprite.__init__(self)
 
         self._id = _id
@@ -43,6 +49,7 @@ class Enemigo(Sprite):
         self._res = res
         self._imagen_path = tank
         self._eventos = []
+        self._disparos_activos = True
 
         imagen = pygame.image.load(self._imagen_path)
         self._imagen_original = pygame.transform.scale(
@@ -110,8 +117,12 @@ class Enemigo(Sprite):
             self.rect.centerx = self.centerx
             self.rect.centery = self.centery
 
+    def __reactivar_disparos(self):
+        self._disparos_activos = True
+        return False
+
     def update(self):
-        self._eventos = random.choice(["w", "s", "d", "a"])
+        self._eventos = random.choice(["w", "s", "d", "a", "space"])
 
         if not self._eventos or self._estado == "paused":
             return
@@ -141,6 +152,11 @@ class Enemigo(Sprite):
             self.__derecha()
         elif "a" in self._eventos:
             self.__izquierda()
+
+        if "space" in self._eventos and self._disparos_activos:
+            self._disparos_activos = False
+            self.emit("disparo")
+            gobject.timeout_add(1000, self.__reactivar_disparos)
 
     def get_disparo(self):
         _dict = {
