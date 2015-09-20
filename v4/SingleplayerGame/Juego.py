@@ -62,8 +62,6 @@ class Juego(gobject.GObject):
         self._estado = False
 
         self._jugador = False
-        self._disparo = False
-        self._disparos_activos = True
         self._contador = 0
         self._data_game_players = {}
 
@@ -76,10 +74,6 @@ class Juego(gobject.GObject):
 
         print "Nuevo Juego Creado:", platform.platform()
 
-    def __reactivar_disparos(self):
-        self._disparos_activos = True
-        return False
-
     def __disparar(self, jugador):
         self._audio.disparo()
         _id = self._jugador._id
@@ -88,12 +82,6 @@ class Juego(gobject.GObject):
         b = Bala(_dict, path, RES, _id)
         self._balas.add(b)
         self._data_game_players[_id]["disparos"] += 1
-
-    def __check_disparos(self):
-        if self._disparo:
-            self._disparo = False
-            self.__disparar(self._jugador)
-            gobject.timeout_add(1000, self.__reactivar_disparos)
 
     def __explosion(self, explosiones):
         if explosiones:
@@ -147,7 +135,6 @@ class Juego(gobject.GObject):
         self._balas.update()
         self._explosiones.update()
 
-        self.__check_disparos()
         self.__check_collisions()
 
         self._jugadores.draw(self._win)
@@ -192,11 +179,6 @@ class Juego(gobject.GObject):
         if "Escape" in eventos:
             self._estado = False
             return False
-        if "space" in eventos:
-            if self._jugador._estado == "activo":
-                if not self._disparo and self._disparos_activos:
-                    self._disparo = True
-                    self._disparos_activos = False
         else:
             if self._jugador:
                 self._jugador.update_events(eventos)
@@ -207,6 +189,7 @@ class Juego(gobject.GObject):
         self._escenario = pygame.transform.scale(imagen, RES).convert_alpha()
         _id = 0
         self._jugador = Jugador(RES, tank, _id)
+        self._jugador.connect("disparo", self.__disparar)
         self._jugadores.add(self._jugador)
         self._data_game_players[_id] = dict(MODEL)
         _id = 1

@@ -20,6 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import pygame
+import gobject
 from math import sin
 from math import cos
 from math import radians
@@ -30,10 +31,15 @@ VELOCIDAD = 5
 INDICE_ROTACION = 5
 
 
-class Jugador(Sprite):
+class Jugador(gobject.GObject, Sprite):
+
+    __gsignals__ = {
+    "disparo": (gobject.SIGNAL_RUN_LAST,
+        gobject.TYPE_NONE, [])}
 
     def __init__(self, res, tank, _id):
 
+        gobject.GObject.__init__(self)
         Sprite.__init__(self)
 
         self._id = _id
@@ -41,6 +47,7 @@ class Jugador(Sprite):
         self._res = res
         self._imagen_path = tank
         self._eventos = []
+        self._disparos_activos = True
 
         imagen = pygame.image.load(self._imagen_path)
         self._imagen_original = pygame.transform.scale(
@@ -147,6 +154,15 @@ class Jugador(Sprite):
             self.__derecha()
         elif "a" in self._eventos:
             self.__izquierda()
+
+        if "space" in self._eventos and self._disparos_activos:
+            self._disparos_activos = False
+            self.emit("disparo")
+            gobject.timeout_add(1000, self.__reactivar_disparos)
+
+    def __reactivar_disparos(self):
+        self._disparos_activos = True
+        return False
 
     def get_disparo(self):
         _dict = {
