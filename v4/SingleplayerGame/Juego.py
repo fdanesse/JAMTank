@@ -236,6 +236,7 @@ class Juego(gobject.GObject):
             JOYAXISMOTION, JOYBALLMOTION, JOYHATMOTION, JOYBUTTONUP,
             JOYBUTTONDOWN, ACTIVEEVENT, USEREVENT, KEYDOWN, KEYUP])
         pygame.event.set_allowed([QUIT, VIDEORESIZE, VIDEOEXPOSE])
+        pygame.mouse.set_visible(False)
         #pygame.display.set_mode((0, 0), pygame.DOUBLEBUF | pygame.FULLSCREEN, 0)
         pygame.display.set_mode(self._res, pygame.DOUBLEBUF, 0)
         pygame.display.set_caption("JAMtank")

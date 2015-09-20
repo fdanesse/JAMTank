@@ -75,7 +75,7 @@ class MultiStatusGame(gtk.Window):
         self._framejugador = FrameJugador(vidas)
         image = gtk.Image()
         path = os.path.join(BASE, "Iconos", "teclas.svg")
-        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, w / 4 - 50, -1)
+        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, w / 4 / 3 * 2, -1)
         image.set_from_pixbuf(pixbuf)
 
         vbox = gtk.VBox()
