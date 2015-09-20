@@ -60,7 +60,6 @@ class Enemigo(Sprite):
             self._imagen_original, -self._angulo)
         self._dx, self._dy = self.__get_vector(self._angulo)
 
-    '''
     def __derecha(self):
         self._angulo += int(0.7 * INDICE_ROTACION)
         if self._angulo > 360:
@@ -84,7 +83,6 @@ class Enemigo(Sprite):
         self._dx = x * -1
         self._dy = y * -1
         self.__calcular_nueva_posicion()
-    '''
 
     def __get_vector(self, angulo):
         """
@@ -111,11 +109,10 @@ class Enemigo(Sprite):
             self.centery = int(self.centery + self._dy)
             self.rect.centerx = self.centerx
             self.rect.centery = self.centery
-    '''
+
     def update(self):
-        """
-        Solo Jugador Local.
-        """
+        self._eventos = random.choice(["w", "s", "d", "a"])
+
         if not self._eventos or self._estado == "paused":
             return
 
@@ -144,7 +141,6 @@ class Enemigo(Sprite):
             self.__derecha()
         elif "a" in self._eventos:
             self.__izquierda()
-    '''
 
     def get_disparo(self):
         _dict = {
@@ -164,8 +160,11 @@ class Enemigo(Sprite):
 
     def reactivar(self):
         self._estado = "activo"
-        self.rect.centerx = self._res[0] / 2
-        self.rect.centery = self._res[1] / 2
-        self._angulo = 0
+        self._angulo = random.randrange(0, 360, 1)
+        self.centerx = random.randrange(50, self._res[0] - 50, 1)
+        self.centery = random.randrange(50, self._res[1] - 50, 1)
+        self.rect.centerx = self.centerx
+        self.rect.centery = self.centery
         self.image = pygame.transform.rotate(
             self._imagen_original, -self._angulo)
+        self._dx, self._dy = self.__get_vector(self._angulo)
