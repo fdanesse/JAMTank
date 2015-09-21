@@ -43,10 +43,10 @@ class OponentesSelectBox(gtk.VBox):
         hbox = gtk.HBox()
         oponentes = gtk.Label("Oponentes")
         set_font(oponentes, "text", typewidget="Label")
-        spin = NumBox(range(1, 10))
+        spin = NumBox(range(1, 11))
         spin.connect("valor", self.__emit_valor, "oponentes")
-        hbox.pack_start(spin, False, False, 5)
-        hbox.pack_start(oponentes, False, False, 5)
+        hbox.pack_end(spin, False, False, 5)
+        hbox.pack_end(oponentes, False, False, 5)
         self.pack_start(hbox, False, False, 0)
 
         hbox = gtk.HBox()
@@ -54,8 +54,8 @@ class OponentesSelectBox(gtk.VBox):
         set_font(limite, "text", typewidget="Label")
         spin = NumBox(range(5, 51))
         spin.connect("valor", self.__emit_valor, "vidas")
-        hbox.pack_start(spin, False, False, 5)
-        hbox.pack_start(limite, False, False, 5)
+        hbox.pack_end(spin, False, False, 5)
+        hbox.pack_end(limite, False, False, 5)
         self.pack_start(hbox, False, False, 0)
 
         self.show_all()
@@ -64,7 +64,7 @@ class OponentesSelectBox(gtk.VBox):
         self.emit("valor", valor, tipo)
 
 
-class NumBox(gtk.HBox):
+class NumBox(gtk.EventBox):
     """
     Spin para cambiar la cantidad de vidas o enemigos.
     """
@@ -75,37 +75,55 @@ class NumBox(gtk.HBox):
 
     def __init__(self, rango):
 
-        gtk.HBox.__init__(self)
+        gtk.EventBox.__init__(self)
+
+        self.set_border_width(2)
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#ffffff"))
 
         self.rango = rango
         self.valor = min(self.rango)
 
-        menos = gtk.Button("-")
-        set_font(menos.get_children()[0], "subtitulo1", typewidget="Label")
-        menos.connect("clicked", self.__change)
+        hbox = gtk.HBox()
+        vbox = gtk.VBox()
+
+        self.mas = gtk.Button()
+        self.mas.add(gtk.Arrow(0, 1))
+        self.mas.connect("clicked", self.__change, "+")
+        vbox.pack_start(self.mas, False, False, 0)
+
+        self.menos = gtk.Button()
+        self.menos.add(gtk.Arrow(1, 1))
+        self.menos.connect("clicked", self.__change, "-")
+        vbox.pack_start(self.menos, False, False, 0)
+
         self.label = gtk.Label("0")
         set_font(self.label, "text", typewidget="Label")
-        mas = gtk.Button("+")
-        set_font(mas.get_children()[0], "subtitulo1", typewidget="Label")
-        mas.connect("clicked", self.__change)
 
-        self.pack_start(menos, False, False, 5)
-        self.pack_start(self.label, False, False, 5)
-        self.pack_start(mas, False, False, 5)
+        hbox.pack_end(vbox, False, False, 0)
+        hbox.pack_end(self.label, False, False, 3)
 
+        self.add(hbox)
         self.show_all()
 
         self.label.set_text(str(self.valor))
+        self.menos.set_sensitive(False)
         gobject.idle_add(self.emit, "valor", self.valor)
 
-    def __change(self, widget):
-        label = widget.get_label()
-        if label == "-":
-            if self.valor - 1 > min(self.rango):
+    def __change(self, widget, tipo):
+        if tipo == "-":
+            if self.valor - 1 >= min(self.rango):
                 self.valor -= 1
-        elif label == "+":
-            if self.valor + 1 < max(self.rango) + 1:
+        elif tipo == "+":
+            if self.valor + 1 <= max(self.rango):
                 self.valor += 1
+        if self.valor == min(self.rango):
+            self.menos.set_sensitive(False)
+        else:
+            self.menos.set_sensitive(True)
+        if self.valor == max(self.rango):
+            self.mas.set_sensitive(False)
+        else:
+            self.mas.set_sensitive(True)
         self.emit("valor", self.valor)
         self.label.set_text(str(self.valor))
 
