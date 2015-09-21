@@ -141,14 +141,14 @@ class Enemigo(gobject.GObject, Sprite):
                 self._eventos = ["a", "w"]
             elif angulo > self._angulo:
                 self._eventos = ["d", "w"]
-            self._eventos.append(random.choice([False, False, False, "space"]))
 
         elif self._brain == 1:
             if angulo < self._angulo:
                 self._eventos = ["a"]
             elif angulo > self._angulo:
                 self._eventos = ["d"]
-            self._eventos.append(random.choice([False, False, False, "space"]))
+
+        self._eventos.append(random.choice([False, False, False, "space"]))
 
     def update(self):
         if not self._tanque_objetivo:
