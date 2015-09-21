@@ -43,7 +43,7 @@ def make_dict():
         DICT[_id] = {}
         DICT[_id]["mapa"] = m
         DICT[_id]["tanque"] = "t5.png"
-        brain = [0, 1]
+        brain = [0, 1, 2, 3, 4, 5, 6, 7]
         b = 0
         ene = []
         for x in range(int(_id * 1.7)):

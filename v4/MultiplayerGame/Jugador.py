@@ -46,7 +46,7 @@ class Jugador(Sprite):
 
         imagen = pygame.image.load(self._imagen_path)
         self._imagen_original = pygame.transform.scale(
-            imagen, (50, 50)).convert_alpha()
+            imagen, (40, 40)).convert_alpha()
 
         self.image = self._imagen_original.copy()
         self.rect = self.image.get_rect()
@@ -98,8 +98,8 @@ class Jugador(Sprite):
         """
         x = self.centerx + self._dx
         y = self.centery + self._dy
-        ancho = range(25, self._res[0] - 25)
-        alto = range(25, self._res[1] - 25)
+        ancho = range(20, self._res[0] - 20)
+        alto = range(20, self._res[1] - 20)
         if x in ancho and y in alto:
             self._temp_x += self._dx
             self._temp_y += self._dy

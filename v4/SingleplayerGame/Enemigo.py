@@ -57,14 +57,14 @@ class Enemigo(gobject.GObject, Sprite):
 
         imagen = pygame.image.load(self._imagen_path)
         self._imagen_original = pygame.transform.scale(
-            imagen, (50, 50)).convert_alpha()
+            imagen, (40, 40)).convert_alpha()
 
         self.image = self._imagen_original.copy()
         self.rect = self.image.get_rect()
 
         self._angulo = random.randrange(0, 360, 1)
-        self.centerx = random.randrange(50, self._res[0] - 50, 1)
-        self.centery = random.randrange(50, self._res[1] - 50, 1)
+        self.centerx = random.randrange(40, self._res[0] - 40, 1)
+        self.centery = random.randrange(40, self._res[1] - 40, 1)
         self.rect.centerx = self.centerx
         self.rect.centery = self.centery
         self.image = pygame.transform.rotate(
@@ -113,8 +113,8 @@ class Enemigo(gobject.GObject, Sprite):
         """
         x = self.centerx + self._dx
         y = self.centery + self._dy
-        ancho = range(25, self._res[0] - 25)
-        alto = range(25, self._res[1] - 25)
+        ancho = range(20, self._res[0] - 20)
+        alto = range(20, self._res[1] - 20)
         if x in ancho and y in alto:
             self.centerx = int(self.centerx + self._dx)
             self.centery = int(self.centery + self._dy)
@@ -125,7 +125,7 @@ class Enemigo(gobject.GObject, Sprite):
         self._disparos_activos = True
         return False
 
-    def __calcular_direccion(self):
+    def __pensar_decidir(self):
         x2 = self._tanque_objetivo.rect.centerx
         y2 = self._tanque_objetivo.rect.centery
         x1, y1 = self.rect.centerx, self.rect.centery
@@ -137,12 +137,60 @@ class Enemigo(gobject.GObject, Sprite):
             angulo = 360 - angulo
 
         if self._brain == 0:
+            eventos = [[], [], []]
+            if angulo < self._angulo:
+                eventos.append(["a", "w"])
+            elif angulo > self._angulo:
+                eventos.append(["d", "w"])
+            self._eventos = random.choice(eventos)
+
+        if self._brain == 1:
+            eventos = [[], []]
+            if angulo < self._angulo:
+                eventos.append(["a", "w"])
+            elif angulo > self._angulo:
+                eventos.append(["d", "w"])
+            self._eventos = random.choice(eventos)
+
+        if self._brain == 2:
+            eventos = [[]]
+            if angulo < self._angulo:
+                eventos.append(["a", "w"])
+            elif angulo > self._angulo:
+                eventos.append(["d", "w"])
+            self._eventos = random.choice(eventos)
+
+        if self._brain == 3:
             if angulo < self._angulo:
                 self._eventos = ["a", "w"]
             elif angulo > self._angulo:
                 self._eventos = ["d", "w"]
 
-        elif self._brain == 1:
+        if self._brain == 4:
+            eventos = [[], [], []]
+            if angulo < self._angulo:
+                eventos.append(["a"])
+            elif angulo > self._angulo:
+                eventos.append(["d"])
+            self._eventos = random.choice(eventos)
+
+        if self._brain == 5:
+            eventos = [[], []]
+            if angulo < self._angulo:
+                eventos.append(["a"])
+            elif angulo > self._angulo:
+                eventos.append(["d"])
+            self._eventos = random.choice(eventos)
+
+        if self._brain == 6:
+            eventos = [[]]
+            if angulo < self._angulo:
+                eventos.append(["a"])
+            elif angulo > self._angulo:
+                eventos.append(["d"])
+            self._eventos = random.choice(eventos)
+
+        elif self._brain == 7:
             if angulo < self._angulo:
                 self._eventos = ["a"]
             elif angulo > self._angulo:
@@ -160,7 +208,7 @@ class Enemigo(gobject.GObject, Sprite):
         if self._estado == "paused":
             return
 
-        self.__calcular_direccion()
+        self.__pensar_decidir()
 
         if not self._eventos:
             return
@@ -215,8 +263,8 @@ class Enemigo(gobject.GObject, Sprite):
     def reactivar(self):
         self._estado = "activo"
         self._angulo = random.randrange(0, 360, 1)
-        self.centerx = random.randrange(50, self._res[0] - 50, 1)
-        self.centery = random.randrange(50, self._res[1] - 50, 1)
+        self.centerx = random.randrange(40, self._res[0] - 40, 1)
+        self.centery = random.randrange(40, self._res[1] - 40, 1)
         self.rect.centerx = self.centerx
         self.rect.centery = self.centery
         self.image = pygame.transform.rotate(
