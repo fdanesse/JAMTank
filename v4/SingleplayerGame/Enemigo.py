@@ -23,6 +23,8 @@ import gobject
 import pygame
 from math import sin
 from math import cos
+from math import degrees
+from math import atan2
 from math import radians
 import random
 random.seed()
@@ -50,6 +52,7 @@ class Enemigo(gobject.GObject, Sprite):
         self._imagen_path = tank
         self._eventos = []
         self._disparos_activos = True
+        self._tanque_objetivo = False
 
         imagen = pygame.image.load(self._imagen_path)
         self._imagen_original = pygame.transform.scale(
@@ -121,8 +124,32 @@ class Enemigo(gobject.GObject, Sprite):
         self._disparos_activos = True
         return False
 
+    def __calcular_direccion(self):
+        x2 = self._tanque_objetivo.rect.centerx
+        y2 = self._tanque_objetivo.rect.centery
+        x1, y1 = self.rect.centerx, self.rect.centery
+        # http://www.vitutor.com/geo/rec/d_4.html
+        angulo = int(degrees(atan2(y2 - y1, x2 - x1)))
+
+        if angulo < 0:
+            angulo = 360 + angulo
+        if angulo > 360:
+            angulo = 360 - angulo
+
+        if angulo < self._angulo:
+            self._eventos = ["a"]
+        elif angulo > self._angulo:
+            self._eventos = ["d"]
+
     def update(self):
-        self._eventos = random.choice(["w", "s", "d", "a", "space"])
+        if not self._tanque_objetivo:
+            for g in self.groups():
+                for t in g.sprites():
+                    if t._id == 0:
+                        self._tanque_objetivo = t
+                        break
+        self.__calcular_direccion()
+        #self._eventos = random.choice(["w", "s", "d", "a", "space"])
 
         if not self._eventos or self._estado == "paused":
             return

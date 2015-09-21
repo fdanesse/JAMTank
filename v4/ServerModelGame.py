@@ -240,7 +240,6 @@ class ServerModelGame(gobject.GObject):
             new = {"ingame": True, "off": True}
             self.client.enviar(new)
             _dict = self.client.recibir(dict(self.default_retorno))
-            print "ServerModel close_all_and_exit recibe:", _dict
             time.sleep(0.5)
 
         self.__kill_client()
