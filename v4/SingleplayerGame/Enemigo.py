@@ -47,9 +47,10 @@ class Enemigo(gobject.GObject, Sprite):
         Sprite.__init__(self)
 
         self._id = _id
+        self._brain = tank[1]
         self._estado = "activo"
         self._res = res
-        self._imagen_path = tank
+        self._imagen_path = tank[0]
         self._eventos = []
         self._disparos_activos = True
         self._tanque_objetivo = False
@@ -130,16 +131,24 @@ class Enemigo(gobject.GObject, Sprite):
         x1, y1 = self.rect.centerx, self.rect.centery
         # http://www.vitutor.com/geo/rec/d_4.html
         angulo = int(degrees(atan2(y2 - y1, x2 - x1)))
-
         if angulo < 0:
             angulo = 360 + angulo
         if angulo > 360:
             angulo = 360 - angulo
 
-        if angulo < self._angulo:
-            self._eventos = ["a"]
-        elif angulo > self._angulo:
-            self._eventos = ["d"]
+        if self._brain == 0:
+            if angulo < self._angulo:
+                self._eventos = ["a", "w"]
+            elif angulo > self._angulo:
+                self._eventos = ["d", "w"]
+            self._eventos.append(random.choice([False, False, False, "space"]))
+
+        elif self._brain == 1:
+            if angulo < self._angulo:
+                self._eventos = ["a"]
+            elif angulo > self._angulo:
+                self._eventos = ["d"]
+            self._eventos.append(random.choice([False, False, False, "space"]))
 
     def update(self):
         if not self._tanque_objetivo:
@@ -148,10 +157,12 @@ class Enemigo(gobject.GObject, Sprite):
                     if t._id == 0:
                         self._tanque_objetivo = t
                         break
-        self.__calcular_direccion()
-        #self._eventos = random.choice(["w", "s", "d", "a", "space"])
+        if self._estado == "paused":
+            return
 
-        if not self._eventos or self._estado == "paused":
+        self.__calcular_direccion()
+
+        if not self._eventos:
             return
 
         # girar en movimiento

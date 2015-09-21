@@ -43,9 +43,15 @@ def make_dict():
         DICT[_id] = {}
         DICT[_id]["mapa"] = m
         DICT[_id]["tanque"] = "t5.png"
+        brain = [0, 1]
+        b = 0
         ene = []
         for x in range(int(_id * 1.7)):
-            ene.append(random.choice(tanques))
+            ene.append([random.choice(tanques), brain[b]])
+            if b < brain.index(brain[-1]):
+                b += 1
+            else:
+                b = 0
         DICT[_id]["enemigos"] = ene
     return DICT
 
@@ -58,7 +64,8 @@ def get_data_game(index):
     tanque = os.path.join(BASE_PATH, "Tanques", DICT[index]["tanque"])
     enemigos = []
     for enemigo in DICT[index]["enemigos"]:
-        enemigos.append(os.path.join(BASE_PATH, "Tanques", enemigo))
+        enemigos.append([os.path.join(BASE_PATH, "Tanques", enemigo[0]),
+            enemigo[1]])
     return (mapa, tanque, enemigos)
 
 
