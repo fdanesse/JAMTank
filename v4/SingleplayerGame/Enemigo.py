@@ -136,35 +136,14 @@ class Enemigo(gobject.GObject, Sprite):
         if angulo > 360:
             angulo = 360 - angulo
 
-        if self._brain == 0:
-            eventos = [[], [], []]
+        eventos = [[], [], []]
+        if self._brain in range(0, 4):
+            eventos = eventos[:3-self._brain]
             if angulo < self._angulo:
                 eventos.append(["a", "w"])
             elif angulo > self._angulo:
                 eventos.append(["d", "w"])
             self._eventos = random.choice(eventos)
-
-        if self._brain == 1:
-            eventos = [[], []]
-            if angulo < self._angulo:
-                eventos.append(["a", "w"])
-            elif angulo > self._angulo:
-                eventos.append(["d", "w"])
-            self._eventos = random.choice(eventos)
-
-        if self._brain == 2:
-            eventos = [[]]
-            if angulo < self._angulo:
-                eventos.append(["a", "w"])
-            elif angulo > self._angulo:
-                eventos.append(["d", "w"])
-            self._eventos = random.choice(eventos)
-
-        if self._brain == 3:
-            if angulo < self._angulo:
-                self._eventos = ["a", "w"]
-            elif angulo > self._angulo:
-                self._eventos = ["d", "w"]
 
         if self._brain == 4:
             eventos = [[], [], []]
