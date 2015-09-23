@@ -126,6 +126,7 @@ class Enemigo(gobject.GObject, Sprite):
         return False
 
     def __pensar_decidir(self):
+        self._eventos = []
         x2 = self._tanque_objetivo.rect.centerx
         y2 = self._tanque_objetivo.rect.centery
         x1, y1 = self.rect.centerx, self.rect.centery
@@ -136,46 +137,39 @@ class Enemigo(gobject.GObject, Sprite):
         if angulo > 360:
             angulo = 360 - angulo
 
+        # movimientos
         eventos = [[], [], []]
         if self._brain in range(0, 4):
-            eventos = eventos[:3-self._brain]
+            # Modo persecución, con velocidad incremental
+            if self._brain == 3:
+                eventos = []
+            else:
+                eventos = eventos[0:3-self._brain]
             if angulo < self._angulo:
                 eventos.append(["a", "w"])
             elif angulo > self._angulo:
                 eventos.append(["d", "w"])
-            self._eventos = random.choice(eventos)
-
-        if self._brain == 4:
-            eventos = [[], [], []]
+        elif self._brain in range(4, 8):
+            # modo estático
+            if self._brain == 7:
+                eventos = []
+            else:
+                eventos = eventos[:7-self._brain]
             if angulo < self._angulo:
                 eventos.append(["a"])
             elif angulo > self._angulo:
                 eventos.append(["d"])
+        if eventos:
             self._eventos = random.choice(eventos)
 
-        if self._brain == 5:
-            eventos = [[], []]
-            if angulo < self._angulo:
-                eventos.append(["a"])
-            elif angulo > self._angulo:
-                eventos.append(["d"])
-            self._eventos = random.choice(eventos)
-
-        if self._brain == 6:
-            eventos = [[]]
-            if angulo < self._angulo:
-                eventos.append(["a"])
-            elif angulo > self._angulo:
-                eventos.append(["d"])
-            self._eventos = random.choice(eventos)
-
-        elif self._brain == 7:
-            if angulo < self._angulo:
-                self._eventos = ["a"]
-            elif angulo > self._angulo:
-                self._eventos = ["d"]
-
-        self._eventos.append(random.choice([False, False, False, "space"]))
+        # disparos
+        disparo = random.randrange(1, 101, 1)
+        if self._brain in range(0, 2) and disparo < 2:
+            self._eventos.append("space")
+        elif self._brain in range(2, 7) and disparo < 6:
+            self._eventos.append("space")
+        elif self._brain == 7 and disparo < 2:
+            self._eventos.append("space")
 
     def update(self):
         if not self._tanque_objetivo:

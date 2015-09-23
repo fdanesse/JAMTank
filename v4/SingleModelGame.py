@@ -81,7 +81,7 @@ class SingleModelGame(gobject.GObject):
         gobject.GObject.__init__(self)
 
         self._topwin = topwin
-        self.index = 0
+        self.index = 18
         self.juego = False
         self.eventos = []
 
