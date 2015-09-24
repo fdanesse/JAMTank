@@ -39,7 +39,7 @@ class MultiDialogoEndGame(gtk.Dialog):
         self.set_decorated(False)
         self.set_border_width(15)
 
-        self._ranking = Ranking()
+        self._ranking = Ranking(0)
         self.vbox.pack_start(self._ranking, True, True, 5)
 
         self._ranking._lista.update(_dict)
@@ -70,7 +70,7 @@ class MultiStatusGame(gtk.Window):
         self.set_deletable(False)
         self.set_transient_for(top)
 
-        self._ranking = Ranking()
+        self._ranking = Ranking(vidas)
         self._volumenes = FrameVolumen()
         self._framejugador = FrameJugador(vidas)
         image = gtk.Image()
@@ -98,7 +98,7 @@ class MultiStatusGame(gtk.Window):
 
 class Ranking(gtk.Frame):
 
-    def __init__(self):
+    def __init__(self, vidas):
 
         gtk.Frame.__init__(self)
 
@@ -107,7 +107,7 @@ class Ranking(gtk.Frame):
         event = gtk.EventBox()
         event.set_border_width(4)
         event.set_property("visible-window", False)
-        self._lista = Lista()
+        self._lista = Lista(vidas)
         event.add(self._lista)
         self.add(event)
         self.connect("realize", self.__realize)
@@ -119,12 +119,13 @@ class Ranking(gtk.Frame):
 
 class Lista(gtk.TreeView):
 
-    def __init__(self):
+    def __init__(self, vidas=0):
 
         gtk.TreeView.__init__(self, gtk.ListStore(gobject.TYPE_STRING,
             gtk.gdk.Pixbuf, gobject.TYPE_STRING, gobject.TYPE_STRING,
             gobject.TYPE_INT, gobject.TYPE_INT))
 
+        self.__vidas = vidas * 100
         self.set_property("rules-hint", True)
         self.set_headers_clickable(False)
         self.set_headers_visible(False)
@@ -138,7 +139,8 @@ class Lista(gtk.TreeView):
         self.append_column(self.__construir_columa("Path", 2, False))
         self.append_column(self.__construir_columa("Nombre", 3, True))
         self.append_column(self.__construir_columa("Puntos", 4, True))
-        self.append_column(self.__construir_columa_progress("Vidas", 5, True))
+        self.append_column(self.__construir_columa_progress(
+            "Vidas", 5, bool(self.__vidas)))
 
     def __construir_columa(self, text, index, visible):
         render = gtk.CellRendererText()
@@ -194,14 +196,33 @@ class Lista(gtk.TreeView):
                 if _iter:
                     model = self.get_model()
                     model.set_value(_iter, 4, _dict[ip]["s"]["p"])
-                    model.set_value(_iter, 5, _dict[ip]["s"]["v"])
+                    vidas = _dict[ip]["s"]["v"]
+                    try:
+                        energia = vidas * 100
+                        if _dict[ip]["s"]["e"]:
+                            energia = energia - 100 + _dict[ip]["s"]["e"]
+                        progress = energia * 100 / self.__vidas
+                        model.set_value(_iter, 5, progress)
+                    except:
+                        pass
+
                 else:
                     nick = _dict[ip]["n"]
                     puntos = _dict[ip]["s"]["p"]
                     vidas = _dict[ip]["s"]["v"]
+                    progress = 0
+                    if vidas:
+                        progress = 100
+                    try:
+                        energia = vidas * 100
+                        if _dict[ip]["s"]["e"]:
+                            energia = energia - 100 + _dict[ip]["s"]["e"]
+                        progress = energia * 100 / self.__vidas
+                    except:
+                        pass
                     path = os.path.join(BASE, "Tanques", _dict[ip]["t"])
                     pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, 50, -1)
-                    items.append([ip, pixbuf, path, nick, puntos, vidas])
+                    items.append([ip, pixbuf, path, nick, puntos, progress])
             self.agregar_items(items)
         except:
             print "ERROR:", self.update, _dict
