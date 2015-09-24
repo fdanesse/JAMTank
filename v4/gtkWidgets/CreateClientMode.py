@@ -123,26 +123,26 @@ class CreateClient(gtk.EventBox):
 
         self.set_border_width(10)
 
-        tabla = gtk.Table(columns=5, rows=6, homogeneous=True)
+        tabla = gtk.Table(columns=3, rows=9, homogeneous=True)
 
         self.framejuegos = FrameJuegos()
-        tabla.attach_defaults(self.framejuegos, 0, 3, 0, 3)
-
-        self.mapview = gtk.Image()
-        tabla.attach_defaults(self.mapview, 3, 5, 3, 5)
+        tabla.attach_defaults(self.framejuegos, 0, 1, 0, 4)
 
         self.frametanque = FrameTanque()
-        tabla.attach_defaults(self.frametanque, 0, 2, 3, 5)
+        tabla.attach_defaults(self.frametanque, 0, 1, 4, 8)
+
+        self.mapview = gtk.Image()
+        tabla.attach_defaults(self.mapview, 1, 3, 0, 4)
 
         self.tanqueview = gtk.Image()
-        tabla.attach_defaults(self.tanqueview, 2, 3, 4, 5)
+        tabla.attach_defaults(self.tanqueview, 1, 2, 6, 7)
 
         self.framenick = FrameNick()
-        tabla.attach_defaults(self.framenick, 2, 5, 3, 4)
+        tabla.attach_defaults(self.framenick, 2, 3, 5, 8)
 
         button = gtk.Button("Cancelar")
         set_font(button.get_children()[0], "subtitulo1", typewidget="Label")
-        tabla.attach_defaults(button, 0, 1, 5, 6)
+        tabla.attach_defaults(button, 0, 1, 8, 9)
         button.connect("clicked", self.__accion, "salir")
 
         self.jugar = gtk.Button("Unirme")
@@ -150,7 +150,7 @@ class CreateClient(gtk.EventBox):
             "subtitulo1", typewidget="Label")
         self.jugar.set_sensitive(False)
         self.jugar.connect("clicked", self.__accion, "run")
-        tabla.attach_defaults(self.jugar, 4, 5, 5, 6)
+        tabla.attach_defaults(self.jugar, 2, 3, 8, 9)
 
         self.add(tabla)
 
@@ -164,6 +164,12 @@ class CreateClient(gtk.EventBox):
 
     def __update_server(self, lista, _dict):
         self.server = _dict
+        mapa = self.server.get("mapa", False)
+        if mapa:
+            path = os.path.join(BASE, "Mapas", mapa)
+            rect = self.mapview.get_allocation()
+            pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, -1, rect.height)
+            self.mapview.set_from_pixbuf(pixbuf)
         self.__check_dict()
 
     def __do_realize(self, widget):
