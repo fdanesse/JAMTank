@@ -90,34 +90,34 @@ class CreateServer(gtk.EventBox):
         self.tanqueview = gtk.Image()
         self.oponentes = OponentesSelectBox()
 
-        tabla = gtk.Table(columns=5, rows=6, homogeneous=True)
+        tabla = gtk.Table(columns=5, rows=9, homogeneous=True)
 
         self.framemapa = FrameMapa()
-        tabla.attach_defaults(self.framemapa, 0, 2, 0, 3)
+        tabla.attach_defaults(self.framemapa, 0, 2, 0, 4)
 
         self.frametanque = FrameTanque()
-        tabla.attach_defaults(self.frametanque, 0, 2, 3, 5)
+        tabla.attach_defaults(self.frametanque, 0, 2, 4, 8)
 
         event = gtk.EventBox()
         event.set_border_width(10)
         event.set_property("visible-window", False)
         event.add(self.mapaview)
-        tabla.attach_defaults(event, 2, 5, 0, 3)
+        tabla.attach_defaults(event, 2, 5, 0, 4)
 
-        tabla.attach_defaults(self.tanqueview, 2, 3, 4, 5)
+        tabla.attach_defaults(self.tanqueview, 2, 3, 6, 7)
 
         self.framenick = FrameNick()
-        tabla.attach_defaults(self.framenick, 2, 5, 3, 4)
+        tabla.attach_defaults(self.framenick, 3, 4, 5, 8)
 
         event = gtk.EventBox()
         event.set_property("visible-window", False)
         event.set_border_width(4)
         event.add(self.oponentes)
-        tabla.attach_defaults(event, 3, 5, 4, 5)
+        tabla.attach_defaults(event, 4, 5, 5, 8)
 
         button = gtk.Button("Cancelar")
         set_font(button.get_children()[0], "subtitulo1", typewidget="Label")
-        tabla.attach_defaults(button, 0, 1, 5, 6)
+        tabla.attach_defaults(button, 0, 1, 8, 9)
         button.connect("clicked", self.__accion, "salir")
 
         self.jugar = gtk.Button("Crear")
@@ -125,7 +125,7 @@ class CreateServer(gtk.EventBox):
             "subtitulo1", typewidget="Label")
         self.jugar.set_sensitive(False)
         self.jugar.connect("clicked", self.__accion, "run")
-        tabla.attach_defaults(self.jugar, 4, 5, 5, 6)
+        tabla.attach_defaults(self.jugar, 4, 5, 8, 9)
 
         self.add(tabla)
 

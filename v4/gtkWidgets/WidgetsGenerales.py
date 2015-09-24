@@ -159,7 +159,7 @@ class ProgressBar(gtk.HScale):
 
         # progreso
         ximage = int(self.ajuste.get_value() * ww / 100)
-        gc.set_rgb_fg_color(gtk.gdk.Color(23000, 41000, 12000))
+        gc.set_rgb_fg_color(gtk.gdk.Color(65535, 0, 0))
         self.window.draw_rectangle(gc, True, xx, yy, ximage, hh)
 
         # borde de progreso
