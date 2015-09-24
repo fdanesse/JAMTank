@@ -73,7 +73,6 @@ def make_dict():
             ene.append([TANQUES[e], e])
             dif += e+1
         DICT[k]["enemigos"] = ene
-        print "Nivel:", k, "Dificultad:", dif
     return DICT
 
 

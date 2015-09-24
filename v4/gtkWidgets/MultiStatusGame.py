@@ -123,7 +123,7 @@ class Lista(gtk.TreeView):
 
         gtk.TreeView.__init__(self, gtk.ListStore(gobject.TYPE_STRING,
             gtk.gdk.Pixbuf, gobject.TYPE_STRING, gobject.TYPE_STRING,
-            gobject.TYPE_INT))
+            gobject.TYPE_INT, gobject.TYPE_INT))
 
         self.set_property("rules-hint", True)
         self.set_headers_clickable(False)
@@ -138,6 +138,7 @@ class Lista(gtk.TreeView):
         self.append_column(self.__construir_columa("Path", 2, False))
         self.append_column(self.__construir_columa("Nombre", 3, True))
         self.append_column(self.__construir_columa("Puntos", 4, True))
+        self.append_column(self.__construir_columa_progress("Vidas", 5, True))
 
     def __construir_columa(self, text, index, visible):
         render = gtk.CellRendererText()
@@ -156,11 +157,18 @@ class Lista(gtk.TreeView):
         columna.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
         return columna
 
+    def __construir_columa_progress(self, text, index, visible):
+        render = gtk.CellRendererProgress()
+        columna = gtk.TreeViewColumn(text, render)
+        columna.set_property("visible", visible)
+        columna.add_attribute(render, "value", 5)
+        return columna
+
     def __ejecutar_agregar_elemento(self, elementos):
         if not elementos:
             return False
-        ip, pixbuf, path, nick, puntos = elementos[0]
-        self.get_model().append([ip, pixbuf, path, nick, puntos])
+        ip, pixbuf, path, nick, puntos, vidas = elementos[0]
+        self.get_model().append([ip, pixbuf, path, nick, puntos, vidas])
         elementos.remove(elementos[0])
         gobject.idle_add(self.__ejecutar_agregar_elemento, elementos)
         return False
@@ -186,12 +194,14 @@ class Lista(gtk.TreeView):
                 if _iter:
                     model = self.get_model()
                     model.set_value(_iter, 4, _dict[ip]["s"]["p"])
+                    model.set_value(_iter, 5, _dict[ip]["s"]["v"])
                 else:
                     nick = _dict[ip]["n"]
                     puntos = _dict[ip]["s"]["p"]
+                    vidas = _dict[ip]["s"]["v"]
                     path = os.path.join(BASE, "Tanques", _dict[ip]["t"])
                     pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, 50, -1)
-                    items.append([ip, pixbuf, path, nick, puntos])
+                    items.append([ip, pixbuf, path, nick, puntos, vidas])
             self.agregar_items(items)
         except:
             print "ERROR:", self.update, _dict
