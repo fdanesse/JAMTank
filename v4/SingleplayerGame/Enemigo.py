@@ -218,10 +218,13 @@ class Enemigo(gobject.GObject, Sprite):
             gobject.timeout_add(1000, self.__reactivar_disparos)
 
     def get_disparo(self):
+        x, y = self.__get_vector(self._angulo)
+        x += self.rect.centerx
+        y += self.rect.centery
         _dict = {
             "a": int(self._angulo),
-            "x": int(self.rect.centerx),
-            "y": int(self.rect.centery),
+            "x": x,
+            "y": y,
             }
         return _dict
 

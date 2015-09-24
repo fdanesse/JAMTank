@@ -128,10 +128,13 @@ class Jugador(Sprite):
         """
         Solo Jugador Local.
         """
+        x, y = self.__get_vector(self._angulo)
+        x += self.rect.centerx
+        y += self.rect.centery
         _dict = {
-            "a": int(self._temp_angulo),
-            "x": int(self._temp_x),
-            "y": int(self._temp_y),
+            "a": int(self._angulo),
+            "x": x,
+            "y": y,
             }
         return _dict
 
