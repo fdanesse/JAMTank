@@ -32,27 +32,48 @@ BASE_PATH = os.path.realpath(os.path.dirname(__file__))
 
 
 def make_dict():
+    TANQUES = {
+        0: "t1.png",
+        1: "t3.png",
+        2: "t4.png",
+        3: "t8.png",
+        4: "t9.png",
+        5: "t7.png",
+        6: "t2.png",
+        7: "t6.png",
+        }
+    NIVELES = {
+        1: {"mapa": "001.png", "enemigos": [0]},
+        2: {"mapa": "002.png", "enemigos": [0, 0]},
+        3: {"mapa": "003.png", "enemigos": [0, 0, 1]},
+        4: {"mapa": "004.png", "enemigos": [0, 0, 1, 1]},
+        5: {"mapa": "005.png", "enemigos": [0, 0, 1, 1, 2]},
+        6: {"mapa": "006.png", "enemigos": [0, 0, 1, 1, 2, 2]},
+        7: {"mapa": "007.png", "enemigos": [0, 1, 1, 1, 2, 2]},
+        8: {"mapa": "008.png", "enemigos": [0, 1, 1, 2, 2, 3]},
+        9: {"mapa": "009.png", "enemigos": [1, 1, 1, 2, 2, 3]},
+        10: {"mapa": "010.png", "enemigos": [7, 6, 1]},
+        11: {"mapa": "011.png", "enemigos": [7, 6, 3]},
+        12: {"mapa": "012.png", "enemigos": [7, 4, 3, 2]},
+        13: {"mapa": "013.png", "enemigos": [5, 4, 3, 2, 1, 0]},
+        14: {"mapa": "014.png", "enemigos": [5, 4, 3, 2, 1, 1]},
+        15: {"mapa": "015.png", "enemigos": [6, 5, 4, 3, 0]},
+        16: {"mapa": "016.png", "enemigos": [7, 5, 4, 3, 1]},
+        17: {"mapa": "017.png", "enemigos": [7, 6, 5, 4, 3]},
+        18: {"mapa": "018.png", "enemigos": [7, 6, 5, 4, 3, 1, 1, 0]},
+        }
     DICT = {}
-    path = os.path.join(BASE_PATH, "Mapas")
-    mapas = reversed(sorted(os.listdir(path)))
-    tanques = os.listdir(os.path.join(BASE_PATH, "Tanques"))
-    tanques.remove("t5.png")
-    _id = 0
-    for m in mapas:
-        _id += 1
-        DICT[_id] = {}
-        DICT[_id]["mapa"] = m
-        DICT[_id]["tanque"] = "t5.png"
-        brain = [0, 1, 2, 3, 4, 5, 6, 7]
-        b = 0
+    for k in NIVELES.keys():
+        DICT[k] = {}
+        DICT[k]["mapa"] = NIVELES[k]["mapa"]
+        DICT[k]["tanque"] = "t5.png"
         ene = []
-        for x in range(int(_id * 1.7)):
-            ene.append([random.choice(tanques), brain[b]])
-            if b < brain.index(brain[-1]):
-                b += 1
-            else:
-                b = 0
-        DICT[_id]["enemigos"] = ene
+        dif = 0
+        for e in NIVELES[k]["enemigos"]:
+            ene.append([TANQUES[e], e])
+            dif += e+1
+        DICT[k]["enemigos"] = ene
+        print "Nivel:", k, "Dificultad:", dif
     return DICT
 
 
@@ -81,7 +102,7 @@ class SingleModelGame(gobject.GObject):
         gobject.GObject.__init__(self)
 
         self._topwin = topwin
-        self.index = 18
+        self.index = 1
         self.juego = False
         self.eventos = []
 
