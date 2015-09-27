@@ -94,6 +94,10 @@ class JAMTank(gtk.Window):
         rect = self.get_allocation()
         path = os.path.join(BASE, "Mapas", "010.png")
         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, rect.width, -1)
+        h = pixbuf.get_height()
+        if h < rect.height:
+            pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path,
+                -1, rect.height)
         self.get_property("window").draw_pixbuf(None, pixbuf, 0, 0, 0, 0)
         return True
 
@@ -112,6 +116,10 @@ class JAMTank(gtk.Window):
         path = os.path.join(BASE, "Iconos", "win01.png")
         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path,
             self.screen_wh[0], -1)
+        h = pixbuf.get_height()
+        if h < self.screen_wh[1]:
+            pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path,
+                -1, self.screen_wh[1])
         pixmap, mask = pixbuf.render_pixmap_and_mask()
         style = self.style
         style.bg_pixmap[gtk.STATE_NORMAL] = pixmap
